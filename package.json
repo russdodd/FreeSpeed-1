@@ -1,0 +1,19 @@
+{
+  "name": "freespeed",
+  "version": "1.0.0",
+  "description": "jfife",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sanisetti/FreeSpeed.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sanisetti/FreeSpeed/issues"
+  },
+  "homepage": "https://github.com/sanisetti/FreeSpeed#readme"
+}
