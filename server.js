@@ -27,8 +27,18 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 app.get('/', function(request, response){
-    console.log('- Request received:', request.method.cyan, request.url.underline);
-    response.sendFile('public/index.html', {root: __dirname });
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  response.sendFile('public/index.html', {root: __dirname });
+});
+
+app.get('/login', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  response.sendFile('public/login.html', {root: __dirname });
+});
+
+app.get('/sign-up', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  response.sendFile('public/signup.html', {root: __dirname });
 });
 
 
