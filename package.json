@@ -15,5 +15,16 @@
   "bugs": {
     "url": "https://github.com/sanisetti/FreeSpeed/issues"
   },
-  "homepage": "https://github.com/sanisetti/FreeSpeed#readme"
+  "homepage": "https://github.com/sanisetti/FreeSpeed#readme",
+  "dependencies": {
+    "any-db": "^2.2.1",
+    "any-db-sqlite3": "^2.1.4",
+    "body-parser": "^1.18.2",
+    "colors": "^1.2.1",
+    "consolidate": "^0.15.1",
+    "express": "^4.16.3",
+    "http": "0.0.0",
+    "path": "^0.12.7",
+    "socket.io": "^2.1.0"
+  }
 }
