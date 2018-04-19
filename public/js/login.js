@@ -33,7 +33,5 @@ socket.on('validCredentials', function(data){
 		var link = 'main/coach/' + data.username; 
 	}
 	location.href = link; 
-	//$('#placeholder').append('<a href=\"' + link + '\" id=\"linkToClick\"">.</a>').click();
-	//$('#linkToClick').click();
 })
 
