@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+  <link rel="stylesheet" href="/css/home.css">
+  <title>FreeSpeed</title>
+  <meta name="username" content={{username}}>
+</head>
+
+<body>
+  <div>
+    <div id="banner">
+      <img src="/images/jerry.jpg" id="banner_logo" />
+      <button id="upload_button" class="banner_button">Upload</button>
+      <p id="user_name">{{username}}</p>
+      <button id="logout_button" class="banner_button">Log Out</button>
+    </div>
+    <div id="white_background_wrapper">
+        <div id="rowers_div">
+          <div id="rowers_title_div">
+            <p id="rowers_title">
+              Rowers
+            </p>
+          </div>
+          <ul id="rowers_list">
+            <li class="rower">
+              Russell
+            </li>
+            <li class="rower">
+              Sathya
+            </li>
+            <li class="rower">
+              Alex
+            </li>
+            <li class="rower">
+              James
+            </li>
+          </ul>
+        </div>
+        <div id="graph_div">
+          <div id="type_selector">
+            <button class="type_selector_button">Power</button>
+            <button class="type_selector_button">Speed</button>
+            <button class="type_selector_button">Slip</button>
+          </div>
+          <p id="graph_title">Power</p>
+          <img id="graph" src="/images/jerry.jpg"/>
+        </div>
+        <div id="averages_div">
+          <p id="averages_div_title">Averages</p>
+        </div>
+    </div>
+  </div>
+  <script src="/js/home.js"></script>
+</html>

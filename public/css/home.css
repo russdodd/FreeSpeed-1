@@ -1,0 +1,159 @@
+body {
+  padding:0 0;
+  margin:0 0;
+  background-color: #ccc;
+}
+
+button {
+  border: none;
+  padding: 0 0;
+  margin: 0 0;
+  background-color: transparent;
+  outline: none;
+}
+
+button:disabled:hover {
+  color: red;
+}
+
+p {
+  margin: 0 0;
+}
+
+input:focus {
+    outline:none;
+}
+
+a {
+  text-decoration: none;
+  font-size: 16px;
+}
+
+textarea {
+  resize: none;
+}
+
+#banner {
+  background-color: white;
+  height: 100px;
+  color: black;
+  padding: 0 10%;
+  border-bottom: 1px solid #ccc;
+}
+
+#banner_logo {
+  display: inline-block;
+  height: 50px;
+  line-height: 100px;
+}
+
+.banner_button {
+  display: inline-block;
+  cursor: pointer;
+  padding: 0 15px;
+  font-size: 14px;
+  height: 50px;
+  background-color: #4AAD00;
+  color: white;
+  border-radius: 8px;
+}
+
+#user_name {
+  display: inline-block;
+  float: right;
+  line-height: 100px;
+  font-size: 24px;
+  font-weight: 600;
+}
+#banner_hr {
+  border-color: #f1f1f1;
+  width: 100%;
+  margin: 0 0;
+}
+
+#white_background_wrapper {
+  position: relative;
+  overflow: hidden;
+  height: 700px;
+  width: 1300px;
+  margin: 0 auto;
+  background-color: white;
+}
+
+#type_selector {
+  display: inline-block;
+  padding-bottom: 10px;
+  margin: 0 0;
+  color: black;
+  z-index: 1;
+  font-size: 21px;
+  border-bottom: 1px solid #ccc;
+}
+
+.type_selector_button {
+  display: inline-block;
+  margin-right: 40px;
+  font-size: 24px;
+}
+
+.type_selector_button:hover {
+  color: gray;
+}
+
+.type_selector_button_selected {
+  display: inline-block;
+  margin-right: 40px;
+  color: red;
+  border-bottom: 1px solid red;
+  padding-bottom: 1%;
+}
+
+.type_selector_button_selected:hover {
+  color: gray;
+}
+
+#rowers_div {
+  float: left;
+  display: inline-block;
+  width: 250px;
+  height: 100%;
+  border-right: 1px solid #ccc;
+}
+
+#rowers_title_div {
+  padding: 20px 0;
+  border-bottom: 1px solid #ccc;
+}
+
+#rowers_title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+#rowers_list {
+  padding: 0 0;
+}
+
+#rowers_list li {
+  list-style: none;
+  padding: 0 20px;
+}
+
+#graph_div {
+  display: inline-block;
+  width: 1009px;
+  padding: 20px 20px;
+  border-bottom: 1px solid #ccc;
+}
+
+#graph_title {
+  text-align: center;
+  padding: 20px 20px;
+}
+
+#graph {
+  display: block;
+  width: 800px;
+  margin: 0 auto;
+}

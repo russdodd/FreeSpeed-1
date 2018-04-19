@@ -45,12 +45,12 @@ app.get('/sign-up', function(request, response) {
 
 app.get('/main/coach/:coachUsername', function(request, response){
 	 console.log('- Request received:', request.method.cyan, request.url.underline);
-	response.render('coachPage.html', {coachUsername: request.params.coachUsername});
+	response.render('home.html', {username: request.params.coachUsername});
 })
 
 app.get('/main/rower/:rowerUsername', function(request, response){
 	 console.log('- Request received:', request.method.cyan, request.url.underline);
-	response.render('rowerPage.html', {rowerUsername: request.params.rowerUsername});
+	response.render('home.html', {username: request.params.rowerUsername});
 })
 
 app.post('/personal-data-page', function(request, response) {
