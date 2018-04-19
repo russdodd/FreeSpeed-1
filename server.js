@@ -41,6 +41,16 @@ app.get('/sign-up', function(request, response) {
   response.sendFile('public/signup.html', {root: __dirname });
 });
 
+app.post('/personal-data-page', function(request, response) {
 
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  response.sendFile('public/personal_page.html', {root: __dirname });
+});
+
+app.post('/data-upload', function(request, response) {
+
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  response.sendFile('public/personal_page.html', {root: __dirname });
+});
 
 server.listen(8080);
