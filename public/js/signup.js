@@ -17,9 +17,7 @@ function sendNewUserInfo(){
 		permission = 1; 
 	};
 
-	$.post('/add-new-user', {firstname, lastname, username, password, confirmPassword, socketID, permission}, function(res){
-		
-	})
+	$.post('/add-new-user', {firstname, lastname, username, password, confirmPassword, socketID, permission}, function(res){})
 }
 
 socket.on('missingFields', function(data){

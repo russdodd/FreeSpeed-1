@@ -43,8 +43,14 @@ app.get('/sign-up', function(request, response) {
   response.sendFile('public/signup.html', {root: __dirname });
 });
 
-app.get('/dummyPage', function(request, response){
-	response.send("personal page yet to be implemented");
+app.get('/main/coach/:coachUsername', function(request, response){
+	 console.log('- Request received:', request.method.cyan, request.url.underline);
+	response.render('coachPage.html', {coachUsername: request.params.coachUsername});
+})
+
+app.get('/main/rower/:rowerUsername', function(request, response){
+	 console.log('- Request received:', request.method.cyan, request.url.underline);
+	response.render('rowerPage.html', {rowerUsername: request.params.rowerUsername});
 })
 
 app.post('/personal-data-page', function(request, response) {
@@ -72,7 +78,15 @@ app.post('/validate-login-credetials', function(request, response){
 				var hashedPassword = result.rows[0].password; 
 				bcrypt.compare(password, hashedPassword, function(err, res) {
    					 if(res){
-   					 	response.redirect('/dummyPage');
+   					 	//password was correct
+   					 	var permission = result.rows[0].permission;
+   					 	if(permission == 1){
+   					 		//verified coach
+   					 		response.redirect('/main/coach/' + username);
+   					 	}else{
+   					 		//verified rower
+   					 		response.redirect('/main/rower/' + username); 
+   					 	}
    					 }else{
    					 	io.to(request.body.socketID).emit('incorrectPassword', {});
    					 }

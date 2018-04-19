@@ -1,12 +1,24 @@
+var socket = io.connect();
+var socketID; 
+socket.on('connect', () => {socketID = socket.id});
 
-function sendNewUserInfo(){
-	var firstname = $.('#first-name-input').val();
-	var lastname = $.('#last-name-input').val();
-	var username = $.('#username-input').val();
-	var password = $.('#password-input').val();
-	var confimPassword = $.('#confirm-password-input').val();  
+function sendLoginCredentials(){
 
-	$.post('/add-new-user', {firstname, lastname, username, password, confimPassword}, function(res){
-		
+	var username = $('#username-input').val();
+	var password = $('#password-input').val(); 
+
+	$.post('/validate-login-credetials', {username, password, socketID}, function(res){
+
 	})
 }
+
+socket.on('usernameNotFound', function(data){
+	$("#username-input").css("border-color", "red");
+	$("#error-paragraph").text("User not found");
+})
+
+socket.on('incorrectPassword', function(data){
+	$("#password-input").css("border-color", "red");
+	$("#error-paragraph").text("Incorrect Password");
+})
+
