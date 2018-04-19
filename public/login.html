@@ -6,14 +6,17 @@
 				integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
   				crossorigin="anonymous">
   </script>
+  <script src="/socket.io/socket.io.js"></script>
+  
   <title>Login</title>
 </head>
 
 <body>
-	<input type="text" placeholder="Username" id="username-input" />
-	<input type="text" placeholder="Password" id="password-input" />
-	<button onclick="sendLoginCredentials()" value="Login" id="login-submit" />
-	<p> New User? <a href="/signup">Sign Up</a> </p>
+	<input type="text" placeholder="Username" id="username-input" /> <br>
+	<input type="text" placeholder="Password" id="password-input" /> <br>
+	<button onclick="sendLoginCredentials()" value="Login" id="login-submit">Sign In</button>
+	<p id="error-paragraph"></p> 
+	<p> New User? <a href="/sign-up">Sign Up</a> </p>
 </body>
-
+<script src="/js/login.js"></script>
 </html>
