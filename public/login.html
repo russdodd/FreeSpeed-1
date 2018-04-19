@@ -2,11 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <script src="https://code.jquery.com/jquery-3.1.1.min.js"
-				integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-  				crossorigin="anonymous">
-  </script>
+  <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/login.js"></script>
   <link rel="stylesheet" href="css/login.css">
   <title>Login</title>
 </head>
@@ -19,6 +17,7 @@
 		<button onclick="sendLoginCredentials()" value="Login" id="login-submit">Sign In</button>
 		<p id="error-paragraph"></p> 
 		<p> New User? <a href="/sign-up">Sign Up</a> </p>
+		<dix id="placeholder"></dix>
 	</div>
 </body>
 <script src="/js/login.js"></script>

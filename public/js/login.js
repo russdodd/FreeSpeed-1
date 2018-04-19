@@ -22,3 +22,18 @@ socket.on('incorrectPassword', function(data){
 	$("#error-paragraph").text("Incorrect Password");
 })
 
+socket.on('validCredentials', function(data){
+	//TODO: eventually check the token attached to data to validate the link 
+
+	console.log("in validate credentials"); 
+	var permission = data.permission; 
+	if(permission == 0){
+		var link = '/main/rower/' + data.username;
+	}else{
+		var link = 'main/coach/' + data.username; 
+	}
+	location.href = link; 
+	//$('#placeholder').append('<a href=\"' + link + '\" id=\"linkToClick\"">.</a>').click();
+	//$('#linkToClick').click();
+})
+

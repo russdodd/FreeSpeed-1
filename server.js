@@ -30,7 +30,7 @@ app.use(bodyParser.json());
 
 app.get('/', function(request, response){
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.sendFile('public/index.html', {root: __dirname });
+  response.redirect('/login');
 });
 
 app.get('/login', function(request, response) {
@@ -54,7 +54,6 @@ app.get('/main/rower/:rowerUsername', function(request, response){
 })
 
 app.post('/personal-data-page', function(request, response) {
-
   console.log('- Request received:', request.method.cyan, request.url.underline);
   response.sendFile('public/personal_page.html', {root: __dirname });
 });
@@ -82,10 +81,14 @@ app.post('/validate-login-credetials', function(request, response){
    					 	var permission = result.rows[0].permission;
    					 	if(permission == 1){
    					 		//verified coach
-   					 		response.redirect('/main/coach/' + username);
+   					 		//eventually attach a token here 
+   					 		io.to(request.body.socketID).emit('validCredentials', {permission: 1, username: username});
+   					 		//response.redirect('/main/coach/' + username);
+   					 		//io.to(request.body.socketID).emit('usernameNotFoun', {});
    					 	}else{
    					 		//verified rower
-   					 		response.redirect('/main/rower/' + username); 
+   					 		//eventually attach a token here 
+   					 		io.to(request.body.socketID).emit('validCredentials', {permission: 0, username: username}); 
    					 	}
    					 }else{
    					 	io.to(request.body.socketID).emit('incorrectPassword', {});
@@ -138,7 +141,6 @@ app.post('/add-new-user', function(request, response) {
 									console.log(error);
 								}else{
 									console.log("successful insert");
-									response.send("personal data page to be created");
 								}
 							})
 						}
