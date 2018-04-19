@@ -4,6 +4,8 @@ var http = require('http');
 var express = require('express');
 var bodyParser = require('body-parser');
 var anyDB = require('any-db');
+var bcrypt = require('bcrypt-nodejs');
+ 
 
 var conn = anyDB.createConnection('sqlite3://freespeed.db');
 conn.query('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT, permission INTEGER, firstName TEXT, lastName TEXT)');
@@ -41,6 +43,10 @@ app.get('/sign-up', function(request, response) {
   response.sendFile('public/signup.html', {root: __dirname });
 });
 
+app.get('/dummyPage', function(request, response){
+	response.send("personal page yet to be implemented");
+})
+
 app.post('/personal-data-page', function(request, response) {
 
   console.log('- Request received:', request.method.cyan, request.url.underline);
@@ -53,4 +59,88 @@ app.post('/data-upload', function(request, response) {
   response.sendFile('public/personal_page.html', {root: __dirname });
 });
 
+app.post('/validate-login-credetials', function(request, response){
+	var username = escape(request.body.username);
+	var password = escape(request.body.password); 
+	conn.query('SELECT * FROM users WHERE username=$1', [username], function(error, result){
+		if(error){
+			console.log(error);
+		}else{
+			if(result.rows.length == 0){
+				io.to(request.body.socketID).emit('usernameNotFound', {});
+			}else{
+				var hashedPassword = result.rows[0].password; 
+				bcrypt.compare(password, hashedPassword, function(err, res) {
+   					 if(res){
+   					 	response.redirect('/dummyPage');
+   					 }else{
+   					 	io.to(request.body.socketID).emit('incorrectPassword', {});
+   					 }
+				});
+			}
+		}
+	})
+})
+
+app.post('/add-new-user', function(request, response) {
+	var username = escape(request.body.username);
+	var firstName = escape(request.body.firstname);
+	var lastName = escape(request.body.lastname); 
+	var password = escape(request.body.password); 
+	var confirmPassword = escape(request.body.confirmPassword);
+	var permission = request.body.permission;
+	console.log(permission)
+
+	//check if any of the values are empty
+	if(username === '' || password === '' || lastName === '' || firstName === '' || confirmPassword === ''){
+		console.log("missing fields inside if satement");
+		io.to(request.body.socketID).emit('missingFields', {});
+	//check if passwords do not match
+	}else if(password !== confirmPassword){
+		console.log("in unequal passwords")
+		console.log(request.body.socketID)
+		io.to(request.body.socketID).emit('unequalPasswords', {});
+	}else if(password.length < 8){
+		io.to(request.body.socketID).emit('passwordTooShort', {});
+	}else{
+		//check if the username already exists
+		conn.query("SELECT * FROM users WHERE username=$1", username, function(error, result){
+			if(error){
+				console.log(error);
+			}else{
+				//username already exists
+				if(result.rowCount != 0){
+					io.to(request.body.socketID).emit('usernameExists', {});
+				//username does not exist, add it to the database
+				}else{
+					bcrypt.hash(password, bcrypt.genSaltSync(10), null, function(err, hash){
+						if(err){
+							console.log(err);
+						}else{
+							console.log(hash);
+	 						conn.query('INSERT INTO users (username, password, permission, firstname, lastname) VALUES($1, $2, $3, $4, $5)',
+	 						[username, hash, permission, firstName, lastName], function(error, result){
+								if(error){
+									console.log(error);
+								}else{
+									console.log("successful insert");
+									response.send("personal data page to be created");
+								}
+							})
+						}
+					}); 
+				}
+			}
+		})
+	}
+})
+
+
+/// socket events 
+
+io.on('connection', function(socket){
+
+})
+
 server.listen(8080);
+console.log('listening on 8080');

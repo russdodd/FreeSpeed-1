@@ -6,22 +6,29 @@
 				integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
   				crossorigin="anonymous">
   </script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/signup.js"></script>
   <title>Sign Up</title>
 </head>
 
 <body>
 	<div id="sign-up-wrapper">
+		<p>Are you a rower or a coach </p>
+		<form>
+			<input type="radio" id="radio-rower" name="usertype" value="Rower" checked> Rower<br>
+  			<input type="radio" id="radio-coach" name="usertype" value="Coach">Coach<br>
+  		</form>
 		<p> First Name: </p>
-		<input type="text" id="first-name-input" />
+		<input type="text" id="first-name-input" class="login-input" />
 		<p> Last Name: </p>
-		<input type="text" id="last-name-input" />
+		<input type="text" id="last-name-input" class="login-input"/>
 		<p> Username: </p>
-		<input type="text" id="username-input" />
+		<input type="text" id="username-input" class="login-input"/>
 		<p> Password: </p>
-		<input type="text" id="password-input" />
+		<input type="text" id="password-input" class="login-input" />
 		<p> Confirm Password: </p>
-		<input type="text" id="confim-password-input" />
-		<button onclick="sendNewUserInfo()" value="Sign Up" />
+		<input type="text" id="confirm-password-input" class="login-input"/><br>
+		<button onclick="sendNewUserInfo()" value="Sign Up">Sign Up</button> <p id="error-message"><p> 
 	</div>
 </body>
 <script src='/js/signup.js'></script>
