@@ -287,7 +287,7 @@ app.post('/add-new-user', function(request, response) {
 								if (error) {
 									console.log(error);
 								} else {
-									console.log("successful insert");
+									io.to(request.body.socketID).emit('successfulInsert', {username: username, permission: permission});
 								}
 							})
 						}
