@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/sanisetti/FreeSpeed#readme",
   "dependencies": {
-    "any-db": "^2.2.1",
+    "any-db": "^2.1.0",
     "any-db-sqlite3": "^2.1.4",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.18.2",
