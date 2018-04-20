@@ -24,8 +24,6 @@ function uploadData(json_data) {
 };
 
 var csvData = [];
-var jsonData = {};
-var json_str = {};
 function upload() {
   if (!browserSupportFileUpload()) {
     alert('The File APIs are not fully supported in this browser!');
@@ -36,7 +34,7 @@ function upload() {
     reader.readAsText(file);
     reader.onload = function(event) {
       console.log("hello");
-      jsonData = {"code": 0,
+      var jsonData = {"code": 0,
               "workoutID": -1,
               "workoutType": $("#workout").val(),
               "boatID": 1,
@@ -46,21 +44,14 @@ function upload() {
       var userJson = {"per_stroke_data": csvData};
       userJson.username = $("#user").val();
       jsonData.users.push(userJson);
-      json_str = {data:JSON.stringify(jsonData)}
+      var json_str = {data:JSON.stringify(jsonData)}
       uploadData(json_str);
-      /*sendCsv(csvData, fname, lname);*/
-                //data = $.csv.toArrays(csvData);
-                //if (data && data.length > 0) {
-                //  alert('Imported -' + data.length + '- rows successfully!');
-                //} else {
-                //    alert('No data to import!');
-                //}
-            };
-            reader.onerror = function() {
-              alert('Unable to read ' + file.fileName);
-            };
-        }
-    }
+      };
+    reader.onerror = function() {
+      alert('Unable to read ' + file.fileName);
+    };
+  }
+}
 
 
 
