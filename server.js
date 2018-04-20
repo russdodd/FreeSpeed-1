@@ -67,6 +67,38 @@ app.get('/upload-data', function(request, response) {
   response.sendFile('public/upload-data.html', {root: __dirname });
 });
 
+app.post('/upload-data-information', function(request, response) {
+  var sql = "SELECT username, firstName, lastName FROM users";
+  var json = {};
+  conn.query(sql, function(err, res) {
+    if (err === null) {
+      json.users = res.rows;
+      sql = "SELECT * FROM workouts ORDER BY date DESC";
+      conn.query(sql, function(err, res){
+        if (err === null) {
+          json.workouts = res.rows;
+          sql = "SELECT * FROM boats";
+          conn.query(sql, function(err, res) {
+            if (err === null) {
+              json.boats = res.rows;
+              console.log(json);
+              response.json(json);
+            } else {
+              /*TODO: Handle Error*/
+            }
+          });
+        } else {
+          /*TODO: Handle Error*/
+          console.log(err);
+        }
+      });
+    } else {
+      /*TODO: Handle Error*/
+      console.log(err);
+    }
+  });
+});
+
 app.post('/data-upload', function(request, response) {
   // 1. Authenticate user is allowed to do what they did using JWT
   // 2. Authenticate that data uploaded is valid
