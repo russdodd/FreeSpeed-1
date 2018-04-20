@@ -60,6 +60,19 @@ textarea {
   border: 1px solid #4AAD00;
 }
 
+.banner_button:hover {
+  display: inline-block;
+  cursor: pointer;
+  padding: 0 15px;
+  margin: 0 15px;
+  font-size: 14px;
+  height: 50px;
+  color: white;
+  border-radius: 8px;
+  border: 1px solid #4AAD00;
+  background-color: #4AAD00;
+}
+
 #banner_right {
   display: inline-block;
   float: right;
