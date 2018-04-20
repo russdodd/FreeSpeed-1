@@ -45,3 +45,14 @@ socket.on('usernameExists', function(data){
 	$("#username-input").css("border-color", "red");
 	$("#error-message").text("Username Already Taken");
 })
+
+socket.on('successfulInsert', function(data){
+	var permission = data.permission; 
+	if(permission == 0){
+		var link = '/main/rower/' + data.username;
+	}else{
+		var link = 'main/coach/' + data.username; 
+	}
+	location.href = link; 
+})
+
