@@ -11,7 +11,7 @@ var conn = anyDB.createConnection('sqlite3://freespeed.db');
 conn.query('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, permission INTEGER NOT NULL, firstName TEXT NOT NULL, lastName TEXT NOT NULL)');
 conn.query('CREATE TABLE IF NOT EXISTS boats (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, size INTEGER NOT NULL)');
 /* NOTE: BOATS TABLE SHOULD BE PRE-POPULATED*/
-conn.query('CREATE TABLE IF NOT EXISTS workouts (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT NOT NULL, type TEXT NOT NULL, startTime TEXT NOT NULL)');
+conn.query('CREATE TABLE IF NOT EXISTS workouts (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT NOT NULL, type TEXT NOT NULL)');
 conn.query('CREATE TABLE IF NOT EXISTS workoutUserBoat (id INTEGER PRIMARY KEY AUTOINCREMENT, workoutID INTEGER NOT NULL, username TEXT NOT NULL, boatID INTEGER NOT NULL)');
 conn.query('CREATE TABLE IF NOT EXISTS data (id INTEGER PRIMARY KEY AUTOINCREMENT, workoutUserBoatID INTEGER NOT NULL, interval INTEGER, distanceGPS REAL, distanceIMP REAL, elapsedTime TEXT, splitGPS TEXT, speedGPS REAL, splitIMP REAL, speedIMP REAL, strokeRate REAL, totalStrokes INTEGER, distancePerStrokeGPS REAL,distancePerStrokeIMP REAL, heartRateBPM INTEGER, power INTEGER, catch INTEGER, slip INTEGER, finish INTEGER, wash INTEGER, forceAvg INTEGER, work INTEGER, forceMax INTEGER, maxForceAngle INTEGER, GPSLat REAL, GPSLon REAL)');
 
@@ -102,8 +102,10 @@ app.post('/:userName/personal-data-page', function(request, response) {
  * JSON file. It then calls createNewBoat()
  */
 function createNewWorkout(data) {
-  var sql = "INSERT INTO workouts (date, type, startTime) VALUES (?, ?, ?)";
-  conn.query(sql, [data.workoutDate, data.workoutType, data.users[0].startTime], function (err, row) {
+  var sql = "INSERT INTO workouts (date, type) VALUES (?, ?)";
+
+  data.users[0].per_stroke_data.startTime = changeDateFormat(data.users[0].per_stroke_data.startTime);
+  conn.query(sql, [data.users[0].per_stroke_data.startTime, data.workoutType], function (err, row) {
     if (err === null) {
       data.workoutID = row.lastInsertId;
       for (var i = 0; i < data.users.length; i++) {
@@ -116,6 +118,28 @@ function createNewWorkout(data) {
     }
   });
 }
+
+function changeDateFormat(date) {
+  var month = date.substring(0, 2);
+  var dd = date.substring(3, 5);
+  var yyyy = '20' + date.substring(6, 8);
+  var hh = Number(date.substring(9,11));
+  var mm = date.substring(12, 14);
+  if (date.substring(14, 16) === 'pm') {
+    if (hh != 12) {
+      hh += 12;
+    } else {
+      hh = 0;
+    }
+  }
+  if (hh < 10) {
+    hh = '0' + String(hh);
+  }
+  time = yyyy + '-' + month + '-' + dd + ' ' + hh + ':' + mm;
+
+  return time;
+}
+
 
 /*
  * This function expects the data to contain the corresponding workout id and adds
