@@ -43,7 +43,8 @@ textarea {
 
 #banner_logo {
   display: inline-block;
-  height: 50px;
+  font-size: 24px;
+  font-weight: 800;
   line-height: 100px;
 }
 
@@ -51,19 +52,30 @@ textarea {
   display: inline-block;
   cursor: pointer;
   padding: 0 15px;
+  margin: 0 15px;
   font-size: 14px;
   height: 50px;
-  background-color: #4AAD00;
-  color: white;
+  color: #4AAD00;
   border-radius: 8px;
+  border: 1px solid #4AAD00;
+}
+
+#banner_right {
+  display: inline-block;
+  float: right;
 }
 
 #user_name {
   display: inline-block;
-  float: right;
   line-height: 100px;
   font-size: 24px;
   font-weight: 600;
+}
+
+#logout_button {
+  background-color: white;
+  border: none;
+  color: blue;
 }
 #banner_hr {
   border-color: #f1f1f1;
@@ -82,7 +94,6 @@ textarea {
 
 #type_selector {
   display: inline-block;
-  padding-bottom: 10px;
   margin: 0 0;
   color: black;
   z-index: 1;
@@ -94,6 +105,8 @@ textarea {
   display: inline-block;
   margin-right: 40px;
   font-size: 24px;
+  cursor: pointer;
+
 }
 
 .type_selector_button:hover {
@@ -103,9 +116,9 @@ textarea {
 .type_selector_button_selected {
   display: inline-block;
   margin-right: 40px;
+  font-size: 24px;
   color: red;
   border-bottom: 1px solid red;
-  padding-bottom: 1%;
 }
 
 .type_selector_button_selected:hover {
@@ -127,17 +140,34 @@ textarea {
 
 #rowers_title {
   text-align: center;
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 18px;
 }
 
 #rowers_list {
   padding: 0 0;
+  margin: 0 0;
 }
 
 #rowers_list li {
   list-style: none;
-  padding: 0 20px;
+  padding: 20px 20px;
+  border-bottom: 1px solid #ccc;
+}
+
+#rowers_list li:hover {
+  background-color: #ADD8E6;
+  cursor: pointer;
+  color: white;
+}
+
+.rower_selected {
+  background-color: #ADD8E6;
+  color: white;
+}
+
+.rower_selected:hover {
+  background-color: white;
+  color: black;
 }
 
 #graph_div {
@@ -154,6 +184,6 @@ textarea {
 
 #graph {
   display: block;
-  width: 800px;
+  width: 500px;
   margin: 0 auto;
 }
