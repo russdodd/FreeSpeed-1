@@ -11,9 +11,10 @@ var conn = anyDB.createConnection('sqlite3://freespeed.db');
 conn.query('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, permission INTEGER NOT NULL, firstName TEXT NOT NULL, lastName TEXT NOT NULL)');
 conn.query('CREATE TABLE IF NOT EXISTS boats (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, size INTEGER NOT NULL)');
 /* NOTE: BOATS TABLE SHOULD BE PRE-POPULATED*/
-conn.query('CREATE TABLE IF NOT EXISTS workouts (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT NOT NULL, type TEXT NOT NULL)');
-conn.query('CREATE TABLE IF NOT EXISTS workoutUserBoat (id INTEGER PRIMARY KEY AUTOINCREMENT, workoutID INTEGER NOT NULL, username TEXT NOT NULL, boatID INTEGER NOT NULL, startTime TEXT NOT NULL)');
+conn.query('CREATE TABLE IF NOT EXISTS workouts (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT NOT NULL, type TEXT NOT NULL, startTime TEXT NOT NULL)');
+conn.query('CREATE TABLE IF NOT EXISTS workoutUserBoat (id INTEGER PRIMARY KEY AUTOINCREMENT, workoutID INTEGER NOT NULL, username TEXT NOT NULL, boatID INTEGER NOT NULL)');
 conn.query('CREATE TABLE IF NOT EXISTS data (id INTEGER PRIMARY KEY AUTOINCREMENT, workoutUserBoatID INTEGER NOT NULL, interval INTEGER, distanceGPS REAL, distanceIMP REAL, elapsedTime TEXT, splitGPS TEXT, speedGPS REAL, splitIMP REAL, speedIMP REAL, strokeRate REAL, totalStrokes INTEGER, distancePerStrokeGPS REAL,distancePerStrokeIMP REAL, heartRateBPM INTEGER, power INTEGER, catch INTEGER, slip INTEGER, finish INTEGER, wash INTEGER, forceAvg INTEGER, work INTEGER, forceMax INTEGER, maxForceAngle INTEGER, GPSLat REAL, GPSLon REAL)');
+
 
 var engines = require('consolidate');
 var colors = require('colors');
@@ -26,8 +27,8 @@ app.engine('html', engines.hogan);
 app.set('views', __dirname + '/templates');
 app.set('view engine', 'html');
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 app.get('/', function(request, response){
   console.log('- Request received:', request.method.cyan, request.url.underline);
@@ -53,7 +54,6 @@ app.get('/main/rower/:rowerUsername', function(request, response){
 	 console.log('- Request received:', request.method.cyan, request.url.underline);
 	response.render('home.html', {username: request.params.rowerUsername});
 })
-
 app.get('/personal-data-page', function(request, response) {
   // 1. Authenticate user is allowed to make this post
   // 2. fetch most recent workout of the user and give them all data
@@ -71,18 +71,30 @@ app.post('/data-upload', function(request, response) {
   // 1. Authenticate user is allowed to do what they did using JWT
   // 2. Authenticate that data uploaded is valid
   // 3. Upload data to database
-  var data = request.body;
-  var code = Number(request.body.code);
+  var data = JSON.parse(request.body.data);
+  for (var i = 0; i < data.users.length; i++){
+    data.users[i].per_stroke_data = parseCsv(data.users[i].per_stroke_data);
+  }
+
+  var code = Number(data.code);
   if (code === 0) {
     // Create New Workout + New boat
-    createNewWorkout(request.body);
+    createNewWorkout(data);
   } else if (code === 1) {
     // Create New Boat for existing workout
-    createNewBoatUsers(request.body);
+    createNewBoatUsers(data);
   } else if (code === 2) {
     //TODO: Update Existing Entry
   }
   console.log('- Request received:', request.method.cyan, request.url.underline);
+});
+
+app.post('/:userName/personal-data-page', function(request, response) {
+  // 1. Authenticate user is allowed to make this post
+  // 2. Figure out which workout they want. If none is specified then you give
+  //    most recent workout data
+  // 3. fetch most recent workout of the user and give them all data
+  var username = request.params.userName;
 });
 
 /*
@@ -90,15 +102,13 @@ app.post('/data-upload', function(request, response) {
  * JSON file. It then calls createNewBoat()
  */
 function createNewWorkout(data) {
-  var sql = "INSERT INTO workouts (date, type) VALUES (?, ?)";
-  conn.query(sql, [data.workoutDate, data.workoutType], function (err, row) {
+  var sql = "INSERT INTO workouts (date, type, startTime) VALUES (?, ?, ?)";
+  conn.query(sql, [data.workoutDate, data.workoutType, data.users[0].startTime], function (err, row) {
     if (err === null) {
       data.workoutID = row.lastInsertId;
-      for (var i = 0; i < data.numUsers; i++) {
-        var username = data[makeJSON(i, "username", -1)];
-        var startTime = data[makeJSON(i, "startTime", -1)];
-        var numRows = data[makeJSON(i, "numberRows", -1)];
-        createNewWorkoutUserBoat(i, startTime, username, data, numRows);
+      for (var i = 0; i < data.users.length; i++) {
+        var username = data.users[i].username;
+        createNewWorkoutUserBoat(i, username, data);
       }
     } else {
       /*TODO: Handle Error */
@@ -111,13 +121,13 @@ function createNewWorkout(data) {
  * This function expects the data to contain the corresponding workout id and adds
  * data to the workoutUserBoat table.
  */
-function createNewWorkoutUserBoat(currUserInd, startTime, username, data, numRows) {
-  var sql = "INSERT INTO workoutUserBoat (workoutID, username, boatID, startTime) VALUES (?, ?, ?, ?)";
-  conn.query(sql, [data.workoutID, username, data.boatID, startTime], function (err, row) {
+function createNewWorkoutUserBoat(currUserInd, username, data) {
+  var sql = "INSERT INTO workoutUserBoat (workoutID, username, boatID) VALUES (?, ?, ?)";
+  conn.query(sql, [data.workoutID, username, data.boatID], function (err, row) {
     if (err === null) {
       console.log(String(username) + " has new workout data!");
       data.workoutUserBoatID = row.lastInsertId;
-      insertData(currUserInd, data, numRows);
+      insertData(currUserInd, data);
     } else {
       /*TODO: Handle Error*/
       console.log(err);
@@ -125,40 +135,80 @@ function createNewWorkoutUserBoat(currUserInd, startTime, username, data, numRow
   });
 }
 
-function insertData(currUserInd, data, numRows) {
-  var toInsert = [];
+function parseCsv(data){
+  var jsonData = {"data": []};
+	var allRows = data.split(/\r?\n|\r/);
+  for (var singleRow = 0; singleRow < allRows.length; singleRow++) {
+  		var rowCells = allRows[singleRow].split(',');
+  		if (rowCells.length > 0 && rowCells[0] === 'Start Time:'){
+  			jsonData.startTime = rowCells[1];
+  		} else if (rowCells.length > 0 && rowCells[0] === 'Per-Stroke Data:'){
+  			break;
+  		}
+  	}
+  	singleRow+=4;
+  for (; singleRow < allRows.length; singleRow++) {
+  	var rowCells = allRows[singleRow].split(',');
+    //console.log(rowCells);
+  	if (rowCells.length == 24){
+      rowCells[0] = parseInt(rowCells[0]);
+      if (rowCells[1] == "---"){
+        continue;
+      } else {
+        rowCells[1] = parseFloat(rowCells[1]);
+      }
+      rowCells[2] = parseFloat(rowCells[2]);
+      rowCells[5] = parseFloat(rowCells[5]);
+      rowCells[7] = parseFloat(rowCells[7]);
+      rowCells[8] = parseFloat(rowCells[8]);
+      rowCells[9] = parseInt(rowCells[9]);
+      rowCells[10] = parseFloat(rowCells[10]);
+      rowCells[11] = parseFloat(rowCells[11]);
+      for (var i = 12; i < 22; i++){
+        if (rowCells[i] == "---"){
+          rowCells[i] = 0;
+        } else {
+          rowCells[i] = parseInt(rowCells[i]);
+        }
+      }
+      if (rowCells[22] == "---"){
+        rowCells[22] = 0.0;
+      } else {
+        rowCells[22] = parseFloat(rowCells[22]);
+      }
+      if (rowCells[23] == "---"){
+        rowCells[23] = 0.0;
+      } else {
+        rowCells[23] = parseFloat(rowCells[23]);
+      }
+  		jsonData.data.push(rowCells);
+  	}
+  }
+  return jsonData;
+}
+
+function insertData(currUserInd, data) {
   var sql = "INSERT INTO data (workoutUserBoatID, interval, distanceGPS, distanceIMP, elapsedTime, splitGPS, speedGPS, splitIMP, speedIMP, strokeRate, totalStrokes, distancePerStrokeGPS, distancePerStrokeIMP, heartRateBPM, power, catch, slip, finish, wash, forceAvg, work, forceMax, maxForceAngle, GPSLat, GPSLon)" +
-  " VALUES ";
-  for (var i = 0; i < numRows; i++) {
-    sql += "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?), ";
+  " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+  for (var i = 0; i < data.users[currUserInd].per_stroke_data.data.length; i++) {
+    var toInsert = [];
     toInsert.push(data.workoutUserBoatID);
-    var concatArray = data[makeJSON(currUserInd, "per-stroke-data", i)];
+    var concatArray = data.users[currUserInd].per_stroke_data.data[i];
     for (var j = 0; j < 24; j++) {
       if (j != 3 & j != 4 & j != 6) {
         concatArray[j] = Number(concatArray[j]);
       }
     }
     toInsert = toInsert.concat(concatArray);
+    conn.query(sql, toInsert, function(err, res) {
+      if (err === null) {
+        console.log("Records succesfully added");
+      } else {
+        /*TODO: Handle Error*/
+        console.log(err);
+      }
+    });
   }
-  sql = sql.slice(0, -2);
-  conn.query(sql, toInsert, function(err, res) {
-    if (err === null) {
-      console.log("Records succesfully added");
-    } else {
-      /*TODO: Handle Error*/
-      console.log(err);
-    }
-  });
-}
-
-function makeJSON(firstIndex, secondIndex, thirdIndex) {
-  // if thirdIndex = -1;
-  var string = "users[" + String(firstIndex) + "][" + String(secondIndex) + "]";
-  if (thirdIndex != -1) {
-    string += "[" + String(thirdIndex) +"][]";
-  }
-
-  return string;
 }
 
 app.post('/validate-login-credetials', function(request, response){
@@ -206,17 +256,17 @@ app.post('/add-new-user', function(request, response) {
 	console.log(permission)
 
 	//check if any of the values are empty
-	if(username === '' || password === '' || lastName === '' || firstName === '' || confirmPassword === ''){
+	if (username === '' || password === '' || lastName === '' || firstName === '' || confirmPassword === ''){
 		console.log("missing fields inside if satement");
 		io.to(request.body.socketID).emit('missingFields', {});
 	//check if passwords do not match
-	}else if(password !== confirmPassword){
+	} else if(password !== confirmPassword){
 		console.log("in unequal passwords")
 		console.log(request.body.socketID)
 		io.to(request.body.socketID).emit('unequalPasswords', {});
-	}else if(password.length < 8){
+	} else if(password.length < 8){
 		io.to(request.body.socketID).emit('passwordTooShort', {});
-	}else{
+	} else{
 		//check if the username already exists
 		conn.query("SELECT * FROM users WHERE username=$1", username, function(error, result){
 			if(error){
@@ -230,13 +280,13 @@ app.post('/add-new-user', function(request, response) {
 					bcrypt.hash(password, bcrypt.genSaltSync(10), null, function(err, hash){
 						if(err){
 							console.log(err);
-						}else{
+						} else {
 							console.log(hash);
 	 						conn.query('INSERT INTO users (username, password, permission, firstname, lastname) VALUES($1, $2, $3, $4, $5)',
 	 						[username, hash, permission, firstName, lastName], function(error, result){
-								if(error){
+								if (error) {
 									console.log(error);
-								}else{
+								} else {
 									console.log("successful insert");
 								}
 							})
