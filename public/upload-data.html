@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Upload Data</title>
+    <script
+    src="https://code.jquery.com/jquery-3.1.1.min.js"
+    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+    crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <button id="button" onClick="uploadData();">Upload Hard-Coded Data</button>
+    <script>
+    /* userID's used rather than names because of chance of repeat names */
+    /*
+     * code of 0 means that everything is new,
+     * code of 1 if anything else is completely new
+    */
+    /*
+    * WorkoutID is -1 if new
+    */
+    var json = {"code": 0,
+      "workoutID": -1,
+      "workoutType": "240x4",
+      "workoutDate": "fake-date",
+      "boatID": 1,
+      "numUsers": 3,
+      "users":[
+        {"username": "fakeuser",
+        "startTime": "fake-start-time",
+        "numberRows": 2,
+        "per-stroke-data": [
+          [1, 24.1, 0,	"00:00:13.1", "00:04:28.8", 1.86, "00:00:00.0",	0,	38,	2,	17.3,	0,	90,	237,	-51,	4,	28,	8,	278,	489,	544,	-13,	41.8548621,	-71.3752703],
+          [2, 24.1, 0,	"00:00:13.1", "00:04:28.8", 1.86, "00:00:00.0",	0,	38,	2,	17.3,	0,	90,	237,	-51,	4,	28,	8,	278,	489,	544,	-13,	41.8548621,	-71.3752703]
+        ]
+      },
+        {"username": "fakeuser1",
+        "numberRows": 2,
+        "startTime": "fake-start-time",
+        "per-stroke-data": [
+          [1, 24.1, 0, "00:00:13.1", "00:04:28.8", 1.86, "00:00:00.0",	0,	38,	2,	17.3,	0,	90,	237,	-51,	4,	28,	8,	278,	489,	544,	-13,	41.8548621,	-71.3752703],
+          [2, 24.1, 0,	"00:00:13.1", "00:04:28.8", 1.86, "00:00:00.0",	0,	38,	2,	17.3,	0,	90,	237,	-51,	4,	28,	8,	278,	489,	544,	-13,	41.8548621,	-71.3752703]
+        ]
+      },
+        {"username": "fakeuser2",
+        "numberRows": 2,
+        "startTime": "fake-start-time",
+        "per-stroke-data": [
+          [1, 24.1, 0,	"00:00:13.1", "00:04:28.8", 1.86, "00:00:00.0",	0,	38,	2,	17.3,	0,	90,	237,	-51,	4,	28,	8,	278,	489,	544,	-13,	41.8548621,	-71.3752703],
+          [2, 24.1, 0,	"00:00:13.1", "00:04:28.8", 1.86, "00:00:00.0",	0,	38,	2,	17.3,	0,	90,	237,	-51,	4,	28,	8,	278,	489,	544,	-13,	41.8548621,	-71.3752703]
+        ]
+      }]};
+      console.log(json.users[0]);
+    function uploadData() {
+      $.post('data-upload', json, function(res) {
+        console.log("success");
+      });
+    }
+    </script>
+  </body>
+</html>
