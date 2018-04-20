@@ -53,13 +53,8 @@ function upload() {
   }
 }
 
-
-
 $(document).ready(function() {
-
     // The event listener for the file upload
     $('#submitUpload').on('click', upload);
     /*document.getElementById('qbutton').addEventListener('click', getPower);*/
-
 });
-
