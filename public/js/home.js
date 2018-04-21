@@ -1,35 +1,107 @@
-var is_highlighted = '0';
+function sendCsv(csv, fname, lname, time) {
+  var postParameters = {csv: csv, fname: fname, lname: lname, time:time};
+  $.post("/csv", postParameters,  function(responseJSON){
+    //
+  });
+}
 
-$(document).ready(function () {
-  document.getElementById(is_highlighted).className = "type_selector_button_selected";
-  document.getElementById(is_highlighted).disabled = true;
-  document.getElementById('graph_title').innerHTML = document.getElementById(is_highlighted).textContent;
-
-
-});
-
-function toggleType(id) {
-  is_highlighted = id;
-
-  for (var i = 0; i < 3; i++) {
-    if (i == is_highlighted) {
-      document.getElementById(i).className = "type_selector_button_selected";
-      document.getElementById(i).disabled = true;
-      document.getElementById('graph_title').innerHTML = document.getElementById(i).textContent;
-
+function browserSupportFileUpload() {
+  var isCompatible = false;
+  if (window.File && window.FileReader && window.FileList && window.Blob) {
+    isCompatible = true;
+  }
+  return isCompatible;
+}
+function uploadData(json_data) {
+  console.log("here");
+  console.log(json_data);
+  $.post('/data-upload', json_data, function(res, err) {
+    if (err != null){
+      console.log(err);
     } else {
-      document.getElementById(i).className = "type_selector_button";
-      document.getElementById(i).disabled = false;
+      console.log("success");
     }
+  });
+};
+
+var csvData = [];
+function upload() {
+  if (!browserSupportFileUpload()) {
+    alert('The File APIs are not fully supported in this browser!');
+  } else {
+    var data = null;
+    var file = $("#txtFileUpload")[0].files[0];
+    var reader = new FileReader();
+    reader.readAsText(file);
+    reader.onload = function(event) {
+      console.log("hello");
+      var jsonData = {"code": 0,
+              "workoutID": -1,
+              "workoutType": $("#workout").val(),
+              "boatID": 1,
+              "users":[]
+            };
+      csvData = event.target.result;
+      var userJson = {"per_stroke_data": csvData};
+      userJson.username = $("#user").val();
+      jsonData.users.push(userJson);
+      var json_str = {data:JSON.stringify(jsonData)}
+      uploadData(json_str);
+      };
+    reader.onerror = function() {
+      alert('Unable to read ' + file.fileName);
+    };
   }
 }
 
-function selectRower(id) {
-  console.log("row clicked");
-  var element = document.getElementById(id);
-  if (element.className == "rower") {
-    element.className = "rower_selected";
-  } else {
-    element.className = "rower";
+$(document).ready(function() {
+    // The event listener for the file upload
+    $('#submitUpload').on('click', upload);
+    $.post("/upload-data-information", function(res) {
+      console.log(res);
+      var sel = $("#username");
+       for(var i = 0; i < res.users.length; i++) {
+          var opt = document.createElement('option');
+          opt.value = res.users[i].username;
+          opt.innerHTML = decodeURI(res.users[i].firstName) + ' ' +  decodeURI(res.users[i].lastName);
+          sel[0].appendChild(opt);
+          }
+      var sel = $("#workouts");
+      for(var i = 0; i < res.workouts.length; i++) {
+        var opt = document.createElement('option');
+        opt.value = res.workouts[i].id;
+        opt.innerHTML = decodeURI(res.workouts[i].startTime) + ' ' +  decodeURI(res.workouts[i].type);
+        sel[0].appendChild(opt);
+         }
+
+      var sel = $("#boat");
+      for(var i = 0; i < res.boats.length; i++) {
+        var opt = document.createElement('option');
+        opt.value = res.boats[i].id;
+        opt.innerHTML = decodeURI(res.boats[i].name) + ' ' +  "(" + res.boats[i].size + ")";
+        sel[0].appendChild(opt);
+         }
+    });
+    /*document.getElementById('qbutton').addEventListener('click', getPower);*/
+});
+
+/* When the user clicks on the button,
+toggle between hiding and showing the dropdown content */
+function myFunction() {
+    document.getElementById("user-dropdown").classList.toggle("show");
+}
+
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(event) {
+  if (!event.target.matches('.dropbtn')) {
+
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
   }
 }
