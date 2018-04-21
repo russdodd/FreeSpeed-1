@@ -59,14 +59,6 @@ $(document).ready(function() {
     $('#submitUpload').on('click', upload);
     $.post("/upload-data-information", function(res) {
       console.log(res);
-      var innerHTML = '<input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">';
-      for (var i = 0; i < res.users.length; i++) {
-        innerHTML += '<li value="' + decodeURI(res.users[i].username) + '">' + decodeURI(res.users[i].firstName) + ' ' +  decodeURI(res.users[i].lastName) + '</li>';
-      }
-      console.log(innerHTML);
-      document.getElementById('user-dropdown').innerHTML = innerHTML;
-
-
       var sel = $("#username");
        for(var i = 0; i < res.users.length; i++) {
           var opt = document.createElement('option');
@@ -74,6 +66,21 @@ $(document).ready(function() {
           opt.innerHTML = decodeURI(res.users[i].firstName) + ' ' +  decodeURI(res.users[i].lastName);
           sel[0].appendChild(opt);
           }
+      var sel = $("#workouts");
+      for(var i = 0; i < res.workouts.length; i++) {
+        var opt = document.createElement('option');
+        opt.value = res.workouts[i].id;
+        opt.innerHTML = decodeURI(res.workouts[i].startTime) + ' ' +  decodeURI(res.workouts[i].type);
+        sel[0].appendChild(opt);
+         }
+
+      var sel = $("#boat");
+      for(var i = 0; i < res.boats.length; i++) {
+        var opt = document.createElement('option');
+        opt.value = res.boats[i].id;
+        opt.innerHTML = decodeURI(res.boats[i].name) + ' ' +  "(" + res.boats[i].size + ")";
+        sel[0].appendChild(opt);
+         }
     });
     /*document.getElementById('qbutton').addEventListener('click', getPower);*/
 });
