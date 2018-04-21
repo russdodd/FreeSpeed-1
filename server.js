@@ -120,7 +120,7 @@ app.post('/data-upload', function(request, response) {
     createNewWorkout(data);
   } else if (code === 1) {
     // Create New Boat for existing workout
-    createNewBoatUsers(data);
+    createNewWorkoutUserBoat(data);
   } else if (code === 2) {
     //TODO: Update Existing Entry
   }
