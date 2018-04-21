@@ -14,6 +14,7 @@ function browserSupportFileUpload() {
 }
 function uploadData(json_data) {
   console.log("here");
+  console.log(json_data);
   $.post('/data-upload', json_data, function(res, err) {
     if (err != null){
       console.log(err);
@@ -56,5 +57,44 @@ function upload() {
 $(document).ready(function() {
     // The event listener for the file upload
     $('#submitUpload').on('click', upload);
+    $.post("/upload-data-information", function(res) {
+      console.log(res);
+      var innerHTML = '<input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">';
+      for (var i = 0; i < res.users.length; i++) {
+        innerHTML += '<li value="' + decodeURI(res.users[i].username) + '">' + decodeURI(res.users[i].firstName) + ' ' +  decodeURI(res.users[i].lastName) + '</li>';
+      }
+      console.log(innerHTML);
+      document.getElementById('user-dropdown').innerHTML = innerHTML;
+
+
+      var sel = $("#username");
+       for(var i = 0; i < res.users.length; i++) {
+          var opt = document.createElement('option');
+          opt.value = res.users[i].username;
+          opt.innerHTML = decodeURI(res.users[i].firstName) + ' ' +  decodeURI(res.users[i].lastName);
+          sel[0].appendChild(opt);
+          }
+    });
     /*document.getElementById('qbutton').addEventListener('click', getPower);*/
 });
+
+/* When the user clicks on the button,
+toggle between hiding and showing the dropdown content */
+function myFunction() {
+    document.getElementById("user-dropdown").classList.toggle("show");
+}
+
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(event) {
+  if (!event.target.matches('.dropbtn')) {
+
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+}
