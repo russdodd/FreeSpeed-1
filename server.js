@@ -9,6 +9,7 @@ var bcrypt = require('bcrypt-nodejs');
 
 var conn = anyDB.createConnection('sqlite3://freespeed.db');
 conn.query('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, permission INTEGER NOT NULL, firstName TEXT NOT NULL, lastName TEXT NOT NULL)');
+conn.query('CREATE TABLE IF NOT EXISTS boats (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, size INTEGER NOT NULL)');
 conn.query('SELECT * FROM boats', function (err, res) {
     if (res.rowCount === 0) {
       /* NOTE: BOATS TABLE SHOULD BE PRE-POPULATED*/

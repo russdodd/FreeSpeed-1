@@ -34,18 +34,25 @@ function upload() {
     var reader = new FileReader();
     reader.readAsText(file);
     reader.onload = function(event) {
-      console.log("hello");
-      var jsonData = {"code": 0,
-              "workoutID": -1,
-              "workoutType": $("#workout").val(),
-              "boatID": 1,
+      var workoutId = $("#workouts").val();
+      if ($("#newWorkout")[0].checked){
+        workoutId = -1;
+      } else if ($("#workouts").val() == null) {
+        alert("No workout selected");
+        return;
+      }
+      var jsonData = {"code": !Number($("#newWorkout")[0].checked),
+              "workoutID": workoutId,
+              "workoutType": $("#workoutType").val(),
+              "boatID": $("#boat").val(),
               "users":[]
             };
       csvData = event.target.result;
       var userJson = {"per_stroke_data": csvData};
-      userJson.username = $("#user").val();
+      userJson.username = $("#username").val();
       jsonData.users.push(userJson);
       var json_str = {data:JSON.stringify(jsonData)}
+
       uploadData(json_str);
       };
     reader.onerror = function() {
@@ -70,7 +77,7 @@ $(document).ready(function() {
       for(var i = 0; i < res.workouts.length; i++) {
         var opt = document.createElement('option');
         opt.value = res.workouts[i].id;
-        opt.innerHTML = decodeURI(res.workouts[i].startTime) + ' ' +  decodeURI(res.workouts[i].type);
+        opt.innerHTML = decodeURI(res.workouts[i].date) + ' ' +  decodeURI(res.workouts[i].type);
         sel[0].appendChild(opt);
          }
 
