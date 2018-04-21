@@ -15,7 +15,6 @@ conn.query('SELECT * FROM boats', function (err, res) {
       conn.query('INSERT INTO boats (name, size) values ("Baker", 8)');
       conn.query('INSERT INTO boats (name, size) values ("94", 8)');
     }
-  });
 });
 conn.query('CREATE TABLE IF NOT EXISTS workouts (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT NOT NULL, type TEXT NOT NULL)');
 conn.query('CREATE TABLE IF NOT EXISTS workoutUserBoat (id INTEGER PRIMARY KEY AUTOINCREMENT, workoutID INTEGER NOT NULL, username TEXT NOT NULL, boatID INTEGER NOT NULL)');
