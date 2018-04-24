@@ -1,50 +1,24 @@
-# FreeSpeed
+To run:
+Run ‘node server.js’ in the same directory as the server.js file
+Open http://localhost:8080/login in a browser to access login page
 
-# TODOS
+To create account:
+Click on sign up and fill in details
 
-Front End: Alex Yu, Russell Dodd
+On home page:
+We have made skeleton of the front-end
+We have a placeholder image where data will be graphed
+We have put our focus on uploading data so click on the “Upload” button to navigate there
 
-1. Login Page
-2. Create Account Page
-3. Upload Data Page
-4. Main Page
+On upload page:
+To upload, use the provided csv file (sample_data.csv):
+drag and drop csv file onto the upload csv button
+Select the user from drop down
+Select boat used
 
-----------------------
-Back-end: James Fife, Sathya Anisetti
 
-1. Design a SQLite3 DB
-2. Create program to parse data + upload to DB
-3. Authentication stuff
-4. Send data to front-end
-
-Data:
-data-id, store Per-stroke Data columns, person-workout-id
-
-person-workout-id, start-times
-
-workout-id, person-workout-id, boat-id
-
-boat-name, boat-size, boat-id
-
-name (potentially add stats columns weights) person-id
-
----------------------------------------------------------------------
-TABLES
-1. Users:
-id, username, password, permission, name
-permission is 1 if coach, 0 o/w
-
-2. Boats:
-id, size, name
-
-3. Workout:
-id, date, type
-
-5. Workout-User-Boat:
-id, workout id, user id, boat id, start-time
-
-6. Data:
-id, workout-user-boat-id, per-stroke data columns
---------------------------------------------------------------------
-
-Request workout for a certain day
+Select the Create new workout checkbox
+Select an existing workout
+Enter anything as the workout type if new workout checkbox was clicked
+Hit submit
+This will send the information to the backend to store in various databases
