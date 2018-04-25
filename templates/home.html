@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+  <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
   <script src="/js/home.js"></script>
   <link rel="stylesheet" href="/css/home.css">
   <title>FreeSpeed</title>
@@ -14,9 +14,9 @@
     <div id="banner">
       <p id="banner_logo">FreeSpeed</p>
       <div id="banner_right">
-        <a href="/upload-data"><button id="upload_button" class="banner_button">Upload</button></a>
+        <button id="upload_button" class="banner_button">Upload</button>
         <p id="user_name">{{username}}</p>
-        <a href="/login"><button id="logout_button" class="banner_button">Log Out</button></a>
+        <button id="logout_button" class="banner_button">Log Out</button>
     </div>
 
     </div>
@@ -49,7 +49,7 @@
             <button class="type_selector_button" id='2' onclick="toggleType(2)">Slip</button>
           </div>
           <p id="graph_title"></p>
-          <img id="graph" src="/images/example_graph.jpg"/>
+          <img id="graph" alt="graph data" src="/images/example_graph.jpg"/>
         </div>
         <div id="averages_div">
           <p id="averages_div_title">Averages</p>
