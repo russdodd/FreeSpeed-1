@@ -360,6 +360,36 @@ app.post('/add-new-user', function(request, response) {
 	}
 })
 
+app.post('/get-workouts', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  var sql = 'SELECT * FROM workouts';
+  conn.query(sql, function(err, result) {
+    if (err === null) {
+      response.json(result.rows);
+    } else {
+      /*TODO: Handle Error*/
+      console.log(err);
+    }
+  });
+});
+
+app.post('/get-workout-data', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  var sql = 'SELECT users.username, users.firstName, boats.name, data.* ' +
+  'FROM workoutUserBoat JOIN users ON users.username = ' +
+  'workoutUserBoat.username JOIN boats ON boats.id = ' +
+  'workoutUserBoat.boatID JOIN data ON data.workoutUserBoatID = workoutUserBoat.id ' +
+  'WHERE workoutID = ?';
+
+  conn.query(sql, [response.workoutID], function(err, result) {
+    if (err === null) {
+      response.json(results.rows);
+    } else {
+      console.log(err);
+    }
+  });
+
+});
 
 /// socket events
 
