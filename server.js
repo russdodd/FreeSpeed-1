@@ -381,9 +381,9 @@ app.post('/get-workout-data', function(request, response) {
   'workoutUserBoat.boatID JOIN data ON data.workoutUserBoatID = workoutUserBoat.id ' +
   'WHERE workoutID = ?';
 
-  conn.query(sql, [response.workoutID], function(err, result) {
+  conn.query(sql, [request.body.workoutID], function(err, result) {
     if (err === null) {
-      response.json(results.rows);
+      response.json(result.rows);
     } else {
       console.log(err);
     }
