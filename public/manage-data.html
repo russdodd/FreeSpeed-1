@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> Manage Team Data </title>
+    <link rel="stylesheet" href="/css/manage-data.css">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <!-- Latest compiled and minified CSS --><!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"> -->
+    <script src="/js/manage.js"></script>
+  </head>
+  <body>
+    <div id="manage-data-container">
+      <h1 id="manage-data-header">Data Center</h1>
+      <div id="manage-data-subcontainer">
+        <div class="manage-data-button-container" id="manage-data-user-container">
+          <img class="manage-data-img" src="/images/users.png" alt="Users Icon" height="80" width="80">
+          <p class="manage-data-p"> Lorem ipsum dolor sit amet, sonet simul ocurreret mel te. Mollis discere vel no, sit no posse indoctum mnesarchum. Fuisset tincidunt instructior no eos, ea dignissim hendrerit mei.</p>
+          <a href="/user-data"><button class="manage-data-button"> Manage Users </button></a>
+        </div>
+        <div class="manage-data-button-container" id="manage-data-boat-container">
+          <img class="manage-data-img" src="/images/boats.png" alt="Users Icon" height="80" width="80">
+          <p class="manage-data-p"> Lorem ipsum dolor sit amet, sonet simul ocurreret mel te. Mollis discere vel no, sit no posse indoctum mnesarchum. Fuisset tincidunt instructior no eos, ea dignissim hendrerit mei.</p>
+          <a href="/boat-data"><button class="manage-data-button"> Manage Boats </button></a>
+        </div>
+        <div class="manage-data-button-container" id="manage-data-data-container">
+          <img class="manage-data-img" src="/images/db.png" alt="DB Icon" height="80" width="80">
+          <p class="manage-data-p"> Lorem ipsum dolor sit amet, sonet simul ocurreret mel te. Mollis discere vel no, sit no posse indoctum mnesarchum. Fuisset tincidunt instructior no eos, ea dignissim hendrerit mei.</p>
+          <a href="/workout-data"><button class="manage-data-button"> Manage Data </button></a>
+        </div>
+      </div>
+    </div>
+    <div id="users-div">
+    <table id="users">
+      <tr>
+        <th>Name</th>
+        <th>Year</th>
+        <th>Email</th>
+        <th></th>
+        <th></th>
+      </tr>
+      <tr>
+        <td><a href="#">Sathya Anisetti</a></td>
+        <td>2020</td>
+        <td>sathya_anisetti@brown.edu</td>
+        <td><button><img src="images/edit.png" height="25" width="25"></button></td>
+        <td><button><img src="images/delete.png" height="25" width="25"></button></td>
+      </tr>
+      <tr>
+        <td>Russell Dodd</td>
+        <td>2018</td>
+        <td>russell_dodd@brown.edu</td>
+        <td><button><img src="images/edit.png" height="25" width="25"></button></td>
+        <td><button><img src="images/delete.png" height="25" width="25"></button></td>
+      </tr>
+      <tr>
+        <td>James Fife</td>
+        <td>2019</td>
+        <td>james_fife@brown.edu</td>
+        <td><button><img src="images/edit.png" height="25" width="25"></button></td>
+        <td><button><img src="images/delete.png" height="25" width="25"></button></td>
+      </tr>
+      <tr>
+        <td>Alexander Yu</td>
+        <td>2020</td>
+        <td>Alexander_Yu@brown.edu</td>
+        <td><button><img src="images/edit.png" height="25" width="25"></button></td>
+        <td><button><img src="images/delete.png" height="25" width="25"></button></td>
+      </tr>
+    </table>
+    <div id="invite-user">
+      Invite New User:
+      <input> </input>
+    </div>
+    </div>
+  </body>
+</html>

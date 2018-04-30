@@ -1,0 +1,202 @@
+body {
+  padding:0 0;
+  margin:0 0;
+  background-color: #ccc;
+}
+
+button {
+  border: none;
+  padding: 0 0;
+  margin: 0 0;
+  background-color: transparent;
+  outline: none;
+}
+
+button:disabled:hover {
+  color: red;
+}
+
+p {
+  margin: 0 0;
+}
+
+input:focus {
+    outline:none;
+}
+
+a {
+  text-decoration: none;
+  font-size: 16px;
+}
+
+textarea {
+  resize: none;
+}
+
+#banner {
+  background-color: white;
+  height: 100px;
+  color: black;
+  padding: 0 10%;
+  border-bottom: 1px solid #ccc;
+}
+
+#banner_logo {
+  display: inline-block;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 100px;
+}
+
+.banner_button {
+  display: inline-block;
+  cursor: pointer;
+  padding: 0 15px;
+  margin: 0 15px;
+  font-size: 14px;
+  height: 50px;
+  color: #4AAD00;
+  border-radius: 8px;
+  border: 1px solid #4AAD00;
+}
+
+.banner_button:hover {
+  display: inline-block;
+  cursor: pointer;
+  padding: 0 15px;
+  margin: 0 15px;
+  font-size: 14px;
+  height: 50px;
+  color: white;
+  border-radius: 8px;
+  border: 1px solid #4AAD00;
+  background-color: #4AAD00;
+}
+
+#banner_right {
+  display: inline-block;
+  float: right;
+}
+
+#user_name {
+  display: inline-block;
+  line-height: 100px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+#logout_button {
+  background-color: white;
+  border: none;
+  color: blue;
+}
+#banner_hr {
+  border-color: #f1f1f1;
+  width: 100%;
+  margin: 0 0;
+}
+
+#white_background_wrapper {
+  position: relative;
+  overflow: hidden;
+  height: 700px;
+  width: 1300px;
+  margin: 0 auto;
+  background-color: white;
+}
+
+#type_selector {
+  display: inline-block;
+  margin: 0 0;
+  color: black;
+  z-index: 1;
+  font-size: 21px;
+  border-bottom: 1px solid #ccc;
+}
+
+.type_selector_button {
+  display: inline-block;
+  margin-right: 40px;
+  font-size: 24px;
+  cursor: pointer;
+
+}
+
+.type_selector_button:hover {
+  color: gray;
+}
+
+.type_selector_button_selected {
+  display: inline-block;
+  margin-right: 40px;
+  font-size: 24px;
+  color: red;
+  border-bottom: 1px solid red;
+}
+
+.type_selector_button_selected:hover {
+  color: gray;
+}
+
+#rowers_div {
+  float: left;
+  display: inline-block;
+  width: 250px;
+  height: 100%;
+  border-right: 1px solid #ccc;
+}
+
+#rowers_title_div {
+  padding: 20px 0;
+  border-bottom: 1px solid #ccc;
+}
+
+#rowers_title {
+  text-align: center;
+  font-size: 18px;
+}
+
+#rowers_list {
+  padding: 0 0;
+  margin: 0 0;
+}
+
+#rowers_list li {
+  list-style: none;
+  padding: 20px 20px;
+  border-bottom: 1px solid #ccc;
+}
+
+#rowers_list li:hover {
+  background-color: #ADD8E6;
+  cursor: pointer;
+  color: white;
+}
+
+.rower_selected {
+  background-color: #ADD8E6;
+  color: white;
+}
+
+.rower_selected:hover {
+  background-color: white;
+  color: black;
+}
+
+#graph_div {
+  display: inline-block;
+  width: 1009px;
+  padding: 20px 20px;
+  border-bottom: 1px solid #ccc;
+}
+
+#graph_title {
+  text-align: center;
+  padding: 20px 20px;
+}
+
+#graph {
+  display: block;
+  width: 500px;
+  margin: 0 auto;
+}
