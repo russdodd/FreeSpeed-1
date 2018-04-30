@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+  <script src="/js/home.js"></script>
+  <link rel="stylesheet" href="/css/home.css">
+  <title>FreeSpeed</title>
+  <meta name="username" content={{username}}>
+</head>
+
+<body>
+  <div>
+    <div id="banner">
+      <p id="banner_logo">FreeSpeed</p>
+      <div id="banner_right">
+        <a href="/upload-data"><button id="upload_button" class="banner_button">Upload</button></a>
+        <p id="user_name">{{username}}</p>
+        <a href="/login"><button id="logout_button" class="banner_button">Log Out</button></a>
+    </div>
+
+    </div>
+    <div id="white_background_wrapper">
+        <div id="rowers_div">
+          <div id="rowers_title_div">
+            <p id="rowers_title">
+              Rowers
+            </p>
+          </div>
+          <ul id="rowers_list">
+            <li class="rower_selected" id="rower_0" onclick="selectRower(this.id)">
+              Russell
+            </li>
+            <li class="rower" id="rower_1" onclick="selectRower(this.id)">
+              Sathya
+            </li>
+            <li class="rower" id="rower_2" onclick="selectRower(this.id)">
+              Alex
+            </li>
+            <li class="rower" id="rower_3" onclick="selectRower(this.id)">
+              James
+            </li>
+          </ul>
+        </div>
+        <div id="graph_div">
+          <div id="type_selector">
+            <button class="type_selector_button" id='0' onclick="toggleType(0)">Power</button>
+            <button class="type_selector_button" id='1' onclick="toggleType(1)">Speed</button>
+            <button class="type_selector_button" id='2' onclick="toggleType(2)">Slip</button>
+          </div>
+          <p id="graph_title"></p>
+          <img id="graph" src="/images/example_graph.jpg"/>
+        </div>
+        <div id="averages_div">
+          <p id="averages_div_title">Averages</p>
+        </div>
+    </div>
+  </div>
+</html>
