@@ -13,8 +13,6 @@ function browserSupportFileUpload() {
   return isCompatible;
 }
 function uploadData(json_data) {
-  console.log("here");
-  console.log(json_data);
   $.post('/data-upload', json_data, function(res, err) {
     if (err != null){
       console.log(err);
@@ -51,6 +49,7 @@ function upload() {
       var userJson = {"per_stroke_data": csvData};
       userJson.username = $("#username").val();
       jsonData.users.push(userJson);
+      console.log(jsonData);
       var json_str = {data:JSON.stringify(jsonData)}
 
       uploadData(json_str);

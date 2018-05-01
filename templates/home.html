@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
-  <script src="/js/home.js"></script>
+  <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
   <link rel="stylesheet" href="/css/home.css">
   <title>FreeSpeed</title>
   <meta name="username" content={{username}}>
@@ -28,7 +28,7 @@
             </p>
           </div>
           <ul id="rowers_list">
-            <li class="rower_selected" id="rower_0" onclick="selectRower(this.id)">
+            <!-- <li class="rower_selected" id="rower_0" onclick="selectRower(this.id)">
               Russell
             </li>
             <li class="rower" id="rower_1" onclick="selectRower(this.id)">
@@ -39,21 +39,46 @@
             </li>
             <li class="rower" id="rower_3" onclick="selectRower(this.id)">
               James
-            </li>
+            </li> -->
           </ul>
         </div>
         <div id="graph_div">
+          <div id="workout_selector">
+            Workouts:
+            <select id="workouts">
+              <option selected disabled>Choose Workout</option>
+            </select>
+          <div>
+            <br/>
           <div id="type_selector">
-            <button class="type_selector_button" id='0' onclick="toggleType(0)">Power</button>
-            <button class="type_selector_button" id='1' onclick="toggleType(1)">Speed</button>
-            <button class="type_selector_button" id='2' onclick="toggleType(2)">Slip</button>
+            <button class="type_selector_button" id='0' value="power" onclick="toggleType(0)">Power</button>
+            <button class="type_selector_button" id='1' value="speedGPS" onclick="toggleType(1)">Speed</button>
+            <button class="type_selector_button" id='2' value="slip" onclick="toggleType(2)">Slip</button>
+            <button class="type_selector_button" id='3' value="wash" onclick="toggleType(3)">Wash</button>
+            <button class="type_selector_button" id='4' value="strokeRate" onclick="toggleType(4)">Stroke/Min</button>
+            <button class="type_selector_button" id='5' value="catch" onclick="toggleType(5)">Catch Angle</button>
+            <button class="type_selector_button" id='6' value="finish" onclick="toggleType(6)">Finish Angle</button>
+            <button class="type_selector_button" id='7' value="maxForceAngle" onclick="toggleType(7)">Max Force Angle</button>
+            <button class="type_selector_button" id='8' value="forceMax" onclick="toggleType(8)">Max Force</button>
+            <button class="type_selector_button" id='9' value="forceAvg" onclick="toggleType(9)">Avg Force</button>
+            <button class="type_selector_button" id='10' value="work" onclick="toggleType(10)">Work</button>
+            <button class="type_selector_button" id='11' value="distancePerStrokeGPS" onclick="toggleType(11)">Distance/Stroke</button>
+            <button class="type_selector_button" id='12' value="heartRateBPM" onclick="toggleType(12)">Heart Rate</button>
           </div>
           <p id="graph_title"></p>
-          <img id="graph" alt="graph data" src="/images/example_graph.jpg"/>
+          <div id="d3Graph">
+          </div>
+          <div id="radioPanel">
+          <ul id="dataRadios">
+            </ul>
+          </div>
+          <!-- <img id="graph" alt="graph data" src="/images/example_graph.jpg"/> -->
         </div>
         <div id="averages_div">
           <p id="averages_div_title">Averages</p>
         </div>
     </div>
   </div>
+  <script src="/js/graph.js"></script>
+  <script src="/js/home.js"></script>
 </html>
