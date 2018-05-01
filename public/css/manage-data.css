@@ -101,10 +101,7 @@ a {
   transition: all 0.3s ease;
   position: relative;
   display: inline-block;
-}
-
-.manage-data-button {
-  background: #f2f2f2;
+	background: #f2f2f2;
   border: 2px solid #000;
   transition: all 0.3s ease;
 }
@@ -116,7 +113,7 @@ a {
   top: 50%;
   height: 2px;
   background: #000;
-  transition: all 0.3s ease;
+  transition: all 1s ease;
 }
 .manage-data-button:before {left: -10%;}
 .manage-data-button:after {right: -10%}
@@ -126,6 +123,20 @@ a {
 }
 .manage-data-button:hover:before {left: 0%;}
 .manage-data-button:hover:after {right: 0%;}
+
+.manage-data-button-active {
+	padding: 10px 25px;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  outline: none !important;
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+  border: 2px solid #000;
+	background: #000;
+	color: #fff;
+	right: 0%;
+}
 
 .manage-data-p {
   margin-bottom: 20px;
@@ -149,7 +160,6 @@ a {
 }
 
 #users-div {
-	/*border: 2px solid black;*/
 	text-align: center;
 	width: 900px;
 	margin: auto;
@@ -161,28 +171,27 @@ h2 {
 	width: 300px;
 }
 
-#users {
+.table {
     border-collapse: collapse;
     width: 100%;
 		text-align: center;
 		margin-top: 10px;
 }
 
-#users th {
+.table th {
     padding: 8px;
 		background-color: black;
 		padding-top: 12px;
 		padding-bottom: 12px;
 		text-align: center;
 		color: white;
-
 }
 
-#users td {
+.table td {
 	padding: 8px;
 }
 
-#users tr:hover {
+.table tr:hover {
 	background-color: #ddd;
 }
 
@@ -203,4 +212,5 @@ a {
 #invite-user {
 	text-align: left;
 	margin-top: 15px;
+	margin-bottom: 20px;
 }

@@ -1,0 +1,34 @@
+TODOS:
+
+All TODOS:
+- Make clicking on trash button link to database
+
+Users TODO:
+- Make clicking on edit button open a modal to enter data for the user
+- Make clicking on the user's name open a user-data page where all data relevant
+to user are contained
+- Make invite user thing send email invitation
+
+Boat TODO:
+- Make table row editable if they click edit
+- Once they make edits, link edits to db
+
+Workout Data TODO:
+ - Create New Workout:
+  - ask how many people for each of the workouts
+  - ask how which boat each person was in +
+  - Make place for them to upload csv for each person for each workout
+  - once workout is completed, move to next workout
+  - once all workouts are completed -> let them submit
+  - if not all fields are filled (use socket) -> require them to fill
+  - give spot for them to change number of workout
+ - Manage Existing Workout Data:
+  - Let them edit what data already uploaded (dropdown existing workouts),
+  - after they select one, ask them for which user they want to modify data for,
+  - after they select one, ask for csv file + boat
+
+  Backend:
+  - Check user exists
+  - check all fields are filled
+  - check boat is valid
+  - check csv is valid
