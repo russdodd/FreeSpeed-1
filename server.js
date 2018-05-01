@@ -36,11 +36,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
-app.get('/', function(request, response){
-  console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.redirect('/login');
-});
-
 app.get('/login', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
   response.sendFile('public/login.html', {root: __dirname });
@@ -370,18 +365,7 @@ app.get('/manage-data', function(request, response) {
   response.sendFile('/public/manage-data.html', {root: __dirname });
 });
 
-app.get('/user-data', function(request, response) {
-  console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.sendFile('/public/user-data.html', {root: __dirname });
-});
-
-app.get('/boat-data', function(request, response) {
-  console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.sendFile('/public/workout-data.html', {root: __dirname });
-});
-
 /// socket events
-
 
 app.post('/get-workouts', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
