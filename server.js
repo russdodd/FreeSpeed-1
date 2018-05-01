@@ -105,6 +105,21 @@ app.post('/upload-data-information', function(request, response) {
   });
 });
 
+app.post('/get-users', function(request, response) {
+  var sql = "SELECT username, firstName, lastName FROM users";
+  var json = {};
+  conn.query(sql, function(err, res) {
+    if (err === null) {
+      json.users = res.rows;
+      console.log(json);
+      response.json(json);
+    } else {
+      /*TODO: Handle Error*/
+      console.log(err);
+    }
+  });
+});
+
 app.post('/data-upload', function(request, response) {
   // 1. Authenticate user is allowed to do what they did using JWT
   // 2. Authenticate that data uploaded is valid
@@ -120,7 +135,10 @@ app.post('/data-upload', function(request, response) {
     createNewWorkout(data);
   } else if (code === 1) {
     // Create New Boat for existing workout
-    createNewWorkoutUserBoat(data);
+    for (var i = 0; i < data.users.length; i++){
+      createNewWorkoutUserBoat(i, data.users[i].username, data);
+    }
+    
   } else if (code === 2) {
     //TODO: Update Existing Entry
   }
@@ -375,7 +393,7 @@ app.post('/get-workouts', function(request, response) {
 
 app.post('/get-workout-data', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  var sql = 'SELECT users.username, users.firstName, boats.name, data.* ' +
+  var sql = 'SELECT users.username, users.firstName, users.lastName, boats.name, data.* ' +
   'FROM workoutUserBoat JOIN users ON users.username = ' +
   'workoutUserBoat.username JOIN boats ON boats.id = ' +
   'workoutUserBoat.boatID JOIN data ON data.workoutUserBoatID = workoutUserBoat.id ' +

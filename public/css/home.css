@@ -113,6 +113,14 @@ textarea {
   font-size: 21px;
   border-bottom: 1px solid #ccc;
 }
+#workout_selector {
+  display: inline-block;
+  margin: 0 0;
+  color: black;
+  z-index: 1;
+  font-size: 21px;
+  border-bottom: 1px solid #ccc;
+}
 
 .type_selector_button {
   display: inline-block;
@@ -199,4 +207,24 @@ textarea {
   display: block;
   width: 500px;
   margin: 0 auto;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.overlay {
+  pointer-events: all;
+}
+
+.focus circle {
+  fill: none;
+  stroke: steelblue;
 }
