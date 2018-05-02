@@ -168,6 +168,9 @@ function toggleWorkouts() {
   // }
 }
 
+function addBoat() {
+}
+
 function deleteUser(elem) {
   result = window.prompt("ALERT! You are about to remove a user. Type in: YES if you want to proceed.");
   parent = elem.parentElement.parentElement;
