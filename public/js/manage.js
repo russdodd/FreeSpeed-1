@@ -119,7 +119,7 @@ function toggleUsers() {
       var users = makeUserTable(response);
       $('#manage-users-data-button').removeClass('manage-data-button').addClass('manage-data-button-active');
       $(users).hide().appendTo(parent).show('slow');
-      $(parent).append('<hr>'+
+      $(parent).append('<hr id="userLine">'+
                    '<div id="invite-user">'+
                    '  Invite New User:'+
                    '  <input id="emailAddress" type="email"> </input>'+
@@ -129,6 +129,7 @@ function toggleUsers() {
   } else {
     $('#manage-users-data-button').removeClass('manage-data-button-active').addClass('manage-data-button');
     $('#users').remove();
+    $('#userLine').remove();
     $('#invite-user').remove();
   }
 }
