@@ -2,6 +2,15 @@ var ind1 = "elapsedTime";
 var ind2 = "power";
 var username = ""
 var global_data = [];
+var global_raw_data = [];
+var toggle_vals = ["power","speedGPS","slip","wash","strokeRate","catch","finish","maxForceAngle","forceMax","forceAvg","work","distancePerStrokeGPS","heartRateBPM"];
+var toggle_types = ["Power", "Speed", "Slip", "Wash", "Stroke/Min", "Catch Angle", "Finish Angle", "Max Force Angle", "Max Force", "Avg Force", "Work", "Distance/Stroke", "Heart Rate"];
+var averages = [];
+var cur_averages = [];
+for (var i = 0; i < toggle_vals.length; i++){
+  averages.push(0);
+  cur_averages.push(0);
+}
 
 var margin = {top: 20, right: 100, bottom: 30, left: 50},
     width = 960 - margin.left - margin.right,
@@ -41,26 +50,26 @@ function d3Init(){
     data = global_data[n];
   }*/
   data = global_data[username];
-  console.log(username);
-  console.log(data);
+  //console.log(username);
+  //console.log(data);
   x.domain(d3.extent(data, function(d) { return d[ind1]; }));
   y.domain(d3.extent(data, function(d) { return d[ind2]; }));
-  console.log("x",x);
+  //console.log("x",x);
   
   function mousemove() {
     var x0 = x.invert(d3.mouse(this)[0]);
-    console.log("mouse", d3.mouse(this)[0]);
-    console.log("x0",x0);
+    //console.log("mouse", d3.mouse(this)[0]);
+    //console.log("x0",x0);
     var i = bisectDate(data, x0, 1);
-    console.log("i",i);
+    //console.log("i",i);
     var d0 = data[i - 1];
     var d1 = data[i];
-    console.log("d1",d1);
+    //console.log("d1",d1);
     var d = x0 - d0[ind1] > d1[ind1] - x0 ? d1 : d0;
     var time = 
     focus.attr("transform", "translate(" + x(d[ind1]) + "," + y(d[ind2]) + ")");
     focus.select("text").text(formatCurrency(d[ind2]) + ", " + formatTime(d[ind1]));
-    console.log("d",d);
+    //console.log("d",d);
 
   }
 
@@ -157,7 +166,7 @@ function cleanData(){
 }
 
 function updateGraph(){
-  ind2 = $(".type_selector_button_selected").val();
+  ind2 = $("#dropdown_button").val();
   username = $(".rower_selected")[0].id;
   $("svg :first-child").empty();
   d3Init();
@@ -193,25 +202,57 @@ function populateUsersList(){
           $(".rower")[0].classList.add("rower_selected");
 }
 
+function updateCurAverages(){
+  for (var i = 0; i < global_data[username].length; i++){
+    for(var j = 0; j < toggle_vals.length; j++){
+      cur_averages[j]+= global_data[username][i][toggle_vals[j]];
+    }
+  }
+  var trHTML = '';
+  for(var j = 0; j < toggle_vals.length; j++){
+    cur_averages[j]/= global_data[username].length;
+    trHTML += '<tr><td>' + toggle_types[j] + '</td><td>' + averages[j].toFixed(2) + '</td><td>' + cur_averages[j].toFixed(2) + '</td></tr>';
+
+  }
+
+  $('#averages_table').append(trHTML);
+}
+
+function updateAverages(){
+  for (var i = 0; i < global_raw_data.length; i++){
+    for(var j = 0; j < toggle_vals.length; j++){
+      averages[j]+= global_raw_data[i][toggle_vals[j]];
+    }
+  }
+  for(var j = 0; j < toggle_vals.length; j++){
+    averages[j]/= global_raw_data.length;
+  }
+}
+
+function getData(){
+    console.log("workout selected");
+    var sel = $("#workouts");
+    $.post("/get-workout-data", {workoutID: sel.val()}, function(res){
+      console.log(res);
+      global_raw_data = res;
+      global_data = res;
+      cleanData();
+      groupByUsername();
+      $("#rowers_list").empty();
+      populateUsersList();
+      updateAverages();
+      updateGraph();
+      updateCurAverages();
+    });
+  }
+
 $( document ).ready(function() {
     var svg = d3.select("#d3Graph").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-  $("#workouts").on("change", function(){
-    console.log("workout selected");
-    var sel = $("#workouts");
-    $.post("/get-workout-data", {workoutID: sel.val()}, function(res){
-      console.log(res);
-      global_data = res;
-      cleanData();
-      groupByUsername();
-      $("#rowers_list").empty();
-      populateUsersList();
-      updateGraph();
-    });
-  });
+  $("#workouts").on("change", getData);
   /*$("#submitData").click(function() {
     ind2 = parseInt($("#idxToGraphX").val());
     ind2 = parseInt($("#idxToGraphY").val());

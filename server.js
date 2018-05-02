@@ -267,6 +267,15 @@ function parseCsv(data){
   return jsonData;
 }
 
+function lastInsert(err, res){
+  if (err === null) {
+        console.log("Records succesfully added");
+      } else {
+        /*TODO: Handle Error*/
+        console.log(err);
+      }
+}
+
 function insertData(currUserInd, data) {
   var sql = "INSERT INTO data (workoutUserBoatID, interval, distanceGPS, distanceIMP, elapsedTime, splitGPS, speedGPS, splitIMP, speedIMP, strokeRate, totalStrokes, distancePerStrokeGPS, distancePerStrokeIMP, heartRateBPM, power, catch, slip, finish, wash, forceAvg, work, forceMax, maxForceAngle, GPSLat, GPSLon)" +
   " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -280,14 +289,18 @@ function insertData(currUserInd, data) {
       }
     }
     toInsert = toInsert.concat(concatArray);
-    conn.query(sql, toInsert, function(err, res) {
-      if (err === null) {
-        console.log("Records succesfully added");
-      } else {
-        /*TODO: Handle Error*/
-        console.log(err);
-      }
-    });
+    if (i == data.users[currUserInd].per_stroke_data.data.length - 1){
+      conn.query(sql, toInsert, lastInsert);
+    } else {
+      conn.query(sql, toInsert, function(err, res) {
+        if (err === null) {
+          //console.log("Records succesfully added");
+        } else {
+          /*TODO: Handle Error*/
+          console.log(err);
+        }
+      });
+    }
   }
 }
 
