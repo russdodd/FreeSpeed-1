@@ -1,31 +1,39 @@
 var showUsers = false;
 var showBoats = false;
 var showWorkouts = false;
-
-var boats = '<table class="table" id="boats">'+
-            '  <tr>'+
-            '    <th>Name</th>'+
-            '    <th>Capacity</th>'+
-            '    <th></th>'+
-            '    <th></th>'+
-            '  </tr>'+
-            '  <tr>'+
-            '    <td value="0">Baker</td>'+
-            '    <td>8</td>'+
-            '    <td><button><img src="images/edit.png" height="25" width="25"></button></td>'+
-            '    <td><button><img src="images/delete.png" height="25" width="25"></button></td>'+
-            '  </tr>'+
-            '  <tr>'+
-            '    <td value="1">\'94</td>'+
-            '    <td>8</td>'+
-            '    <td><button><img src="images/edit.png" height="25" width="25"></button></td>'+
-            '    <td><button><img src="images/delete.png" height="25" width="25"></button></td>'+
-            '</table>'+
-            '<div id="add-boat">'+
-            '  Add Boat:'+
-            '  <input> </input>'+
-            '  <input> </input>'+
-            '</div>';
+var modal = '<!-- The Modal -->'+
+'<div id="myModal" class="modal">'+
+''+
+'  <!-- Modal content -->'+
+'  <div class="modal-content">'+
+'    <div class="modal-header">'+
+'      <span class="close">×</span>'+
+'      <h2>Upload Workout Data</h2>'+
+'    </div>'+
+'    <div class="modal-body">'+
+'    <div id="dvImportSegments" class="fileupload ">'+
+'    <fieldset>'+
+'    Create New Workout: <input id="newWorkout" type="checkbox"><br>'+
+'    Workouts:'+
+'    <select id="workouts">'+
+'     <option selected disabled>Choose Workout</option>'+
+'    </select><br>'+
+'          Workout Type: <input id="workoutType" type="text"><br>'+
+'          Upload your CSV File'+
+'          <input type="file" name="File Upload" id="txtFileUpload" accept=".csv"/>'+
+'          <br>'+
+'          Boat:'+
+'          <select id="boat-dropdown">'+
+'              <option selected>Choose Boat...</option>'+
+'            </select><br>'+
+'          <button id="submitUpload">submit</button>'+
+'        </fieldset>'+
+'    </div>'+
+'  </div>'+
+'    <div class="modal-footer">'+
+'       <h3>Modal Footer</h3>'+
+'    </div>'+
+'</div>';
 
 function makeUserTable(response) {
   var users = document.createElement("table");
@@ -50,11 +58,12 @@ function makeUserTable(response) {
     var newRow = document.createElement("tr");
     var firstElem = document.createElement("td");
     firstElem.setAttribute("value", response[i].username);
-    newRow.appendChild(firstElem).appendChild(document.createTextNode(response[i].firstName + " " + response[i].lastName));
+    firstElem.innerHTML = '<a href=#>' + response[i].firstName + " " + response[i].lastName + '</a>';
+    newRow.appendChild(firstElem);
     newRow.appendChild(document.createElement("td")).appendChild(document.createTextNode(response[i].year));
     newRow.appendChild(document.createElement("td")).appendChild(document.createTextNode(response[i].email));
     var editRow = document.createElement("td");
-    editRow.innerHTML = '<button><img src="images/edit.png" height="25" width="25"></button>';
+    editRow.innerHTML = '<button onclick="openEditModal(this)"><img src="images/plus.png" height="25" width="25"></button>';
     newRow.appendChild(editRow);
     var deleteRow = document.createElement("td");
     deleteRow.innerHTML = '<button onclick="deleteUser(this)"><img src="images/delete.png" height="25" width="25"></button>';
@@ -71,7 +80,7 @@ function makeBoatsTable(response) {
   boats.setAttribute("id", "boats");
   var colWidths = ["25%", "25%", "25%", "25%"];
   for (var i = 0; i < colWidths.length; i++) {
-    var col = document.createElement("col")
+    var col = document.createElement("col");
     col.setAttribute("width", colWidths[i]);
     boats.appendChild(col);
   }
@@ -144,16 +153,16 @@ function toggleBoats() {
 }
 
 function toggleWorkouts() {
-  showWorkouts = !showWorkouts;
-  var parent = $('#users-div');
-  if (showWorkouts) {
-    $('#manage-workouts-data-button').removeClass('manage-data-button').addClass('manage-data-button-active');
-    $(users).hide().appendTo(parent).show('slow');
-  } else {
-    $('#manage-workouts-data-button').removeClass('manage-data-button-active').addClass('manage-data-button');
-    $('#users').remove();
-    $('#invite-user').remove();
-  }
+  // showWorkouts = !showWorkouts;
+  // var parent = $('#users-div');
+  // if (showWorkouts) {
+  //   $('#manage-workouts-data-button').removeClass('manage-data-button').addClass('manage-data-button-active');
+  //   $(users).hide().appendTo(parent).show('slow');
+  // } else {
+  //   $('#manage-workouts-data-button').removeClass('manage-data-button-active').addClass('manage-data-button');
+  //   $('#users').remove();
+  //   $('#invite-user').remove();
+  // }
 }
 
 function deleteUser(elem) {
@@ -180,6 +189,112 @@ function deleteBoat(elem) {
   }
 }
 
-$(document).ready(function() {
-  toggleBoats();
-});
+function openEditModal(elem) {
+  console.log(modal);
+  row = elem.parentElement.parentElement;
+  username = row.children[0].attributes[0].value;
+  $(modal).appendTo('#manage-data-container');
+  var span = document.getElementsByClassName("close")[0];
+  span.onclick = function() {
+    $('#myModal').remove();
+  }
+  window.onclick = function(event) {
+    if (event.target === document.getElementById('myModal')) {
+      $('#myModal').remove();
+    }
+  }
+  // The event listener for the file upload
+  $('#submitUpload').on('click', upload);
+  $.post("/upload-data-information", function(res) {
+    console.log(res);
+    // var sel = $("#workouts");
+    // for(var i = 0; i < res.workouts.length; i++) {
+    //   var opt = document.createElement('option');
+    //   opt.value = res.workouts[i].id;
+    //   opt.innerHTML = decodeURI(res.workouts[i].date) + ' ' +  decodeURI(res.workouts[i].type);
+    //   sel[0].appendChild(opt);
+    //    }
+    // var sel = $("#boat");
+    // for(var i = 0; i < res.boats.length; i++) {
+    //   var opt = document.createElement('option');
+    //   opt.value = res.boats[i].id;
+    //   opt.innerHTML = decodeURI(res.boats[i].name) + ' ' +  "(" + res.boats[i].size + ")";
+    //   sel[0].appendChild(opt);
+    //    }
+  });
+}
+
+function sendCsv(csv, fname, lname, time) {
+  var postParameters = {csv: csv, fname: fname, lname: lname, time:time};
+  $.post("/csv", postParameters,  function(responseJSON){
+    //
+  });
+}
+
+function browserSupportFileUpload() {
+  var isCompatible = false;
+  if (window.File && window.FileReader && window.FileList && window.Blob) {
+    isCompatible = true;
+  }
+  return isCompatible;
+}
+function uploadData(json_data) {
+  $.post('/data-upload', json_data, function(res, err) {
+    if (err != null){
+      console.log(err);
+    } else {
+      console.log("success");
+    }
+  });
+};
+
+var csvData = [];
+function upload() {
+  if (!browserSupportFileUpload()) {
+    alert('The File APIs are not fully supported in this browser!');
+  } else {
+    var data = null;
+    var file = $("#txtFileUpload")[0].files[0];
+    var reader = new FileReader();
+    reader.readAsText(file);
+    reader.onload = function(event) {
+      var workoutId = $("#workouts").val();
+      if ($("#newWorkout")[0].checked){
+        workoutId = -1;
+      } else if ($("#workouts").val() == null) {
+        alert("No workout selected");
+        return;
+      }
+      var jsonData = {"code": !Number($("#newWorkout")[0].checked),
+              "workoutID": workoutId,
+              "workoutType": $("#workoutType").val(),
+              "boatID": $("#boat").val(),
+              "users":[]
+            };
+      csvData = event.target.result;
+      var userJson = {"per_stroke_data": csvData};
+      userJson.username = $("#username").val();
+      jsonData.users.push(userJson);
+      var json_str = {data:JSON.stringify(jsonData)}
+
+      uploadData(json_str);
+      };
+    reader.onerror = function() {
+      alert('Unable to read ' + file.fileName);
+    };
+  }
+}
+
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(event) {
+  if (!event.target.matches('.dropbtn')) {
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+}
