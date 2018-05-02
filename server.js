@@ -130,6 +130,7 @@ app.post('/data-upload', function(request, response) {
     //TODO: Update Existing Entry
   }
   console.log('- Request received:', request.method.cyan, request.url.underline);
+  response.end("success");
 });
 
 app.post('/:userName/personal-data-page', function(request, response) {
