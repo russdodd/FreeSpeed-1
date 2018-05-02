@@ -399,7 +399,7 @@ app.post('/get-workout-data', function(request, response) {
 
   conn.query(sql, [response.workoutID], function(err, result) {
     if (err === null) {
-      response.json(results.rows);
+      response.json(result.rows);
     } else {
       console.log(err);
     }
