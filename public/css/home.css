@@ -1,6 +1,7 @@
 html *
 {
    font: Roboto;
+   font-size: 16px;
 }
 
 body {
@@ -87,14 +88,12 @@ textarea {
 
 #person_type {
   display: inline-block;
-  font-size: 24px;
   font-weight: 600;
 }
 
 #user_name {
   display: inline-block;
   line-height: 100px;
-  font-size: 24px;
   font-weight: 600;
 }
 
@@ -122,7 +121,6 @@ textarea {
   margin: 0 0;
   color: black;
   z-index: 1;
-  font-size: 21px;
   border-bottom: 1px solid #ccc;
 }
 #workout_selector {
@@ -130,7 +128,6 @@ textarea {
   margin: 0 0;
   color: black;
   z-index: 1;
-  font-size: 21px;
 }
 
 #dropdown_label {
@@ -145,17 +142,22 @@ textarea {
 .dropdown-menu {
   width: 100px;
 }
+
 #dropdown_button {
-  background-color: transparent;
-  font-size: 24px;
-  color: black;
-  border: none;
-  border-bottom: 1px solid red;
-  padding: 0 0;
+  background-color: white;
+  color: red;
+  border: 1px solid red;
+  padding: 2px 10px;
+}
+
+
+#dropdown_button:hover {
+  background-color: red;
+  color: white;
 }
 
 .type_selector_button {
-  font-size: 24px;
+  padding: 5px 5px;
   cursor: pointer;
 }
 
@@ -164,11 +166,10 @@ textarea {
 }
 
 .type_selector_button_selected {
+  padding: 5px 5px;
   display: inline-block;
   margin-right: 40px;
-  font-size: 24px;
   color: red;
-  border-bottom: 1px solid red;
 }
 
 .type_selector_button_selected:hover {
@@ -189,7 +190,6 @@ textarea {
 
 #rowers_title {
   text-align: center;
-  font-size: 18px;
 }
 
 #rowers_list {
@@ -220,8 +220,8 @@ textarea {
 }
 
 #graph_div {
-  display: inline-block;
-  width: 1009px;
+  float: right;
+  width: 1050px;
   padding: 20px 20px;
   border: none;
   border-left: 1px solid #ccc;
@@ -260,10 +260,10 @@ textarea {
 
 #averages_div {
   border-top: 1px solid #ccc;
+  float: right;
 }
 
 #averages_div_title {
-  font-size: 24px;
   font-weight: 800;
 }
 
@@ -284,9 +284,40 @@ textarea {
 #profile_dropdown_button {
   background-color: transparent;
   color: black;
-  font-size: 24px;
   padding: 0 0;
   font-weight: 600;
   border: none;
   border-bottom:1px solid #ccc;
+}
+
+#workout_button {
+  background-color: white;
+  color: red;
+  border: 1px solid red;
+  padding: 2px 10px;
+}
+
+#stats_title {
+  display: inline-block;
+  font-size: 24px;
+  font-weight: 600;
+  padding: 15px 15px;
+}
+
+#choose_workout_div {
+  float: right;
+}
+
+#choose_statistic_div {
+  display: inline-block;
+  padding: 0 20px;
+}
+
+#stats_header {
+  display: inline-block;
+  width: 1050px;
+  height: 63px;
+  padding: 0 20px;
+  border-left: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
 }
