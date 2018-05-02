@@ -6,9 +6,8 @@ var bodyParser = require('body-parser');
 var anyDB = require('any-db');
 var bcrypt = require('bcrypt-nodejs');
 
-
 var conn = anyDB.createConnection('sqlite3://freespeed.db');
-conn.query('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, permission INTEGER NOT NULL, firstName TEXT NOT NULL, lastName TEXT NOT NULL)');
+conn.query('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, permission INTEGER NOT NULL, firstName TEXT NOT NULL, lastName TEXT NOT NULL, email TEXT NOT NULL, year INTEGER NOT NULL)');
 conn.query('CREATE TABLE IF NOT EXISTS boats (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, size INTEGER NOT NULL)');
 conn.query('SELECT * FROM boats', function (err, res) {
     if (res.rowCount === 0) {
@@ -73,6 +72,11 @@ app.get('/upload-data', function(request, response) {
   response.sendFile('public/upload-data.html', {root: __dirname });
 });
 
+app.get('/upload-data2', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  response.sendFile('public/upload-data2.html', {root: __dirname });
+});
+
 app.post('/upload-data-information', function(request, response) {
   var sql = "SELECT username, firstName, lastName FROM users";
   var json = {};
@@ -105,21 +109,6 @@ app.post('/upload-data-information', function(request, response) {
   });
 });
 
-app.post('/get-users', function(request, response) {
-  var sql = "SELECT username, firstName, lastName FROM users";
-  var json = {};
-  conn.query(sql, function(err, res) {
-    if (err === null) {
-      json.users = res.rows;
-      console.log(json);
-      response.json(json);
-    } else {
-      /*TODO: Handle Error*/
-      console.log(err);
-    }
-  });
-});
-
 app.post('/data-upload', function(request, response) {
   // 1. Authenticate user is allowed to do what they did using JWT
   // 2. Authenticate that data uploaded is valid
@@ -135,10 +124,7 @@ app.post('/data-upload', function(request, response) {
     createNewWorkout(data);
   } else if (code === 1) {
     // Create New Boat for existing workout
-    for (var i = 0; i < data.users.length; i++){
-      createNewWorkoutUserBoat(i, data.users[i].username, data);
-    }
-    
+    createNewWorkoutUserBoat(data);
   } else if (code === 2) {
     //TODO: Update Existing Entry
   }
@@ -267,15 +253,6 @@ function parseCsv(data){
   return jsonData;
 }
 
-function lastInsert(err, res){
-  if (err === null) {
-        console.log("Records succesfully added");
-      } else {
-        /*TODO: Handle Error*/
-        console.log(err);
-      }
-}
-
 function insertData(currUserInd, data) {
   var sql = "INSERT INTO data (workoutUserBoatID, interval, distanceGPS, distanceIMP, elapsedTime, splitGPS, speedGPS, splitIMP, speedIMP, strokeRate, totalStrokes, distancePerStrokeGPS, distancePerStrokeIMP, heartRateBPM, power, catch, slip, finish, wash, forceAvg, work, forceMax, maxForceAngle, GPSLat, GPSLon)" +
   " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -289,18 +266,14 @@ function insertData(currUserInd, data) {
       }
     }
     toInsert = toInsert.concat(concatArray);
-    if (i == data.users[currUserInd].per_stroke_data.data.length - 1){
-      conn.query(sql, toInsert, lastInsert);
-    } else {
-      conn.query(sql, toInsert, function(err, res) {
-        if (err === null) {
-          //console.log("Records succesfully added");
-        } else {
-          /*TODO: Handle Error*/
-          console.log(err);
-        }
-      });
-    }
+    conn.query(sql, toInsert, function(err, res) {
+      if (err === null) {
+        console.log("Records succesfully added");
+      } else {
+        /*TODO: Handle Error*/
+        console.log(err);
+      }
+    });
   }
 }
 
@@ -346,6 +319,10 @@ app.post('/add-new-user', function(request, response) {
 	var password = escape(request.body.password);
 	var confirmPassword = escape(request.body.confirmPassword);
 	var permission = request.body.permission;
+  var email = request.body.email;
+  var year = request.body.year;
+  console.log('YEAR');
+  console.log(year);
 	console.log(permission)
 
 	//check if any of the values are empty
@@ -375,8 +352,8 @@ app.post('/add-new-user', function(request, response) {
 							console.log(err);
 						} else {
 							console.log(hash);
-	 						conn.query('INSERT INTO users (username, password, permission, firstname, lastname) VALUES($1, $2, $3, $4, $5)',
-	 						[username, hash, permission, firstName, lastName], function(error, result){
+	 						conn.query('INSERT INTO users (username, password, permission, firstname, lastname, email, year) VALUES($1, $2, $3, $4, $5, $6, $7)',
+	 						[username, hash, permission, firstName, lastName, email, year], function(error, result){
 								if (error) {
 									console.log(error);
 								} else {
@@ -390,6 +367,13 @@ app.post('/add-new-user', function(request, response) {
 		})
 	}
 })
+
+app.get('/manage-data', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  response.sendFile('/public/manage-data.html', {root: __dirname });
+});
+
+/// socket events
 
 app.post('/get-workouts', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
@@ -406,15 +390,15 @@ app.post('/get-workouts', function(request, response) {
 
 app.post('/get-workout-data', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  var sql = 'SELECT users.username, users.firstName, users.lastName, boats.name, data.* ' +
+  var sql = 'SELECT users.username, users.firstName, boats.name, data.* ' +
   'FROM workoutUserBoat JOIN users ON users.username = ' +
   'workoutUserBoat.username JOIN boats ON boats.id = ' +
   'workoutUserBoat.boatID JOIN data ON data.workoutUserBoatID = workoutUserBoat.id ' +
   'WHERE workoutID = ?';
 
-  conn.query(sql, [request.body.workoutID], function(err, result) {
+  conn.query(sql, [response.workoutID], function(err, result) {
     if (err === null) {
-      response.json(result.rows);
+      response.json(results.rows);
     } else {
       console.log(err);
     }
@@ -422,7 +406,57 @@ app.post('/get-workout-data', function(request, response) {
 
 });
 
-/// socket events
+app.post('/get-user-data', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  var sql = 'SELECT username, firstName, lastName, email, year FROM users';
+
+  conn.query(sql, function(err, result) {
+    if (err === null) {
+      response.json(result.rows);
+    } else {
+      console.log(err);
+    }
+  });
+});
+
+app.post('/get-boat-data', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  var sql = 'SELECT * FROM boats';
+
+  conn.query(sql, function(err, result) {
+    if (err === null) {
+      response.json(result.rows);
+    } else {
+      console.log(err);
+    }
+  });
+});
+
+app.post('/remove-user', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  var sql = 'DELETE FROM users WHERE username = ?';
+
+  conn.query(sql, request.body.username,function(err, result) {
+    if (err === null) {
+      response.json([]);
+    } else {
+      console.log(err);
+    }
+  });
+});
+
+app.post('/remove-boat', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  var sql = 'DELETE FROM boats WHERE id = ?';
+
+  conn.query(sql, request.body.boatID, function(err, result) {
+    if (err === null) {
+      response.json([]);
+    } else {
+      console.log(err);
+    }
+  });
+});
 
 io.on('connection', function(socket){
 
