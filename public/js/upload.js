@@ -1,3 +1,4 @@
+var data = "";
 function sendCsv(csv, fname, lname, time) {
   var postParameters = {csv: csv, fname: fname, lname: lname, time:time};
   $.post("/csv", postParameters,  function(responseJSON){
@@ -22,17 +23,8 @@ function uploadData(json_data) {
   });
 };
 
-var csvData = [];
-function upload() {
-  if (!browserSupportFileUpload()) {
-    alert('The File APIs are not fully supported in this browser!');
-  } else {
-    var data = null;
-    var file = $("#txtFileUpload")[0].files[0];
-    var reader = new FileReader();
-    reader.readAsText(file);
-    reader.onload = function(event) {
-      var workoutId = $("#workouts").val();
+function upload(){
+  var workoutId = $("#workouts").val();
       if ($("#newWorkout")[0].checked){
         workoutId = -1;
       } else if ($("#workouts").val() == null) {
@@ -45,14 +37,25 @@ function upload() {
               "boatID": $("#boat").val(),
               "users":[]
             };
-      csvData = event.target.result;
-      var userJson = {"per_stroke_data": csvData};
+      var userJson = {"per_stroke_data": data};
       userJson.username = $("#username").val();
       jsonData.users.push(userJson);
       console.log(jsonData);
       var json_str = {data:JSON.stringify(jsonData)}
+  uploadData(json_str);
+      
+}
 
-      uploadData(json_str);
+function uploadCSV() {
+  if (!browserSupportFileUpload()) {
+    alert('The File APIs are not fully supported in this browser!');
+  } else {
+    //var data = null;
+    var file = $("#txtFileUpload")[0].files[0];
+    var reader = new FileReader();
+    reader.readAsText(file);
+    reader.onload = function(event) {
+        data = event.target.result;
       };
     reader.onerror = function() {
       alert('Unable to read ' + file.fileName);
@@ -88,6 +91,7 @@ $(document).ready(function() {
         sel[0].appendChild(opt);
          }
     });
+  document.getElementById('txtFileUpload').addEventListener('change', uploadCSV, false);
     /*document.getElementById('qbutton').addEventListener('click', getPower);*/
 });
 
