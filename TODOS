@@ -1,8 +1,5 @@
 TODOS:
 
-All TODOS:
-- Make clicking on trash button link to database
-
 Users TODO:
 - Make clicking on edit button open a modal to enter data for the user
 - Make clicking on the user's name open a user-data page where all data relevant
