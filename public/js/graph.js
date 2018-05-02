@@ -209,12 +209,14 @@ function updateCurAverages(){
     }
   }
   var trHTML = '';
+    trHTML += '<tr><th>Stat</th><th>Workout Average</th><th>Your Average</th></tr>';
+
   for(var j = 0; j < toggle_vals.length; j++){
     cur_averages[j]/= global_data[username].length;
     trHTML += '<tr><td>' + toggle_types[j] + '</td><td>' + averages[j].toFixed(2) + '</td><td>' + cur_averages[j].toFixed(2) + '</td></tr>';
 
   }
-
+  $('#averages_table').empty();
   $('#averages_table').append(trHTML);
 }
 
