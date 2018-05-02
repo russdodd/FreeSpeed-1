@@ -308,3 +308,18 @@ br {
 	border: 2px solid black;
 	transition: all 0.3s ease;
 }
+
+#email-submit {
+	background: transparent;
+	padding: 5px 20px;
+	border: 2px solid black;
+	margin-left: 5px;
+}
+
+#email-submit:hover {
+	background: black;
+	color: white;
+	padding: 5px 20px;
+	border: 2px solid black;
+	transition: all 0.3s ease;
+}

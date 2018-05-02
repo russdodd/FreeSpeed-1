@@ -119,10 +119,11 @@ function toggleUsers() {
       var users = makeUserTable(response);
       $('#manage-users-data-button').removeClass('manage-data-button').addClass('manage-data-button-active');
       $(users).hide().appendTo(parent).show('slow');
-      $(parent).append('<div id="invite-user">'+
+      $(parent).append('<hr>'+
+                   '<div id="invite-user">'+
                    '  Invite New User:'+
                    '  <input id="emailAddress" type="email"> </input>'+
-                   '  <button onclick="sendEmail()"> Submit </button>'+
+                   '  <button id="email-submit" onclick="sendEmail()"> Send </button>'+
                    '</div>');
     });
   } else {
@@ -290,7 +291,12 @@ function sendEmail() {
   $.post('/send-email', {email: document.getElementById('emailAddress').value}, function(res) {
     if (res.yo != 'err') {
       document.getElementById('emailAddress').value = '';
-      var message = document.createElement('p').innerHTML = 'Success!';
+      var message = document.getElementById('email-message');
+      if (message === null) {
+        message = document.createElement('p');
+        message.setAttribute("id", "email-message");
+      }
+      message.innerHTML = 'Success!';
       document.getElementById('invite-user').append(message);
     } else {
       var message = document.createElement('p').innerHTML = 'Error, Try again later';
