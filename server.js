@@ -125,7 +125,9 @@ app.post('/data-upload', function(request, response) {
     createNewWorkout(data);
   } else if (code === 1) {
     // Create New Boat for existing workout
-    createNewWorkoutUserBoat(data);
+    for (var i = 0; i < data.users.length; i++){
+      createNewWorkoutUserBoat(i, data.users[i].username, data); 
+    }
   } else if (code === 2) {
     //TODO: Update Existing Entry
   }
@@ -255,6 +257,16 @@ function parseCsv(data){
   return jsonData;
 }
 
+function lastInsert(err, res){ 
+  if (err === null) {  
+        console.log("Records succesfully added");  
+      } else { 
+        /*TODO: Handle Error*/ 
+        console.log(err);  
+      }  
+}  
+
+
 function insertData(currUserInd, data) {
   var sql = "INSERT INTO data (workoutUserBoatID, interval, distanceGPS, distanceIMP, elapsedTime, splitGPS, speedGPS, splitIMP, speedIMP, strokeRate, totalStrokes, distancePerStrokeGPS, distancePerStrokeIMP, heartRateBPM, power, catch, slip, finish, wash, forceAvg, work, forceMax, maxForceAngle, GPSLat, GPSLon)" +
   " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -268,14 +280,18 @@ function insertData(currUserInd, data) {
       }
     }
     toInsert = toInsert.concat(concatArray);
-    conn.query(sql, toInsert, function(err, res) {
-      if (err === null) {
-        console.log("Records succesfully added");
-      } else {
-        /*TODO: Handle Error*/
-        console.log(err);
-      }
-    });
+    if (i == data.users[currUserInd].per_stroke_data.data.length - 1){
+      conn.query(sql, toInsert, lastInsert);
+    } else {
+      conn.query(sql, toInsert, function(err, res) {
+        if (err === null) {
+          //console.log("Records succesfully added");
+        } else {
+          /*TODO: Handle Error*/
+          console.log(err);  
+        }  
+      });  
+    }
   }
 }
 
@@ -392,13 +408,13 @@ app.post('/get-workouts', function(request, response) {
 
 app.post('/get-workout-data', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  var sql = 'SELECT users.username, users.firstName, boats.name, data.* ' +
+  var sql = 'SELECT users.username, users.firstName, users.lastName, boats.name, data.* ' +
   'FROM workoutUserBoat JOIN users ON users.username = ' +
   'workoutUserBoat.username JOIN boats ON boats.id = ' +
   'workoutUserBoat.boatID JOIN data ON data.workoutUserBoatID = workoutUserBoat.id ' +
   'WHERE workoutID = ?';
-
-  conn.query(sql, [response.workoutID], function(err, result) {
+  //console.log("workoutID", request.body.workoutID);
+  conn.query(sql, [request.body.workoutID], function(err, result) {
     if (err === null) {
       response.json(result.rows);
     } else {
