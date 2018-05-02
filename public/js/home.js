@@ -2,12 +2,14 @@ var is_highlighted = '0';
 var current_stat = 0;
 var toggle_types = ["Power", "Speed", "Slip", "Wash", "Stroke/Min", "Catch Angle",
   "Finish Angle", "Max Force Angle", "Max Force", "Avg Force", "Work", "Distance/Stroke", "Heart Rate"];
+var toggle_vals = ["power","speedGPS","slip","wash","strokeRate","catch","finish","maxForceAngle","forceMax","forceAvg","work","distancePerStrokeGPS","heartRateBPM"];
 
 $(document).ready(function () {
   document.getElementById(is_highlighted).className = "type_selector_button_selected";
   document.getElementById(is_highlighted).disabled = true;
   document.getElementById('graph_title').innerHTML = document.getElementById(is_highlighted).textContent;
   document.getElementById('dropdown_button').innerHTML = toggle_types[current_stat] + "<span class=\"caret\"></span>";
+  document.getElementById('dropdown_button').value = toggle_vals[current_stat];
   $.post("/get-workouts", function(res) {
     console.log(res);
     var sel = $("#workouts");
@@ -17,9 +19,9 @@ $(document).ready(function () {
       opt.innerHTML = decodeURI(res[i].date) + ' ' +  decodeURI(res[i].type);
       sel[0].appendChild(opt);
     }
+  $("#workouts").val($("#workouts option:first").val());
+  getData();
   });
-
-
 });
 
 function get_stat() {
@@ -30,6 +32,7 @@ function toggleType(id) {
   is_highlighted = id;
   current_stat = parseInt(id);
   document.getElementById('dropdown_button').innerHTML = toggle_types[current_stat] + "<span class=\"caret\"></span>";
+  document.getElementById('dropdown_button').value = toggle_vals[current_stat];
 
   for (var i = 0; i < 13; i++) {
     if (i == is_highlighted) {
@@ -55,6 +58,7 @@ function selectRower(id) {
     element.className = "rower";
   }
   updateGraph();
+  updateCurAverages();
 }
 
 //$("#workouts").on("change", function(){

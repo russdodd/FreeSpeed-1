@@ -68,6 +68,7 @@
                 value="get_stat()" data-toggle="dropdown" id="dropdown_button">Power
               </button>
               <ul class="dropdown-menu">
+
                 <li class="type_selector_button" id='0' value="power" onclick="toggleType(0)">Power</li>
                 <li class="type_selector_button" id='1' value="speedGPS" onclick="toggleType(1)">Speed</li>
                 <li class="type_selector_button" id='2' value="slip" onclick="toggleType(2)">Slip</li>
@@ -94,21 +95,13 @@
         </div>
         <div id="averages_div">
           <p id="averages_div_title">Team Averages</p>
-            <ul id="averages_list">
-              <li class="average" id='0' value="power">Power:</li>
-              <li class="average" id='1' value="speedGPS">Speed:</li>
-              <li class="average" id='2' value="slip">Slip:</li>
-              <li class="average" id='3' value="wash">Wash:</li>
-              <li class="average" id='4' value="strokeRate">Stroke/Min:</li>
-              <li class="average" id='5' value="catch">Catch Angle:</li>
-              <li class="average" id='6' value="finish">Finish Angle:</li>
-              <li class="average" id='7' value="maxForceAngle">Max Force Angle:</li>
-              <li class="average" id='8' value="forceMax">Max Force:</li>
-              <li class="average" id='9' value="forceAvg">Avg Force:</li>
-              <li class="average" id='10' value="work">Work:</li>
-              <li class="average" id='11' value="distancePerStrokeGPS">Distance/Stroke:</li>
-              <li class="average" id='12' value="heartRateBPM">Heart Rate:</li>
-            </ul>
+            <table id="averages_table" style="width:70%">
+  <tr>
+    <th>Stat</th>
+    <th>Workout Average</th> 
+    <th>Your Average</th>
+  </tr>
+</table>
           </div>
         </div>
     </div>
