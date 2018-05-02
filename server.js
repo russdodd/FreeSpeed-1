@@ -5,6 +5,11 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var anyDB = require('any-db');
 var bcrypt = require('bcrypt-nodejs');
+var passport = require('passport');
+var GoogleStrategy = require('passport-google-oauth20');
+var session = require('express-session');
+var cookieSession = require('cookie-session');
+var LocalStrategy = require('passport-local').Strategy;
 
 var conn = anyDB.createConnection('sqlite3://freespeed.db');
 conn.query('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, permission INTEGER NOT NULL, firstName TEXT NOT NULL, lastName TEXT NOT NULL, email TEXT NOT NULL, year INTEGER NOT NULL)');
@@ -19,7 +24,7 @@ conn.query('SELECT * FROM boats', function (err, res) {
 conn.query('CREATE TABLE IF NOT EXISTS workouts (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT NOT NULL, type TEXT NOT NULL)');
 conn.query('CREATE TABLE IF NOT EXISTS workoutUserBoat (id INTEGER PRIMARY KEY AUTOINCREMENT, workoutID INTEGER NOT NULL, username TEXT NOT NULL, boatID INTEGER NOT NULL)');
 conn.query('CREATE TABLE IF NOT EXISTS data (id INTEGER PRIMARY KEY AUTOINCREMENT, workoutUserBoatID INTEGER NOT NULL, interval INTEGER, distanceGPS REAL, distanceIMP REAL, elapsedTime TEXT, splitGPS TEXT, speedGPS REAL, splitIMP REAL, speedIMP REAL, strokeRate REAL, totalStrokes INTEGER, distancePerStrokeGPS REAL,distancePerStrokeIMP REAL, heartRateBPM INTEGER, power INTEGER, catch INTEGER, slip INTEGER, finish INTEGER, wash INTEGER, forceAvg INTEGER, work INTEGER, forceMax INTEGER, maxForceAngle INTEGER, GPSLat REAL, GPSLon REAL)');
-
+conn.query('CREATE TABLE IF NOT EXISTS googlePassportUsers (id INTEGER, permission INTEGER, firstName TEXT, lastName TEXT, email TEXT, organization TEXT, year INTEGER)');
 
 var engines = require('consolidate');
 var colors = require('colors');
@@ -27,7 +32,115 @@ var path = require('path');
 var app = express();
 var server = http.createServer(app);
 var io = require('socket.io').listen(server);
-var nodemailer = require('nodemailer');
+
+app.use(cookieSession({
+	maxAge: 24 * 60 * 60 *1000,
+	keys: ['freespeedCookieSessionKey1320']
+}))
+
+//initialize passport and session for passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser((user, done) => {
+	console.log("in serialize user")
+	done(null, user.id);
+})
+
+passport.deserializeUser((id, done) => {
+	conn.query('SELECT * FROM googlePassportUsers WHERE id=$1', [id], function(error, result){
+		if(error){
+			console.log("error when deserializing user")
+			console.log(error)
+		}else{
+			var user = result.rows[0].id
+			done(null, user)
+		}
+	})
+})
+
+const authCheck = (request, response, next) => {
+	if(request.user){
+		//executes if user is logged in
+		next()
+	}else{
+		response.redirect('/login')
+	}
+}
+
+passport.use(
+	new GoogleStrategy({
+		callbackURL: '/auth/google/redirect',
+		clientID:'186582549927-k2u8qhib86iibneciakpptqmihqi68d7.apps.googleusercontent.com',
+		clientSecret: 'BMP666T4cOBlpbLaykZWBfYf'
+		}, (accessToken, refreshToken, profile, done) => {
+			console.log("passport callback fired")
+			console.log(profile)
+
+			var id =  profile.id
+			var firstname = profile.name.givenName
+			var lastname = profile.name.familyName
+			var email = profile.emails[0].value
+			var domainArray = email.split('@')
+			var domain = domainArray[1]
+
+			conn.query('SELECT * FROM googlePassportUsers WHERE id=$1', [id], function(error, result){
+				if(error){
+					console.log("error when finding google user from database")
+					console.log(error)
+				}else{
+					console.log("result.rows.length " + result.rows.length)
+					if(result.rows.length == 0){
+						//user is not found, must be added to the database
+						console.log("user not in database");
+						var insertQuery = 'INSERT INTO googlePassportUsers (id, permission, firstname, lastname, email, organization, year) VALUES($1, $2, $3, $4, $5, $6, $7)';
+						conn.query(insertQuery, [id, 3, firstname, lastname, email, domain, 1000], function(error, result){
+							if(error){
+								console.log("error when inserting new user")
+								console.log(error)
+							}else{
+								//console.log("successfulInsert");
+								//console.log(result.rows)
+								var user = {
+									id: id,
+    								permission: 3,
+    								firstName: firstname,
+    								lastName: lastname,
+    								email: email,
+   									organization: domain
+   								}
+								done(null, user);
+							}
+						})
+					}else{
+						//user is in the database
+						//console.log("user in the database")
+						//console.log(result.rows[0])
+						var user = result.rows[0]
+						done(null, user)
+					}
+				}
+			})
+
+		})
+)
+
+app.get('/auth/google', passport.authenticate('google', {
+	scope:['profile', 'email']
+}));
+
+app.get('/auth/google/redirect', passport.authenticate('google'), function(request, response){
+	//hangle with passport
+	//console.log(request.user)
+
+	if(request.user.permission == 3){
+		//redirrect to the page where they choose if they're a rower or a coach
+		//this is the first time they've logged in
+		response.redirect('/selectRowingStatus')
+	} else{
+		response.send("demo profile");
+	}
+});
 
 app.engine('html', engines.hogan);
 app.set('views', __dirname + '/templates');
@@ -78,6 +191,36 @@ app.get('/upload-data2', function(request, response) {
   response.sendFile('public/upload-data2.html', {root: __dirname });
 });
 
+app.get('/selectRowingStatus', authCheck, function(request, response){
+	console.log('- Request received:', request.method.cyan, request.url.underline);
+	response.sendFile('public/selectRowingStatus.html', {root: __dirname});
+})
+
+app.post('/updatePermission', authCheck, function(request, response){
+	var permission = request.body.permission;
+	var year = request.body.year;
+	console.log(year)
+	userID = request.user;
+	conn.query("UPDATE googlePassportUsers SET permission=$1, year=$2 WHERE id=$3", [permission, year, userID], function(error, result){
+		if(error){
+			console.log("error setting permission")
+			console.log(error)
+		}else{
+			response.send("demo profile")
+		}
+	})
+})
+
+app.get('/dashboard', authCheck, function(request, response){
+
+})
+
+app.get('/auth/logout', function(request, response){
+	//hangle with passport
+	request.logout()
+	response.redirect('/');
+});
+
 app.post('/upload-data-information', function(request, response) {
   var sql = "SELECT username, firstName, lastName FROM users";
   var json = {};
@@ -125,14 +268,11 @@ app.post('/data-upload', function(request, response) {
     createNewWorkout(data);
   } else if (code === 1) {
     // Create New Boat for existing workout
-    for (var i = 0; i < data.users.length; i++){
-      createNewWorkoutUserBoat(i, data.users[i].username, data); 
-    }
+    createNewWorkoutUserBoat(data);
   } else if (code === 2) {
     //TODO: Update Existing Entry
   }
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.end("success");
 });
 
 app.post('/:userName/personal-data-page', function(request, response) {
@@ -257,16 +397,6 @@ function parseCsv(data){
   return jsonData;
 }
 
-function lastInsert(err, res){ 
-  if (err === null) {  
-        console.log("Records succesfully added");  
-      } else { 
-        /*TODO: Handle Error*/ 
-        console.log(err);  
-      }  
-}  
-
-
 function insertData(currUserInd, data) {
   var sql = "INSERT INTO data (workoutUserBoatID, interval, distanceGPS, distanceIMP, elapsedTime, splitGPS, speedGPS, splitIMP, speedIMP, strokeRate, totalStrokes, distancePerStrokeGPS, distancePerStrokeIMP, heartRateBPM, power, catch, slip, finish, wash, forceAvg, work, forceMax, maxForceAngle, GPSLat, GPSLon)" +
   " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -280,18 +410,14 @@ function insertData(currUserInd, data) {
       }
     }
     toInsert = toInsert.concat(concatArray);
-    if (i == data.users[currUserInd].per_stroke_data.data.length - 1){
-      conn.query(sql, toInsert, lastInsert);
-    } else {
-      conn.query(sql, toInsert, function(err, res) {
-        if (err === null) {
-          //console.log("Records succesfully added");
-        } else {
-          /*TODO: Handle Error*/
-          console.log(err);  
-        }  
-      });  
-    }
+    conn.query(sql, toInsert, function(err, res) {
+      if (err === null) {
+        console.log("Records succesfully added");
+      } else {
+        /*TODO: Handle Error*/
+        console.log(err);
+      }
+    });
   }
 }
 
@@ -408,13 +534,13 @@ app.post('/get-workouts', function(request, response) {
 
 app.post('/get-workout-data', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  var sql = 'SELECT users.username, users.firstName, users.lastName, boats.name, data.* ' +
+  var sql = 'SELECT users.username, users.firstName, boats.name, data.* ' +
   'FROM workoutUserBoat JOIN users ON users.username = ' +
   'workoutUserBoat.username JOIN boats ON boats.id = ' +
   'workoutUserBoat.boatID JOIN data ON data.workoutUserBoatID = workoutUserBoat.id ' +
   'WHERE workoutID = ?';
-  //console.log("workoutID", request.body.workoutID);
-  conn.query(sql, [request.body.workoutID], function(err, result) {
+
+  conn.query(sql, [response.workoutID], function(err, result) {
     if (err === null) {
       response.json(result.rows);
     } else {
@@ -473,32 +599,6 @@ app.post('/remove-boat', function(request, response) {
     } else {
       console.log(err);
     }
-  });
-});
-
-app.post('/send-email', function(req, res) {
-  var transporter = nodemailer.createTransport({
-    service: 'Gmail',
-    auth: {
-      user: 'brownfreespeed@gmail.com',// email id
-      pass: 'Freespeed!'// password
-    }
-  });
-    var text = 'Here is the signup link: http://localhost:8080/sign-up';
-    var mailOptions = {
-    from: 'brownfreespeed@gmail.com', // sender address
-    to: req.body.email, // list of receivers
-    subject: 'Sign Up For Brown Freespeed!', // Subject line
-    text: text //, // plaintext body
-  };
-  transporter.sendMail(mailOptions, function(error, info) {
-    if (error) {
-      console.log(error);
-      res.json({yo: 'error'});
-    } else {
-      console.log('Message sent:' + info.response);
-      res.json({yo: info.response});
-    };
   });
 });
 
