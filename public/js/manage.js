@@ -121,7 +121,8 @@ function toggleUsers() {
       $(users).hide().appendTo(parent).show('slow');
       $(parent).append('<div id="invite-user">'+
                    '  Invite New User:'+
-                   '  <input> </input>'+
+                   '  <input id="emailAddress" type="email"> </input>'+
+                   '  <button onclick="sendEmail()"> Submit </button>'+
                    '</div>');
     });
   } else {
@@ -283,6 +284,19 @@ function upload() {
       alert('Unable to read ' + file.fileName);
     };
   }
+}
+
+function sendEmail() {
+  $.post('/send-email', {email: document.getElementById('emailAddress').value}, function(res) {
+    if (res.yo != 'err') {
+      document.getElementById('emailAddress').value = '';
+      var message = document.createElement('p').innerHTML = 'Success!';
+      document.getElementById('invite-user').append(message);
+    } else {
+      var message = document.createElement('p').innerHTML = 'Error, Try again later';
+      document.getElementById('invite-user').append(message);
+    }
+  });
 }
 
 // Close the dropdown if the user clicks outside of it
