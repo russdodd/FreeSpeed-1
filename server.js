@@ -27,6 +27,7 @@ var path = require('path');
 var app = express();
 var server = http.createServer(app);
 var io = require('socket.io').listen(server);
+var nodemailer = require('nodemailer');
 
 app.engine('html', engines.hogan);
 app.set('views', __dirname + '/templates');
@@ -455,6 +456,33 @@ app.post('/remove-boat', function(request, response) {
     } else {
       console.log(err);
     }
+  });
+});
+
+app.post('/send-email', function(req, res) {
+  var transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+      user: 'bruh',// email id
+      pass: 'bruh'// password
+    }
+  });
+    var text = 'Hello world';
+    var mailOptions = {
+    from: 'example@gmail.com>', // sender address
+    to: 'receiver@destination.com', // list of receivers
+    subject: 'Email Example', // Subject line
+    text: text //, // plaintext body
+    // html: '<b>Hello world ✔</b>' // You can choose to send an HTML body instead
+  };
+  transporter.sendMail(mailOptions, function(error, info) {
+    if (error) {
+      console.log(error);
+      res.json({yo: 'error'});
+    } else {
+      console.log('Message sent:' + info.response);
+      res.json({yo: info.response});
+    };
   });
 });
 
