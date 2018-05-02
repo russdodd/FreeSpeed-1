@@ -1,9 +1,13 @@
 var is_highlighted = '0';
+var current_stat = 0;
+var toggle_types = ["Power", "Speed", "Slip", "Wash", "Stroke/Min", "Catch Angle",
+  "Finish Angle", "Max Force Angle", "Max Force", "Avg Force", "Work", "Distance/Stroke", "Heart Rate"];
 
 $(document).ready(function () {
   document.getElementById(is_highlighted).className = "type_selector_button_selected";
   document.getElementById(is_highlighted).disabled = true;
   document.getElementById('graph_title').innerHTML = document.getElementById(is_highlighted).textContent;
+  document.getElementById('dropdown_button').innerHTML = toggle_types[current_stat] + "<span class=\"caret\"></span>";
   $.post("/get-workouts", function(res) {
     console.log(res);
     var sel = $("#workouts");
@@ -14,12 +18,18 @@ $(document).ready(function () {
       sel[0].appendChild(opt);
     }
   });
-  
+
 
 });
 
+function get_stat() {
+  return toggle_types[current_stat];
+}
+
 function toggleType(id) {
   is_highlighted = id;
+  current_stat = parseInt(id);
+  document.getElementById('dropdown_button').innerHTML = toggle_types[current_stat] + "<span class=\"caret\"></span>";
 
   for (var i = 0; i < 13; i++) {
     if (i == is_highlighted) {
