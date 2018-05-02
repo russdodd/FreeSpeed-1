@@ -463,17 +463,16 @@ app.post('/send-email', function(req, res) {
   var transporter = nodemailer.createTransport({
     service: 'Gmail',
     auth: {
-      user: 'bruh',// email id
-      pass: 'bruh'// password
+      user: 'brownfreespeed@gmail.com',// email id
+      pass: 'Freespeed!'// password
     }
   });
-    var text = 'Hello world';
+    var text = 'Here is the signup link: http://localhost:8080/sign-up';
     var mailOptions = {
-    from: 'example@gmail.com>', // sender address
-    to: 'receiver@destination.com', // list of receivers
-    subject: 'Email Example', // Subject line
+    from: 'brownfreespeed@gmail.com', // sender address
+    to: req.body.email, // list of receivers
+    subject: 'Sign Up For Brown Freespeed!', // Subject line
     text: text //, // plaintext body
-    // html: '<b>Hello world ✔</b>' // You can choose to send an HTML body instead
   };
   transporter.sendMail(mailOptions, function(error, info) {
     if (error) {
