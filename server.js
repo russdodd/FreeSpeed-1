@@ -552,7 +552,7 @@ app.post('/get-workout-data', function(request, response) {
 
 app.post('/get-user-data', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  var sql = 'SELECT username, firstName, lastName, email, year FROM googlePassportUsers';
+  var sql = 'SELECT email, firstName, lastName, email, year FROM googlePassportUsers';
 
   conn.query(sql, function(err, result) {
     if (err === null) {
