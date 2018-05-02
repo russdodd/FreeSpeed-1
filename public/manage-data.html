@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> Manage Team Data </title>
+    <link rel="stylesheet" href="/css/manage-data.css">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <!-- Latest compiled and minified CSS --><!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"> -->
+    <script src="/js/manage.js"></script>
+  </head>
+  <body>
+    <div id="manage-data-container">
+      <h1 id="manage-data-header">Data Center</h1>
+      <div id="manage-data-subcontainer">
+        <div class="manage-data-button-container" id="manage-data-user-container">
+          <img class="manage-data-img" src="/images/users.png" alt="Users Icon" height="80" width="80">
+          <p class="manage-data-p"> Lorem ipsum dolor sit amet, sonet simul ocurreret mel te. Mollis discere vel no, sit no posse indoctum mnesarchum. Fuisset tincidunt instructior no eos, ea dignissim hendrerit mei.</p>
+          <button onclick="toggleUsers()" class="manage-data-button" id="manage-users-data-button"> Manage Users </button>
+        </div>
+        <div class="manage-data-button-container" id="manage-data-boat-container">
+          <img class="manage-data-img" src="/images/boats.png" alt="Users Icon" height="80" width="80">
+          <p class="manage-data-p"> Lorem ipsum dolor sit amet, sonet simul ocurreret mel te. Mollis discere vel no, sit no posse indoctum mnesarchum. Fuisset tincidunt instructior no eos, ea dignissim hendrerit mei.</p>
+          <button onclick="toggleBoats()" class="manage-data-button" id="manage-boats-data-button"> Manage Boats </button>
+        </div>
+        <div class="manage-data-button-container" id="manage-data-data-container">
+          <img class="manage-data-img" src="/images/db.png" alt="DB Icon" height="80" width="80">
+          <p class="manage-data-p"> Lorem ipsum dolor sit amet, sonet simul ocurreret mel te. Mollis discere vel no, sit no posse indoctum mnesarchum. Fuisset tincidunt instructior no eos, ea dignissim hendrerit mei.</p>
+          <button onclick="toggleWorkouts()" class="manage-data-button" id="manage-workouts-data-button"> Manage Data </button>
+        </div>
+      </div>
+    </div>
+    <div id="users-div">
+    </div>
+  </body>
+</html>
