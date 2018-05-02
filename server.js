@@ -8,7 +8,7 @@ var bcrypt = require('bcrypt-nodejs');
 var asynch = require('async');
 
 var conn = anyDB.createConnection('sqlite3://freespeed.db');
-conn.query('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, permission INTEGER NOT NULL, firstName TEXT NOT NULL, lastName TEXT NOT NULL)');
+conn.query('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, permission INTEGER NOT NULL, firstName TEXT NOT NULL, lastName TEXT NOT NULL, email TEXT NOT NULL, year INTEGER NOT NULL)');
 conn.query('CREATE TABLE IF NOT EXISTS boats (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, size INTEGER NOT NULL)');
 conn.query('SELECT * FROM boats', function (err, res) {
     if (res.rowCount === 0) {
@@ -315,6 +315,10 @@ app.post('/add-new-user', function(request, response) {
 	var password = escape(request.body.password);
 	var confirmPassword = escape(request.body.confirmPassword);
 	var permission = request.body.permission;
+  var email = request.body.email;
+  var year = request.body.year;
+  console.log('YEAR');
+  console.log(year);
 	console.log(permission)
 
 	//check if any of the values are empty
@@ -344,8 +348,8 @@ app.post('/add-new-user', function(request, response) {
 							console.log(err);
 						} else {
 							console.log(hash);
-	 						conn.query('INSERT INTO users (username, password, permission, firstname, lastname) VALUES($1, $2, $3, $4, $5)',
-	 						[username, hash, permission, firstName, lastName], function(error, result){
+	 						conn.query('INSERT INTO users (username, password, permission, firstname, lastname, email, year) VALUES($1, $2, $3, $4, $5, $6, $7)',
+	 						[username, hash, permission, firstName, lastName, email, year], function(error, result){
 								if (error) {
 									console.log(error);
 								} else {
@@ -396,6 +400,58 @@ app.post('/get-workout-data', function(request, response) {
     }
   });
 
+});
+
+app.post('/get-user-data', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  var sql = 'SELECT username, firstName, lastName, email, year FROM users';
+
+  conn.query(sql, function(err, result) {
+    if (err === null) {
+      response.json(result.rows);
+    } else {
+      console.log(err);
+    }
+  });
+});
+
+app.post('/get-boat-data', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  var sql = 'SELECT * FROM boats';
+
+  conn.query(sql, function(err, result) {
+    if (err === null) {
+      response.json(result.rows);
+    } else {
+      console.log(err);
+    }
+  });
+});
+
+app.post('/remove-user', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  var sql = 'DELETE FROM users WHERE username = ?';
+
+  conn.query(sql, request.body.username,function(err, result) {
+    if (err === null) {
+      response.json([]);
+    } else {
+      console.log(err);
+    }
+  });
+});
+
+app.post('/remove-boat', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  var sql = 'DELETE FROM boats WHERE id = ?';
+
+  conn.query(sql, request.body.boatID, function(err, result) {
+    if (err === null) {
+      response.json([]);
+    } else {
+      console.log(err);
+    }
+  });
 });
 
 io.on('connection', function(socket){
