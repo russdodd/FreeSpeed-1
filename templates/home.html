@@ -4,6 +4,14 @@
   <meta charset="utf-8">
   <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
   <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="/css/home.css">
   <title>FreeSpeed</title>
   <meta name="username" content={{username}}>
@@ -12,11 +20,16 @@
 <body>
   <div>
     <div id="banner">
-      <p id="banner_logo">FreeSpeed</p>
+      <img id="banner_logo" src="/images/freespeed_logo.png"></img>
+      <button id="upload_button" class="banner_button">Upload</button>
       <div id="banner_right">
-        <button id="upload_button" class="banner_button">Upload</button>
-        <p id="user_name">{{username}}</p>
-        <button id="logout_button" class="banner_button">Log Out</button>
+        <div class="dropdown" id="profile_dropdown">
+          <button class="btn btn-primary dropdown-toggle"
+            type="button" data-toggle="dropdown" id="profile_dropdown_button">{{username}}<span class="caret"></span></button>
+          <ul class="dropdown-menu">
+            <li class="banner_button" id="logout_button">Log Out</li>
+          </ul>
+        </div>
     </div>
 
     </div>
@@ -46,25 +59,30 @@
           <div id="workout_selector">
             Workouts:
             <select id="workouts">
-              <option selected disabled>Choose Workout</option>
             </select>
           <div>
             <br/>
-          <div id="type_selector">
-            <button class="type_selector_button" id='0' value="power" onclick="toggleType(0)">Power</button>
-            <button class="type_selector_button" id='1' value="speedGPS" onclick="toggleType(1)">Speed</button>
-            <button class="type_selector_button" id='2' value="slip" onclick="toggleType(2)">Slip</button>
-            <button class="type_selector_button" id='3' value="wash" onclick="toggleType(3)">Wash</button>
-            <button class="type_selector_button" id='4' value="strokeRate" onclick="toggleType(4)">Stroke/Min</button>
-            <button class="type_selector_button" id='5' value="catch" onclick="toggleType(5)">Catch Angle</button>
-            <button class="type_selector_button" id='6' value="finish" onclick="toggleType(6)">Finish Angle</button>
-            <button class="type_selector_button" id='7' value="maxForceAngle" onclick="toggleType(7)">Max Force Angle</button>
-            <button class="type_selector_button" id='8' value="forceMax" onclick="toggleType(8)">Max Force</button>
-            <button class="type_selector_button" id='9' value="forceAvg" onclick="toggleType(9)">Avg Force</button>
-            <button class="type_selector_button" id='10' value="work" onclick="toggleType(10)">Work</button>
-            <button class="type_selector_button" id='11' value="distancePerStrokeGPS" onclick="toggleType(11)">Distance/Stroke</button>
-            <button class="type_selector_button" id='12' value="heartRateBPM" onclick="toggleType(12)">Heart Rate</button>
-          </div>
+            <p id="dropdown_label">Statistic:</p>
+            <div class="dropdown">
+              <button class="btn btn-primary dropdown-toggle" type="button"
+                value="get_stat()" data-toggle="dropdown" id="dropdown_button">Power
+              </button>
+              <ul class="dropdown-menu">
+                <li class="type_selector_button" id='0' value="power" onclick="toggleType(0)">Power</li>
+                <li class="type_selector_button" id='1' value="speedGPS" onclick="toggleType(1)">Speed</li>
+                <li class="type_selector_button" id='2' value="slip" onclick="toggleType(2)">Slip</li>
+                <li class="type_selector_button" id='3' value="wash" onclick="toggleType(3)">Wash</li>
+                <li class="type_selector_button" id='4' value="strokeRate" onclick="toggleType(4)">Stroke/Min</li>
+                <li class="type_selector_button" id='5' value="catch" onclick="toggleType(5)">Catch Angle</li>
+                <li class="type_selector_button" id='6' value="finish" onclick="toggleType(6)">Finish Angle</li>
+                <li class="type_selector_button" id='7' value="maxForceAngle" onclick="toggleType(7)">Max Force Angle</li>
+                <li class="type_selector_button" id='8' value="forceMax" onclick="toggleType(8)">Max Force</li>
+                <li class="type_selector_button" id='9' value="forceAvg" onclick="toggleType(9)">Avg Force</li>
+                <li class="type_selector_button" id='10' value="work" onclick="toggleType(10)">Work</li>
+                <li class="type_selector_button" id='11' value="distancePerStrokeGPS" onclick="toggleType(11)">Distance/Stroke</li>
+                <li class="type_selector_button" id='12' value="heartRateBPM" onclick="toggleType(12)">Heart Rate</li>
+              </ul>
+            </div>
           <p id="graph_title"></p>
           <div id="d3Graph">
           </div>
@@ -75,7 +93,23 @@
           <!-- <img id="graph" alt="graph data" src="/images/example_graph.jpg"/> -->
         </div>
         <div id="averages_div">
-          <p id="averages_div_title">Averages</p>
+          <p id="averages_div_title">Team Averages</p>
+            <ul id="averages_list">
+              <li class="average" id='0' value="power">Power:</li>
+              <li class="average" id='1' value="speedGPS">Speed:</li>
+              <li class="average" id='2' value="slip">Slip:</li>
+              <li class="average" id='3' value="wash">Wash:</li>
+              <li class="average" id='4' value="strokeRate">Stroke/Min:</li>
+              <li class="average" id='5' value="catch">Catch Angle:</li>
+              <li class="average" id='6' value="finish">Finish Angle:</li>
+              <li class="average" id='7' value="maxForceAngle">Max Force Angle:</li>
+              <li class="average" id='8' value="forceMax">Max Force:</li>
+              <li class="average" id='9' value="forceAvg">Avg Force:</li>
+              <li class="average" id='10' value="work">Work:</li>
+              <li class="average" id='11' value="distancePerStrokeGPS">Distance/Stroke:</li>
+              <li class="average" id='12' value="heartRateBPM">Heart Rate:</li>
+            </ul>
+          </div>
         </div>
     </div>
   </div>
