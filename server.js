@@ -222,7 +222,7 @@ app.get('/auth/logout', function(request, response){
 });
 
 app.post('/upload-data-information', function(request, response) {
-  var sql = "SELECT username, firstName, lastName FROM users";
+  var sql = "SELECT username, firstName, lastName FROM googlePassportUsers";
   var json = {};
   conn.query(sql, function(err, res) {
     if (err === null) {
@@ -424,7 +424,7 @@ function insertData(currUserInd, data) {
 app.post('/validate-login-credetials', function(request, response){
 	var username = escape(request.body.username);
 	var password = escape(request.body.password);
-	conn.query('SELECT * FROM users WHERE username=$1', [username], function(error, result){
+	conn.query('SELECT * FROM googlePassportUsers WHERE email=$1', [username], function(error, result){
 		if(error){
 			console.log(error);
 		}else{
@@ -482,7 +482,7 @@ app.post('/add-new-user', function(request, response) {
 		io.to(request.body.socketID).emit('passwordTooShort', {});
 	} else{
 		//check if the username already exists
-		conn.query("SELECT * FROM users WHERE username=$1", username, function(error, result){
+		conn.query("SELECT * FROM googlePassportUsers WHERE email=$1", username, function(error, result){
 			if(error){
 				console.log(error);
 			}else{
@@ -534,8 +534,8 @@ app.post('/get-workouts', function(request, response) {
 
 app.post('/get-workout-data', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  var sql = 'SELECT users.username, users.firstName, boats.name, data.* ' +
-  'FROM workoutUserBoat JOIN users ON users.username = ' +
+  var sql = 'SELECT googlePassportUsers.email, googlePassportUsers.firstName, boats.name, data.* ' +
+  'FROM workoutUserBoat JOIN googlePassportUsers ON googlePassportUsers.email = ' +
   'workoutUserBoat.username JOIN boats ON boats.id = ' +
   'workoutUserBoat.boatID JOIN data ON data.workoutUserBoatID = workoutUserBoat.id ' +
   'WHERE workoutID = ?';
@@ -552,7 +552,7 @@ app.post('/get-workout-data', function(request, response) {
 
 app.post('/get-user-data', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  var sql = 'SELECT username, firstName, lastName, email, year FROM users';
+  var sql = 'SELECT username, firstName, lastName, email, year FROM googlePassportUsers';
 
   conn.query(sql, function(err, result) {
     if (err === null) {
@@ -578,7 +578,7 @@ app.post('/get-boat-data', function(request, response) {
 
 app.post('/remove-user', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  var sql = 'DELETE FROM users WHERE username = ?';
+  var sql = 'DELETE FROM googlePassportUsers WHERE email = ?';
 
   conn.query(sql, request.body.username,function(err, result) {
     if (err === null) {
