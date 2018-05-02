@@ -1,0 +1,310 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+
+/* BELOW IS TO RESET CSS*/
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+/* ABOVE IS TO RESET CSS*/
+
+/*Change Font*/
+
+html {
+  font-family: 'Roboto', sans-serif;
+}
+body {
+  background: #f2f2f2;
+}
+
+a {
+	text-decoration: none;
+}
+
+#manage-data-header {
+  font-size: 50px;
+  width: 100%;
+  margin: auto;
+  margin-top: 10px;
+  margin-bottom: 30px;
+	position: relative;
+	text-align: center;
+}
+
+#manage-data-container {
+  width: 900px;
+  margin: auto;
+}
+#manage-data-subcontainer {
+  width: 740px;
+  margin: auto;
+}
+
+.manage-data-button-container {
+  display: inline-block;
+  margin: 22px;
+  max-width: 200px;
+  text-align: center;
+}
+
+.manage-data-img {
+  display: block;
+  margin: auto;
+  margin-bottom: 20px;
+}
+
+.manage-data-button {
+  padding: 10px 25px;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  background: transparent;
+  outline: none !important;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  display: inline-block;
+	background: #f2f2f2;
+  border: 2px solid #000;
+  transition: all 0.3s ease;
+}
+
+.manage-data-button:before, .manage-data-button:after {
+  position: absolute;
+  content: ' ';
+  z-index: -1;
+  width: 25%;
+  top: 50%;
+  height: 2px;
+  background: #000;
+  transition: all 1s ease;
+}
+.manage-data-button:before {left: -10%;}
+.manage-data-button:after {right: -10%}
+.manage-data-button:hover {
+  background: #000;
+  color: #fff;
+}
+.manage-data-button:hover:before {left: 0%;}
+.manage-data-button:hover:after {right: 0%;}
+
+.manage-data-button-active {
+	padding: 10px 25px;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  outline: none !important;
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+  border: 2px solid #000;
+	background: #000;
+	color: #fff;
+	right: 0%;
+}
+
+.manage-data-p {
+  margin-bottom: 20px;
+}
+
+#user-data-container {
+	width: 786px;
+	margin: auto;
+	text-align: center;
+}
+
+.list-element {
+	text-align: center;
+	padding: 15px;
+	padding-left: 30px;
+	border: 2px solid black;
+	background-color: white;
+	border-radius: 10px;
+	margin-bottom: 10px;
+	font-size: 20px;
+}
+
+#users-div {
+	text-align: center;
+	width: 900px;
+	margin: auto;
+}
+
+h2 {
+	font-size: 30px;
+	margin: auto;
+	width: 300px;
+}
+
+.table {
+    border-collapse: collapse;
+    width: 100%;
+		text-align: center;
+		margin-top: 10px;
+}
+
+.table th {
+    padding: 8px;
+		background-color: black;
+		padding-top: 12px;
+		padding-bottom: 12px;
+		text-align: center;
+		color: white;
+}
+
+.table td {
+	padding: 8px;
+}
+
+.table tr:hover {
+	background-color: #ddd;
+}
+
+#users-div {
+	margin-bottom: 30px;
+	margin-top: 10px;
+}
+
+a {
+	color: blue;
+}
+
+button {
+	border: 0px;
+	background-color: transparent;
+}
+
+#invite-user {
+	text-align: left;
+	margin-top: 15px;
+	margin-bottom: 20px;
+}
+
+/* The Modal (background) */
+.modal {
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+    position: relative;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 0;
+    border: 1px solid #888;
+    width: 80%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    -webkit-animation-name: animatetop;
+    -webkit-animation-duration: 0.4s;
+    animation-name: animatetop;
+    animation-duration: 0.4s
+}
+
+/* Add Animation */
+@-webkit-keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+}
+
+@keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+}
+
+/* The Close Button */
+.close {
+    color: white;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-header {
+    padding: 10px 16px;
+    background-color: black;
+    color: white;
+		margin-bottom: 10px;
+}
+
+.modal-body {
+	padding: 2px 16px;
+	width: 90%;
+	margin: auto;
+}
+
+.modal-footer {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+}
+
+br {
+	display: block;
+	margin: 5px 0;
+}
+
+#submitUpload {
+	background: transparent;
+	padding: 10px 20px;
+	border: 2px solid black;
+}
+
+#submitUpload:hover {
+	background: black;
+	color: white;
+	padding: 10px 20px;
+	border: 2px solid black;
+	transition: all 0.3s ease;
+}
