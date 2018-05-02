@@ -21,7 +21,7 @@
   <div>
     <div id="banner">
       <img id="banner_logo" src="/images/freespeed_logo.png"></img>
-      <button id="upload_button" class="banner_button">Upload</button>
+      <button id="upload_button" class="banner_button">Manage Data</button>
       <div id="banner_right">
         <div class="dropdown" id="profile_dropdown">
           <button class="btn btn-primary dropdown-toggle"
@@ -55,44 +55,51 @@
             </li> -->
           </ul>
         </div>
-        <div id="graph_div">
-          <div id="workout_selector">
-            Workouts:
-            <select id="workouts">
-            </select>
-          <div>
-            <br/>
-            <p id="dropdown_label">Statistic:</p>
-            <div class="dropdown">
-              <button class="btn btn-primary dropdown-toggle" type="button"
-                value="get_stat()" data-toggle="dropdown" id="dropdown_button">Power
-              </button>
-              <ul class="dropdown-menu">
+          <div id="stats_header">
+          <p id="stats_title">Stats</p>
+          <div id="choose_workout_div">
+            <div id="choose_statistic_div">
+              <br/>
+              <p id="dropdown_label">Statistic:</p>
+              <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button"
+                  value="get_stat()" data-toggle="dropdown" id="dropdown_button">Power
+                </button>
+                <ul class="dropdown-menu">
 
-                <li class="type_selector_button" id='0' value="power" onclick="toggleType(0)">Power</li>
-                <li class="type_selector_button" id='1' value="speedGPS" onclick="toggleType(1)">Speed</li>
-                <li class="type_selector_button" id='2' value="slip" onclick="toggleType(2)">Slip</li>
-                <li class="type_selector_button" id='3' value="wash" onclick="toggleType(3)">Wash</li>
-                <li class="type_selector_button" id='4' value="strokeRate" onclick="toggleType(4)">Stroke/Min</li>
-                <li class="type_selector_button" id='5' value="catch" onclick="toggleType(5)">Catch Angle</li>
-                <li class="type_selector_button" id='6' value="finish" onclick="toggleType(6)">Finish Angle</li>
-                <li class="type_selector_button" id='7' value="maxForceAngle" onclick="toggleType(7)">Max Force Angle</li>
-                <li class="type_selector_button" id='8' value="forceMax" onclick="toggleType(8)">Max Force</li>
-                <li class="type_selector_button" id='9' value="forceAvg" onclick="toggleType(9)">Avg Force</li>
-                <li class="type_selector_button" id='10' value="work" onclick="toggleType(10)">Work</li>
-                <li class="type_selector_button" id='11' value="distancePerStrokeGPS" onclick="toggleType(11)">Distance/Stroke</li>
-                <li class="type_selector_button" id='12' value="heartRateBPM" onclick="toggleType(12)">Heart Rate</li>
+                  <li class="type_selector_button" id='0' value="power" onclick="toggleType(0)">Power</li>
+                  <li class="type_selector_button" id='1' value="speedGPS" onclick="toggleType(1)">Speed</li>
+                  <li class="type_selector_button" id='2' value="slip" onclick="toggleType(2)">Slip</li>
+                  <li class="type_selector_button" id='3' value="wash" onclick="toggleType(3)">Wash</li>
+                  <li class="type_selector_button" id='4' value="strokeRate" onclick="toggleType(4)">Stroke/Min</li>
+                  <li class="type_selector_button" id='5' value="catch" onclick="toggleType(5)">Catch Angle</li>
+                  <li class="type_selector_button" id='6' value="finish" onclick="toggleType(6)">Finish Angle</li>
+                  <li class="type_selector_button" id='7' value="maxForceAngle" onclick="toggleType(7)">Max Force Angle</li>
+                  <li class="type_selector_button" id='8' value="forceMax" onclick="toggleType(8)">Max Force</li>
+                  <li class="type_selector_button" id='9' value="forceAvg" onclick="toggleType(9)">Avg Force</li>
+                  <li class="type_selector_button" id='10' value="work" onclick="toggleType(10)">Work</li>
+                  <li class="type_selector_button" id='11' value="distancePerStrokeGPS" onclick="toggleType(11)">Distance/Stroke</li>
+                  <li class="type_selector_button" id='12' value="heartRateBPM" onclick="toggleType(12)">Heart Rate</li>
+                </ul>
+              </div>
+            </div>
+            Workout Day:
+            <div id="workout_selector" class="dropdown">
+              <button class="btn btn-primary dropdown-toggle" type="button"
+                data-toggle="dropdown" id="workout_button">Big booty<span class="caret"></span>
+              </button>
+              <ul id="workouts">
               </ul>
             </div>
-          <p id="graph_title"></p>
-          <div id="d3Graph">
-          </div>
-          <div id="radioPanel">
-          <ul id="dataRadios">
-            </ul>
-          </div>
-          <!-- <img id="graph" alt="graph data" src="/images/example_graph.jpg"/> -->
+      </div>
+    </div>
+      <div id="graph_div">
+
+
+        <p id="graph_title"></p>
+        <div id="d3Graph">
         </div>
+      </div>
         <div id="averages_div">
           <p id="averages_div_title">Team Averages</p>
             <table id="averages_table" style="width:70%">
