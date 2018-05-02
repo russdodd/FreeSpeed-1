@@ -1,162 +1,159 @@
 //94THoF 2 seat 20180417 0706am
+//94THoF 2 seat 20180417 0706am
+var passport = require('passport');
+var GoogleStrategy = require('passport-google-oauth20');
+var session = require('express-session');
+var cookieSession = require('cookie-session');
+var LocalStrategy = require('passport-local').Strategy; 
 
-var http = require('http');
-var express = require('express');
-var bodyParser = require('body-parser');
-var anyDB = require('any-db');
-var bcrypt = require('bcrypt-nodejs');
- 
+conn.query('CREATE TABLE IF NOT EXISTS googlePassportUsers (id INTEGER, permission INTEGER, firstName TEXT, lastName TEXT, email TEXT, organization TEXT, year INTEGER)');
 
-var conn = anyDB.createConnection('sqlite3://freespeed.db');
-conn.query('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT, permission INTEGER, firstName TEXT, lastName TEXT)');
-conn.query('CREATE TABLE IF NOT EXISTS boats (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, size INTEGER)');
-conn.query('CREATE TABLE IF NOT EXISTS workouts (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, type TEXT)');
-conn.query('CREATE TABLE IF NOT EXISTS workoutUserBoat (id INTEGER PRIMARY KEY AUTOINCREMENT, workoutID INTEGER, userID INTEGER, boatID INTEGER, startTime TEXT)');
-conn.query('CREATE TABLE IF NOT EXISTS data (id INTEGER PRIMARY KEY AUTOINCREMENT, workoutUserBoatID INTEGER, interval INTEGER, distanceGPS REAL, distanceIMP REAL, elapsedTime TEXT, splitGPS TEXT, speedGPS REAL, splitIMP REAL, speedIMP REAL, strokeRate REAL, totalStrokes INTEGER, distancePerStrokeGPS REAL,distancePerStrokeIMP REAL, heartRateBPM INTEGER, power INTEGER, catch INTEGER, slip INTEGER, finish INTEGER, wash INTEGER, forceAvg INTEGER, work INTEGER, forceMax INTEGER, maxForceAngle INTEGER, GPSLat REAL, GPSLon REAL)')
+app.use(cookieSession({
+	maxAge: 24 * 60 * 60 *1000,
+	keys: ['freespeedCookieSessionKey1320'] 
+}))
 
-var engines = require('consolidate');
-var colors = require('colors');
-var path = require('path');
-var app = express();
-var server = http.createServer(app);
-var io = require('socket.io').listen(server);
+//initialize passport and session for passport
+app.use(passport.initialize());
+app.use(passport.session());
 
-app.engine('html', engines.hogan);
-app.set('views', __dirname + '/templates');
-app.set('view engine', 'html');
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json());
+passport.serializeUser((user, done) => {
+	console.log("in serialize user")
+	done(null, user.id); 
+})
 
-app.get('/', function(request, response){
-  console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.redirect('/login');
-});
+passport.deserializeUser((id, done) => {
+	conn.query('SELECT * FROM googlePassportUsers WHERE id=$1', [id], function(error, result){
+		if(error){
+			console.log("error when deserializing user")
+			console.log(error)
+		}else{
+			var user = result.rows[0].id
+			done(null, user)
+		}
+	})
+})
+
+const authCheck = (request, response, next) => {
+	if(request.user){
+		//executes if user is logged in
+		next()
+	}else{
+		response.redirect('/login')
+	}
+}
+
+//values from google
+//186582549927-k2u8qhib86iibneciakpptqmihqi68d7.apps.googleusercontent.com
+//	BMP666T4cOBlpbLaykZWBfYf
+passport.use(
+	new GoogleStrategy({
+		callbackURL: '/auth/google/redirect',
+		clientID:'186582549927-k2u8qhib86iibneciakpptqmihqi68d7.apps.googleusercontent.com',
+		clientSecret: 'BMP666T4cOBlpbLaykZWBfYf'
+		}, (accessToken, refreshToken, profile, done) => {
+			console.log("passport callback fired")
+			console.log(profile)
+		
+			var id =  profile.id
+			var firstname = profile.name.givenName
+			var lastname = profile.name.familyName
+			var email = profile.emails[0].value
+			var domainArray = email.split('@')
+			var domain = domainArray[1]
+	
+			conn.query('SELECT * FROM googlePassportUsers WHERE id=$1', [id], function(error, result){
+				if(error){
+					console.log("error when finding google user from database")
+					console.log(error)
+				}else{
+					console.log("result.rows.length " + result.rows.length)
+					if(result.rows.length == 0){
+						//user is not found, must be added to the database
+						console.log("user not in database");
+						var insertQuery = 'INSERT INTO googlePassportUsers (id, permission, firstname, lastname, email, organization, year) VALUES($1, $2, $3, $4, $5, $6, $7)';
+						conn.query(insertQuery, [id, 3, firstname, lastname, email, domain, 1000], function(error, result){
+							if(error){
+								console.log("error when inserting new user")
+								console.log(error)
+							}else{
+								//console.log("successfulInsert");
+								//console.log(result.rows)
+								var user = {
+									id: id,
+    								permission: 3,
+    								firstName: firstname,
+    								lastName: lastname,
+    								email: email,
+   									organization: domain 
+   								}
+								done(null, user); 
+							}
+						})
+					}else{
+						//user is in the database
+						//console.log("user in the database")
+						//console.log(result.rows[0])
+						var user = result.rows[0]
+						done(null, user)
+					}
+				}
+			})
+
+		})
+)
 
 app.get('/login', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
   response.sendFile('public/login.html', {root: __dirname });
 });
 
-app.get('/sign-up', function(request, response) {
-  console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.sendFile('public/signup.html', {root: __dirname });
+
+//auth with google
+app.get('/auth/google', passport.authenticate('google', {
+	scope:['profile', 'email']
+})); 
+
+app.get('/auth/google/redirect', passport.authenticate('google'), function(request, response){
+	//hangle with passport
+	//console.log(request.user)
+	
+	if(request.user.permission == 3){
+		//redirrect to the page where they choose if they're a rower or a coach
+		//this is the first time they've logged in
+		response.redirect('/selectRowingStatus')
+	} else{
+		response.send("demo profile");
+	}
 });
 
-app.get('/main/coach/:coachUsername', function(request, response){
-	 console.log('- Request received:', request.method.cyan, request.url.underline);
-	response.render('home.html', {username: request.params.coachUsername});
+app.get('/selectRowingStatus', authCheck, function(request, response){
+	console.log('- Request received:', request.method.cyan, request.url.underline);
+	response.sendFile('public/selectRowingStatus.html', {root: __dirname});
 })
 
-app.get('/main/rower/:rowerUsername', function(request, response){
-	 console.log('- Request received:', request.method.cyan, request.url.underline);
-	response.render('home.html', {username: request.params.rowerUsername});
-})
-
-app.post('/personal-data-page', function(request, response) {
-  console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.sendFile('public/personal_page.html', {root: __dirname });
-});
-
-app.post('/data-upload', function(request, response) {
-
-  console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.sendFile('public/personal_page.html', {root: __dirname });
-});
-
-app.post('/validate-login-credetials', function(request, response){
-	var username = escape(request.body.username);
-	var password = escape(request.body.password); 
-	conn.query('SELECT * FROM users WHERE username=$1', [username], function(error, result){
+app.post('/updatePermission', authCheck, function(request, response){
+	var permission = request.body.permission;
+	var year = request.body.year;
+	console.log(year)
+	userID = request.user;
+	conn.query('UPDATE googlePassportUsers SET permission=$1 year=$2 WHERE id=$3', [permission, year, userID], function(error, result){
 		if(error){
-			console.log(error);
+			console.log("error setting permission")
+			console.log(error)
 		}else{
-			if(result.rows.length == 0){
-				io.to(request.body.socketID).emit('usernameNotFound', {});
-			}else{
-				var hashedPassword = result.rows[0].password; 
-				bcrypt.compare(password, hashedPassword, function(err, res) {
-   					 if(res){
-   					 	//password was correct
-   					 	var permission = result.rows[0].permission;
-   					 	if(permission == 1){
-   					 		//verified coach
-   					 		//eventually attach a token here 
-   					 		io.to(request.body.socketID).emit('validCredentials', {permission: 1, username: username});
-   					 		//response.redirect('/main/coach/' + username);
-   					 		//io.to(request.body.socketID).emit('usernameNotFoun', {});
-   					 	}else{
-   					 		//verified rower
-   					 		//eventually attach a token here 
-   					 		io.to(request.body.socketID).emit('validCredentials', {permission: 0, username: username}); 
-   					 	}
-   					 }else{
-   					 	io.to(request.body.socketID).emit('incorrectPassword', {});
-   					 }
-				});
-			}
+			response.send("demo profile")
 		}
 	})
 })
 
-app.post('/add-new-user', function(request, response) {
-	var username = escape(request.body.username);
-	var firstName = escape(request.body.firstname);
-	var lastName = escape(request.body.lastname); 
-	var password = escape(request.body.password); 
-	var confirmPassword = escape(request.body.confirmPassword);
-	var permission = request.body.permission;
-	console.log(permission)
-
-	//check if any of the values are empty
-	if(username === '' || password === '' || lastName === '' || firstName === '' || confirmPassword === ''){
-		console.log("missing fields inside if satement");
-		io.to(request.body.socketID).emit('missingFields', {});
-	//check if passwords do not match
-	}else if(password !== confirmPassword){
-		console.log("in unequal passwords")
-		console.log(request.body.socketID)
-		io.to(request.body.socketID).emit('unequalPasswords', {});
-	}else if(password.length < 8){
-		io.to(request.body.socketID).emit('passwordTooShort', {});
-	}else{
-		//check if the username already exists
-		conn.query("SELECT * FROM users WHERE username=$1", username, function(error, result){
-			if(error){
-				console.log(error);
-			}else{
-				//username already exists
-				if(result.rowCount != 0){
-					io.to(request.body.socketID).emit('usernameExists', {});
-				//username does not exist, add it to the database
-				}else{
-					bcrypt.hash(password, bcrypt.genSaltSync(10), null, function(err, hash){
-						if(err){
-							console.log(err);
-						}else{
-							console.log(hash);
-	 						conn.query('INSERT INTO users (username, password, permission, firstname, lastname) VALUES($1, $2, $3, $4, $5)',
-	 						[username, hash, permission, firstName, lastName], function(error, result){
-								if(error){
-									console.log(error);
-								}else{
-									console.log("successful insert");
-								}
-							})
-						}
-					}); 
-				}
-			}
-		})
-	}
-})
-
-
-/// socket events 
-
-io.on('connection', function(socket){
+app.get('/dashboard', authCheck, function(request, response){
 
 })
 
-server.listen(8080);
-console.log('listening on 8080');
+app.get('/auth/logout', function(request, response){
+	//hangle with passport 
+	request.logout()
+	response.redirect('/'); 
+});
+
