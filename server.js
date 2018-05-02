@@ -5,7 +5,6 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var anyDB = require('any-db');
 var bcrypt = require('bcrypt-nodejs');
-var asynch = require('async');
 
 var conn = anyDB.createConnection('sqlite3://freespeed.db');
 conn.query('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, permission INTEGER NOT NULL, firstName TEXT NOT NULL, lastName TEXT NOT NULL, email TEXT NOT NULL, year INTEGER NOT NULL)');
@@ -35,6 +34,11 @@ app.set('view engine', 'html');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+
+app.get('/', function(request, response){
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  response.redirect('/login');
+});
 
 app.get('/login', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
