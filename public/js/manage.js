@@ -100,7 +100,7 @@ function makeBoatsTable(response) {
     newRow.appendChild(firstElem).appendChild(document.createTextNode(response[i].name));
     newRow.appendChild(document.createElement("td")).appendChild(document.createTextNode(response[i].size));
     var editRow = document.createElement("td");
-    editRow.innerHTML = '<button><img src="images/edit.png" height="25" width="25"></button>';
+    editRow.innerHTML = '<button onclick="editBoat()"><img src="images/edit.png" height="25" width="25"></button>';
     newRow.appendChild(editRow);
     var deleteRow = document.createElement("td");
     deleteRow.innerHTML = '<button onclick="deleteBoat(this)"><img src="images/delete.png" height="25" width="25"></button>';
@@ -121,10 +121,14 @@ function toggleUsers() {
       $(users).hide().appendTo(parent).show('slow');
       $(parent).append('<hr id="userLine">'+
                    '<div id="invite-user">'+
+                   '<form action="/invite-user" method="post" id="inviteUserForm">'+
                    '  Invite New User:'+
                    '  <input id="emailAddress" type="email"> </input>'+
-                   '  <button id="email-submit" onclick="sendEmail()"> Send </button>'+
+                   '  <input type="submit" value="submit"> </input>'+
+                   '</form>'+
                    '</div>');
+      var userForm = $('#inviteUserForm').submit(sendEmail);
+      console.log(userForm);
     });
   } else {
     $('#manage-users-data-button').removeClass('manage-data-button-active').addClass('manage-data-button');
@@ -144,9 +148,13 @@ function toggleBoats() {
       $(boats).hide().appendTo(parent).show('slow');
       $(parent).append('<div id="add-boat">'+
                   '  Add Boat:'+
-                  '  <input> </input>'+
-                  '  <input> </input>'+
+                  '<form action="/add-boat" method="post" id="addBoatForm">'+
+                  '  <input id="boatName" type="text"> </input>'+
+                  '  <input id="capacity" type="number"> </input>'+
+                  '  <input type="submit" value="Submit">'+
+                  '</form>'+
                   '</div>');
+      var messageForm = $('#addBoatForm').submit(addBoat);
     });
   } else {
     $('#manage-boats-data-button').removeClass('manage-data-button-active').addClass('manage-data-button');
@@ -169,6 +177,29 @@ function toggleWorkouts() {
 }
 
 function addBoat() {
+  event.preventDefault();
+  var boatName = $('#boatName')[0].value;
+  var capacity = $('#capacity')[0].value;
+  var parent = $('#users-div');
+  $.post('/add-boat', {boatName: boatName, capacity: capacity},function(response) {
+      $('#boats').remove();
+      $('#add-boat').remove();
+      var boats = makeBoatsTable(response);
+      $(boats).hide().appendTo(parent).show('slow');
+      $(parent).append('<div id="add-boat">'+
+                  '  Add Boat:'+
+                  '<form action="/add-boat" method="post" id="addBoatForm">'+
+                  '  <input id="boatName" type="text"> </input>'+
+                  '  <input id="capacity" type="number"> </input>'+
+                  '  <input type="submit" value="Submit">'+
+                  '</form>'+
+                  '</div>');
+      var messageForm = $('#addBoatForm').submit(addBoat);
+  });
+}
+
+function editBoat() {
+
 }
 
 function deleteUser(elem) {
@@ -291,7 +322,8 @@ function upload() {
   }
 }
 
-function sendEmail() {
+function sendEmail(event) {
+  event.preventDefault();
   $.post('/send-email', {email: document.getElementById('emailAddress').value}, function(res) {
     if (res.yo != 'err') {
       document.getElementById('emailAddress').value = '';
