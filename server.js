@@ -10,6 +10,7 @@ var GoogleStrategy = require('passport-google-oauth20');
 var session = require('express-session');
 var cookieSession = require('cookie-session');
 var LocalStrategy = require('passport-local').Strategy;
+var nodemailer = require('nodemailer');
 
 var conn = anyDB.createConnection('sqlite3://freespeed.db');
 conn.query('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, permission INTEGER NOT NULL, firstName TEXT NOT NULL, lastName TEXT NOT NULL, email TEXT NOT NULL, year INTEGER NOT NULL)');
@@ -598,6 +599,67 @@ app.post('/remove-boat', function(request, response) {
       response.json([]);
     } else {
       console.log(err);
+    }
+  });
+});
+
+app.post('/add-boat', function(req, response) {
+  var sql = 'SELECT * FROM boats WHERE name = ?';
+
+  conn.query(sql, [req.body.boatName], function(err, res) {
+    if (err != null) {
+      console.log(err);
+    } else {
+      if (res.rows.length == 0) {
+        addBoat(req, response);
+      } else {
+        console.log("HERE");
+      }
+    }
+  });
+});
+
+function addBoat(req, response) {
+  var sql = 'INSERT INTO boats (name, size) VALUES (?, ?)';
+
+  conn.query(sql, [req.body.boatName, req.body.capacity], function(err, result) {
+      if (err != null) {
+          console.log(err);
+      }
+      else {
+        sql = 'SELECT * FROM boats';
+        conn.query(sql, function(err, res) {
+          if (err != null) {
+            console.log(err);
+          }
+          response.json(res.rows);
+        });
+      }
+  });
+}
+
+app.post('/send-email', function (req, res) {
+  var transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+      user: 'brownfreespeed@gmail.com',
+      pass: 'Freespeed!'
+    }
+  });
+  var text = 'Here is the signup link: http://localhost:8080/sign-up';
+  var mailOptions = {
+    from: 'brownfreespeed@gmail.com',
+    to: req.body.email,
+    subject: 'Sign Up For Brown Freespeed!',
+    text: text
+  }
+  transporter.sendMail(mailOptions, function(error, info) {
+    if (error) {
+      console.log(error);
+      res.json({yo: 'error'});
+    } else {
+      console.log('Message sent:' + info.response);
+      res.json({yo: info.response});
     }
   });
 });
