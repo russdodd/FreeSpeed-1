@@ -176,11 +176,12 @@ function toggleWorkouts() {
   // }
 }
 
-function addBoat() {
+function addBoat(event) {
   event.preventDefault();
   var boatName = $('#boatName')[0].value;
   var capacity = $('#capacity')[0].value;
   var parent = $('#users-div');
+  console.log(boatName);
   $.post('/add-boat', {boatName: boatName, capacity: capacity},function(response) {
       $('#boats').remove();
       $('#add-boat').remove();
