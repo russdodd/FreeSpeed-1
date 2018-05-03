@@ -223,7 +223,7 @@ app.get('/auth/logout', function(request, response){
 });
 
 app.post('/upload-data-information', function(request, response) {
-  var sql = "SELECT username, firstName, lastName FROM googlePassportUsers";
+  var sql = "SELECT email, firstName, lastName FROM googlePassportUsers";
   var json = {};
   conn.query(sql, function(err, res) {
     if (err === null) {
@@ -553,7 +553,7 @@ app.post('/get-workout-data', function(request, response) {
 
 app.post('/get-user-data', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  var sql = 'SELECT email, firstName, lastName, email, year FROM googlePassportUsers';
+  var sql = 'SELECT email, firstName, lastName, year FROM googlePassportUsers';
 
   conn.query(sql, function(err, result) {
     if (err === null) {
