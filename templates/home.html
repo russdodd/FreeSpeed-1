@@ -21,13 +21,13 @@
   <div>
     <div id="banner">
       <img id="banner_logo" src="/images/freespeed_logo.png"></img>
-      <button id="upload_button" class="banner_button">Manage Data</button>
+      <a href="/manage-data"><button id="upload_button" class="banner_button">Manage Data</button></a>
       <div id="banner_right">
         <div class="dropdown" id="profile_dropdown">
           <button class="btn btn-primary dropdown-toggle"
             type="button" data-toggle="dropdown" id="profile_dropdown_button">{{username}}<span class="caret"></span></button>
           <ul class="dropdown-menu">
-            <li class="banner_button" id="logout_button">Log Out</li>
+            <li id="logout_button">Log Out</li>
           </ul>
         </div>
     </div>
@@ -55,8 +55,9 @@
             </li> -->
           </ul>
         </div>
+        <div id="float_right_div">
+
           <div id="stats_header">
-          <p id="stats_title">Stats</p>
           <div id="choose_workout_div">
             <div id="choose_statistic_div">
               <br/>
@@ -108,7 +109,7 @@
         </div>
     </div>
   </div>
+  </div>
   <script src="/js/graph.js"></script>
   <script src="/js/home.js"></script>
-  <!-- <script src="/js/test_graph.js"></script> -->
 </html>
