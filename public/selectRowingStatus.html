@@ -4,23 +4,28 @@
 	<link rel="stylesheet" href="css/selectRowingStatus.css">
 	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
   	<script src="/socket.io/socket.io.js"></script>
-		<script src="/js/selectRowingStatus.js"></script>
-
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:100" rel="stylesheet">
 </head>
 <body>
-<h2>Select Rowing Status</h2>
-<h4>Sign Up as a:</h4>
-<form id="status">
-  <input type="radio" id="radio-rower" name="rowerType" value="rower" checked> Rower
-  <div id ="classYearDiv">
-  	<input type="radio" id="2022" name="classYear" value="2022" checked> 2022<br>
-  	<input type="radio" id="2021" name="classYear" value="2021"> 2021<br>
-  	<input type="radio" id="2020" name="classYear" value="2020"> 2020<br>
-  	<input type="radio" id="2019" name="classYear" value="2019"> 2019<br>
-  	<input type="radio" id="2018" name="classYear" value="2018"> 2018<br> <br>
+<div id="wrapper">
+  <div id="box">
+    <h1>Enter Profile Info</h1>
+    <h4>Sign Up as a:</h4>
+    <form id="status">
+      <input type="radio" id="radio-rower" name="rowerType" value="rower" checked> Rower: 
+      <div id ="classYearDiv">
+        <p id="selectClassYear"> Select Class Year</p>
+      	<input type="radio" id="2022" name="classYear" value="2022" checked> 2022<br>
+      	<input type="radio" id="2021" name="classYear" value="2021"> 2021<br>
+      	<input type="radio" id="2020" name="classYear" value="2020"> 2020<br>
+      	<input type="radio" id="2019" name="classYear" value="2019"> 2019<br>
+      	<input type="radio" id="2018" name="classYear" value="2018"> 2018<br> <br>
+      </div>
+      <input type="radio" id="radio-coach" name="rowerType" value="coach"> Coach 
+    </form> <br>
+    <a href='#'><button id="submitButton" onclick="sendResponse()">Submit</button></a>
   </div>
-  <input type="radio" id="radio-coach" name="rowerType" value="coach"> Coach
-</form>
-<a href='#'><button id="submitButton" onclick="sendResponse()">Sign Up</button></a>
+</div>
 </body>
+	<script src="/js/selectRowingStatus.js"></script>
 </html>
