@@ -153,6 +153,7 @@ function makeUL() {
       d3Init(this.value);
     });
 }*/
+
 function cleanData(){
   //var clean_data = [];
   global_data.forEach(function(piece) {
@@ -221,6 +222,7 @@ function updateCurAverages(){
 }
 
 function updateAverages(){
+  if (global_raw_data.length > 0){
   for (var i = 0; i < global_raw_data.length; i++){
     for(var j = 0; j < toggle_vals.length; j++){
       averages[j]+= global_raw_data[i][toggle_vals[j]];
@@ -229,6 +231,7 @@ function updateAverages(){
   for(var j = 0; j < toggle_vals.length; j++){
     averages[j]/= global_raw_data.length;
   }
+}
 }
 
 function getData(){
@@ -266,7 +269,7 @@ $( document ).ready(function() {
   }}); */   
   console.log( "ready!" );
   //parseCsvInit(path, d3Init)
-  
+
 });
 
 
