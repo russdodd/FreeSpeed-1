@@ -120,6 +120,85 @@ app.post('/get-users', function(request, response) {
   });
 });
 
+function deleteData(workoutUserBoatID) {
+  var sql = "DELETE FROM data where workoutUserBoatID = $1";
+  conn.query(sql,[workoutUserBoatID], function(err, res) {
+    if (err === null) {
+      console.log("removed data");
+      return;
+    } else {
+      /*TODO: Handle Error*/
+      console.log(err);
+      return;
+    }
+  });
+}
+
+function deleteWorkoutUserBoat(workoutUserBoatID){
+  var sql = "DELETE FROM workoutUserBoatID where id = $1";
+  conn.query(sql, [workoutUserBoatID], function(err, res) {
+    if (err === null) {
+      console.log("removed workoutUserBoatID");
+      return;
+    } else {
+      /*TODO: Handle Error*/
+      console.log(err);
+      return;
+    }
+  });
+}
+
+function deleteWorkout(workoutID){
+  var sql = "DELETE FROM workouts where id = $1";
+  conn.query(sql, [workoutID], function(err, res) {
+    if (err === null) {
+      console.log("removed workout");
+      return;
+    } else {
+      /*TODO: Handle Error*/
+      console.log(err);
+      return;
+    }
+  });
+}
+
+function getWorkoutUserBoatIDs(workoutID){
+  var sql = "SELECT getWorkoutUserBoatID FROM workoutUserBoat WHERE workoutID=$1";
+  var json = {};
+  conn.query(sql, [workoutID], function(err, res) {
+    if (err === null) {
+      return res.rows;
+    } else {
+      /*TODO: Handle Error*/
+      console.log(err);
+      return;
+    }
+  });
+}
+
+app.post('/workout-remove', function(request, response) {
+  // definitely need to authenticate here and make sure data belongs to user
+  var workoutID = escape(request.body.workoutID);
+  var workoutUserBoatIDs = getWorkoutUserBoatIDs(workoutID);
+  console.log("workoutUserBoatIDs", workoutUserBoatIDs);
+  for(var i = 0; i < workoutUserBoatIDs; i++){
+    deleteData(workoutUserBoatIDs[i]);
+    deleteWorkoutUserBoat(workoutUserBoatID);
+  }
+  deleteWorkout(workoutID);
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  response.end("success");
+});
+
+app.post('/data-remove', function(request, response) {
+  // definitely need to authenticate here and make sure data belongs to user
+  var workoutUserBoatID = escape(request.body.workoutUserBoatID);
+  deleteData(workoutUserBoatID);
+  deleteWorkoutUserBoat(workoutUserBoatID);
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  response.end("success");
+});
+
 app.post('/data-upload', function(request, response) {
   // 1. Authenticate user is allowed to do what they did using JWT
   // 2. Authenticate that data uploaded is valid
@@ -131,8 +210,12 @@ app.post('/data-upload', function(request, response) {
 
   var code = Number(data.code);
   if (code === 0) {
-    // Create New Workout + New boat
-    createNewWorkout(data);
+    // Create New Workout
+    var id = createNewWorkout(data);
+    for (var i = 0; i < data.users.length; i++) {
+        var username = data.users[i].username;
+        createNewWorkoutUserBoat(i, username, data);
+      }
   } else if (code === 1) {
     // Create New Boat for existing workout
     for (var i = 0; i < data.users.length; i++){
@@ -164,11 +247,8 @@ function createNewWorkout(data) {
   data.users[0].per_stroke_data.startTime = changeDateFormat(data.users[0].per_stroke_data.startTime);
   conn.query(sql, [data.users[0].per_stroke_data.startTime, data.workoutType], function (err, row) {
     if (err === null) {
-      data.workoutID = row.lastInsertId;
-      for (var i = 0; i < data.users.length; i++) {
-        var username = data.users[i].username;
-        createNewWorkoutUserBoat(i, username, data);
-      }
+      return row.lastInsertId;
+      
     } else {
       /*TODO: Handle Error */
       console.log(err);

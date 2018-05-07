@@ -23,14 +23,71 @@ function uploadData(json_data) {
   });
 };
 
+function deleteWorkout(){
+  var workoutId = $("#workouts").val();
+
+}
+
+/*function createWorkout(){
+  var workoutId = $("#workouts").val();
+  var data = {date: , type: }
+}*/
+
+function uploadCSV(file){
+  reader.readAsText(file);
+  reader.onload = function(event) {
+    console.log("success");
+    return event.target.result;
+  };
+  reader.onerror = function() {
+    alert('Unable to read ' + file.fileName);
+  };
+}
+
+function uploadData(){
+  if ($("#newWorkout")[0].checked){
+        workoutId = -1;
+      } else if ($("#workouts").val() == null) {
+        alert("No workout selected");
+        return;
+      }
+      var jsonData = {"code": !Number($("#newWorkout")[0].checked),
+              "workoutID": workoutId,
+              "workoutType": $("#workoutType").val(),
+              "boatID": $("#boat").val(),
+              "users":[]
+            };
+            if (!browserSupportFileUpload()) {
+    alert('The File APIs are not fully supported in this browser!');
+  } else {
+    //var data = null;
+    var fileUploads = $("#txtFileUpload");
+    for (var fileUploadsIdx = 0; fileUploadsIdx < fileUploads.length; fileUploadsIdx++){
+      var files = fileUploads[fileUploadsIdx].files;
+      var reader = new FileReader();
+      var fileData = [];
+      for (var fileIdx = 0; fileIdx < files.length; fileIdx++){
+        fileData.push(uploadCSV(files[fileIdx]));
+      }
+    });
+  }
+}
+
+function deleteData(){
+
+}
+
 function upload(){
   var workoutId = $("#workouts").val();
+
       if ($("#newWorkout")[0].checked){
         workoutId = -1;
       } else if ($("#workouts").val() == null) {
         alert("No workout selected");
         return;
       }
+
+
       var jsonData = {"code": !Number($("#newWorkout")[0].checked),
               "workoutID": workoutId,
               "workoutType": $("#workoutType").val(),
