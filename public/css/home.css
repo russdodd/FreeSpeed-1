@@ -170,8 +170,6 @@ textarea {
 
 .type_selector_button_selected {
   padding: 5px 5px;
-  display: inline-block;
-  margin-right: 40px;
   color: red;
 }
 
