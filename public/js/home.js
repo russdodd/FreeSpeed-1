@@ -3,6 +3,10 @@ var current_stat = 0;
 var toggle_types = ["Power", "Speed", "Slip", "Wash", "Stroke/Min", "Catch Angle",
   "Finish Angle", "Max Force Angle", "Max Force", "Avg Force", "Work", "Distance/Stroke", "Heart Rate"];
 var toggle_vals = ["power","speedGPS","slip","wash","strokeRate","catch","finish","maxForceAngle","forceMax","forceAvg","work","distancePerStrokeGPS","heartRateBPM"];
+var results = {
+    total: 0,
+    bad: 0
+  };
 
 $(document).ready(function () {
   document.getElementById(is_highlighted).className = "type_selector_button_selected";
@@ -11,10 +15,9 @@ $(document).ready(function () {
   document.getElementById('dropdown_button').innerHTML = toggle_types[current_stat] + "<span class=\"caret\"></span>";
   document.getElementById('dropdown_button').value = toggle_vals[current_stat];
   $.post("/get-workouts", function(res) {
-    console.log(res);
     var sel = $("#workouts");
     for(var i = 0; i < res.length; i++) {
-      var opt = document.createElement('option');
+      var opt = document.createElement('li');
       opt.value = res[i].id;
       opt.innerHTML = decodeURI(res[i].date) + ' ' +  decodeURI(res[i].type);
       sel[0].appendChild(opt);
@@ -22,6 +25,25 @@ $(document).ready(function () {
   $("#workouts").val($("#workouts option:first").val());
   getData();
   });
+
+
+  test('1', "Speed");
+  test('2', "Slip");
+  test('3', "Wash");
+  test('4', "Stroke/Min");
+  test('5', "Catch Angle");
+  test('6', "Finish Angle");
+  test('7', "Max Force Angle");
+  test('8', "Max Force");
+  test('9', "Avg Force");
+  test('10', "Work");
+  test('11', "Distance/Stroke");
+  test('12', "Heart Rate");
+  test('0', "Power");
+  console.log("Of " + results.total + " tests, " +
+    results.bad + " failed, " +
+    (results.total - results.bad) + " passed.");
+
 });
 
 function get_stat() {
@@ -46,6 +68,7 @@ function toggleType(id) {
     }
   }
   updateGraph(); //function from the graph.js file
+  return document.getElementById(is_highlighted).innerHTML;
 }
 
 function selectRower(id) {
@@ -78,3 +101,13 @@ $("#workouts").on("change", function(){
   }
 });
 */
+
+function test(then, expected) {
+  results.total++;
+  var result = toggleType(then);
+  if (result !== expected) {
+    results.bad++;
+    console.log("Expected " + expected +
+      ", but was " + result);
+  }
+}

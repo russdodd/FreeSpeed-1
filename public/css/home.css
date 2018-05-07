@@ -1,6 +1,7 @@
 html *
 {
    font: Roboto;
+   font-size: 16px;
 }
 
 body {
@@ -51,6 +52,7 @@ textarea {
   line-height: 100px;
   width: 100px;
   margin-right: 20px;
+  cursor: pointer;
 }
 
 .banner_button {
@@ -87,21 +89,19 @@ textarea {
 
 #person_type {
   display: inline-block;
-  font-size: 24px;
   font-weight: 600;
 }
 
 #user_name {
   display: inline-block;
   line-height: 100px;
-  font-size: 24px;
   font-weight: 600;
 }
 
 #logout_button {
   background-color: white;
-  border: none;
-  color: blue;
+  padding: 0 10px;
+  cursor: pointer;
 }
 #banner_hr {
   border-color: #f1f1f1;
@@ -115,6 +115,8 @@ textarea {
   width: 1300px;
   margin: 0 auto;
   background-color: white;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
 }
 
 #type_selector {
@@ -122,7 +124,6 @@ textarea {
   margin: 0 0;
   color: black;
   z-index: 1;
-  font-size: 21px;
   border-bottom: 1px solid #ccc;
 }
 #workout_selector {
@@ -130,7 +131,6 @@ textarea {
   margin: 0 0;
   color: black;
   z-index: 1;
-  font-size: 21px;
 }
 
 #dropdown_label {
@@ -145,17 +145,22 @@ textarea {
 .dropdown-menu {
   width: 100px;
 }
+
 #dropdown_button {
-  background-color: transparent;
-  font-size: 24px;
-  color: black;
-  border: none;
-  border-bottom: 1px solid red;
-  padding: 0 0;
+  background-color: white;
+  color: red;
+  border: 1px solid red;
+  padding: 2px 10px;
+}
+
+
+#dropdown_button:hover {
+  background-color: red;
+  color: white;
 }
 
 .type_selector_button {
-  font-size: 24px;
+  padding: 5px 5px;
   cursor: pointer;
 }
 
@@ -164,11 +169,10 @@ textarea {
 }
 
 .type_selector_button_selected {
+  padding: 5px 5px;
   display: inline-block;
   margin-right: 40px;
-  font-size: 24px;
   color: red;
-  border-bottom: 1px solid red;
 }
 
 .type_selector_button_selected:hover {
@@ -189,7 +193,7 @@ textarea {
 
 #rowers_title {
   text-align: center;
-  font-size: 18px;
+  font-weight: 600;
 }
 
 #rowers_list {
@@ -220,11 +224,8 @@ textarea {
 }
 
 #graph_div {
-  display: inline-block;
-  width: 1009px;
-  padding: 20px 20px;
-  border: none;
-  border-left: 1px solid #ccc;
+  width: 100%;
+  padding: 20px 0;
 }
 
 #graph_title {
@@ -259,11 +260,13 @@ textarea {
 }
 
 #averages_div {
+  width: 100%;
   border-top: 1px solid #ccc;
+  padding: 20px 20px;
+
 }
 
 #averages_div_title {
-  font-size: 24px;
   font-weight: 800;
 }
 
@@ -284,9 +287,69 @@ textarea {
 #profile_dropdown_button {
   background-color: transparent;
   color: black;
-  font-size: 24px;
   padding: 0 0;
+  font-size: 24px;
   font-weight: 600;
   border: none;
   border-bottom:1px solid #ccc;
+}
+
+#workout_button {
+  background-color: white;
+  color: red;
+  border: 1px solid red;
+  padding: 2px 10px;
+}
+
+#stats_title {
+  display: inline-block;
+  font-weight: 600;
+  padding: 20px 20px;
+}
+
+#choose_workout_div {
+  float: right;
+  padding: 0 20px;
+}
+
+#choose_statistic_div {
+  display: inline-block;
+  padding: 0 20px;
+}
+
+#stats_header {
+  display: inline-block;
+  width: 100%;
+  height: 63px;
+  border-bottom: 1px solid #ccc;
+}
+
+#float_right_div {
+  float: right;
+  width: 1048px;
+  border-left: 1px solid #ccc;
+}
+
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(odd) {
+    background-color: #dddddd;
+}
+
+#averages_table {
+  margin: 0 auto;
+}
+
+.title_cell {
+  background-color: white;
+  border: 1px solid red;
 }

@@ -55,7 +55,7 @@ function d3Init(){
   x.domain(d3.extent(data, function(d) { return d[ind1]; }));
   y.domain(d3.extent(data, function(d) { return d[ind2]; }));
   //console.log("x",x);
-  
+
   function mousemove() {
     var x0 = x.invert(d3.mouse(this)[0]);
     //console.log("mouse", d3.mouse(this)[0]);
@@ -66,7 +66,7 @@ function d3Init(){
     var d1 = data[i];
     //console.log("d1",d1);
     var d = x0 - d0[ind1] > d1[ind1] - x0 ? d1 : d0;
-    var time = 
+    var time =
     focus.attr("transform", "translate(" + x(d[ind1]) + "," + y(d[ind2]) + ")");
     focus.select("text").text(formatCurrency(d[ind2]) + ", " + formatTime(d[ind1]));
     //console.log("d",d);
@@ -90,7 +90,7 @@ function d3Init(){
       .attr("dy", "0.71em")
       .attr("text-anchor", "end");
 
-  
+
       drawLines([data], svg);
 
 
@@ -160,17 +160,19 @@ function cleanData(){
     //var clean_piece = [];
     piece.elapsedTime = parseDate(piece.elapsedTime + "00")
     piece.splitGPS = parseDate(piece.splitGPS + "00")
-    
+
     //clean_data.push(clean_piece);
   });
   //global_data = clean_data;
 }
 
 function updateGraph(){
-  ind2 = $("#dropdown_button").val();
-  username = $(".rower_selected")[0].id;
-  $("svg :first-child").empty();
-  d3Init();
+  if ($(".rower_selected").length > 0) {
+    ind2 = $("#dropdown_button").val();
+    username = $(".rower_selected")[0].id;
+    $("svg :first-child").empty();
+    d3Init();
+  }
 }
 
 function groupByUsername(){
@@ -191,7 +193,10 @@ function groupByUsername(){
   global_data = partitionedData
 }
 function populateUsersList(){
+
   var ul = $("#rowers_list");
+
+
        for (var username in global_data){
           var li = document.createElement('li');
           li.id = username;
@@ -200,10 +205,14 @@ function populateUsersList(){
           li.innerHTML = decodeURI(global_data[username][0].firstName) + ' ' +  decodeURI(global_data[username][0].lastName);
           ul.append(li);
           }
+          if ($("rowers_list").length > 0) {
+
           $(".rower")[0].classList.add("rower_selected");
+        }
 }
 
 function updateCurAverages(){
+  if (global_data[username]) {
   for (var i = 0; i < global_data[username].length; i++){
     for(var j = 0; j < toggle_vals.length; j++){
       cur_averages[j]+= global_data[username][i][toggle_vals[j]];
@@ -219,6 +228,7 @@ function updateCurAverages(){
   }
   $('#averages_table').empty();
   $('#averages_table').append(trHTML);
+}
 }
 
 function updateAverages(){
@@ -266,17 +276,9 @@ $( document ).ready(function() {
       cleanData();
       makeUL();
       d3Init(0);
-  }}); */   
+  }}); */
   console.log( "ready!" );
   //parseCsvInit(path, d3Init)
 
+
 });
-
-
-
-
-
-
-
-
-
