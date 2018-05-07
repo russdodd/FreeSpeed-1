@@ -358,7 +358,7 @@ app.post('/data-upload', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
   var data = JSON.parse(request.body.data);
   for (var i = 0; i < data.users.length; i++){
-    data.users[i].per_stroke_data = parseCsv(data.users[i].per_stroke_data);
+    data.users[i].per_stroke_data = parseCsv(data.users[i].per_stroke_data[0]);
   }
 
   var workoutID = data.workoutID;
@@ -625,6 +625,7 @@ app.post('/get-workouts', function(request, response) {
   var sql = 'SELECT * FROM workouts';
   conn.query(sql, function(err, result) {
     if (err === null) {
+      console.log("workouts", result.rows);
       response.json(result.rows);
     } else {
       /*TODO: Handle Error*/
@@ -635,16 +636,19 @@ app.post('/get-workouts', function(request, response) {
 
 app.post('/get-workout-data', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
+  console.log("workoutID", request.body.workoutID);
   var sql = 'SELECT googlePassportUsers.email, googlePassportUsers.firstName, googlePassportUsers.lastName, boats.name, data.* ' +
   'FROM workoutUserBoat JOIN googlePassportUsers ON googlePassportUsers.email = ' +
   'workoutUserBoat.username JOIN boats ON boats.id = ' +
   'workoutUserBoat.boatID JOIN data ON data.workoutUserBoatID = workoutUserBoat.id ' +
-  'WHERE workoutID = ?';
+  'WHERE workoutID = $1';
 
   conn.query(sql, [request.body.workoutID], function(err, result) {
     if (err === null) {
-      console.log("result is " + result.rows);
-      response.json(result.rows);
+      console.log("result is " + JSON.stringify(result.rows));
+      console.log("result len " + result.rows.length);
+      console.log("result 0 " + JSON.stringify(result.rows[0]));
+      response.json({data: JSON.stringify(result.rows)});
     } else {
       console.log(err);
     }

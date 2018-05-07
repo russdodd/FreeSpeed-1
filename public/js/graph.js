@@ -50,6 +50,7 @@ function d3Init(){
     data = global_data[n];
   }*/
   data = global_data[username];
+  console.log("data", data);
   //console.log(username);
   //console.log(data);
   x.domain(d3.extent(data, function(d) { return d[ind1]; }));
@@ -180,10 +181,10 @@ function updateGraph(){
 function groupByUsername(){
   partitionedData = {};
   for(var i = 0; i < global_data.length; i++){
-    if (!partitionedData[global_data[i].username]){
-      partitionedData[global_data[i].username] = [];
+    if (!partitionedData[global_data[i].email]){
+      partitionedData[global_data[i].email] = [];
     }
-    partitionedData[global_data[i].username].push(global_data[i]);
+    partitionedData[global_data[i].email].push(global_data[i]);
   }
   for (var username in partitionedData){
     partitionedData[username].sort(function(a, b){
@@ -200,6 +201,7 @@ function populateUsersList(){
 
 
        for (var username in global_data){
+        console.log("username", username);
           var li = document.createElement('li');
           li.id = username;
           li.classList.add('rower');
@@ -208,7 +210,7 @@ function populateUsersList(){
           ul.append(li);
           }
           if ($("#rowers_list").length > 0) {
-          // $("#rowers_list").first().attr('class', 'rower_selected');
+           $("#rowers_list :first-child").classList.add("rower_selected");
           // $("#rowers_list").first().click();
 
         }
@@ -251,8 +253,10 @@ function getData(){
     console.log("workout selected");
     var chosen_workout = $('#workout_button');
     $.post("/get-workout-data", {workoutID: chosen_workout.val()}, function(res){
-      global_raw_data = res;
-      global_data = res;
+      console.log(JSON.parse(res.data));
+      console.log(res);
+      global_raw_data = JSON.parse(res.data);
+      global_data = JSON.parse(res.data);
       cleanData();
       groupByUsername();
       $("#rowers_list").empty();
