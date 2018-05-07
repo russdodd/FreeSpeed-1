@@ -1,10 +1,12 @@
 var data = "";
-function sendCsv(csv, fname, lname, time) {
+var fileData = [];
+var fileCounter = 0;
+/*function sendCsv(csv, fname, lname, time) {
   var postParameters = {csv: csv, fname: fname, lname: lname, time:time};
   $.post("/csv", postParameters,  function(responseJSON){
     //
   });
-}
+}*/
 
 function browserSupportFileUpload() {
   var isCompatible = false;
@@ -13,8 +15,13 @@ function browserSupportFileUpload() {
   }
   return isCompatible;
 }
-function uploadData(json_data) {
-  $.post('/data-upload', {data:JSON.stringify(jsonData)}, function(res, err) {
+function sendData(json_data) {
+  for (var i = 0; i< json_data.users.length; i++){
+    json_data.users[i].per_stroke_data = fileData[i];
+  }
+
+  console.log(json_data.users[0].per_stroke_data[0]);
+  $.post('/data-upload', {data:JSON.stringify(json_data)}, function(res, err) {
     if (err != null){
       console.log(err);
     } else {
@@ -37,16 +44,41 @@ function deleteData(){
   var data = {date: , type: }
 }*/
 
-function uploadCSV(file){
+function uploadCSV(file, index, callback){
   var reader = new FileReader();
-  reader.readAsText(file);
-  reader.onload = function(event) {
+  console.log("file", file);
+  reader.onload = (function(file, index, callback) { return function(event) {
     console.log("success");
-    return event.target.result;
+    /*console.log("event.target.result", event.target.result);*/
+    //console.log({1:event.target.result});
+    fileCounter --;
+    console.log("fileCounter after --", fileCounter);
+    if(!fileData[index]){
+      fileData[index] = [event.target.result];
+    } else {
+      fileData[index].push(event.target.result);
+    }
+    if (fileCounter == 0) {
+      callback();
+    }
   };
+})(file, index, callback);
   reader.onerror = function() {
     alert('Unable to read ' + file.fileName);
+    return;
   };
+  reader.readAsText(file);
+  /*console.log("reader.result", reader.result);*/
+  return reader.result;
+}
+
+function getNumFiles(){
+  var fileUploads = $("#txtFileUpload");
+  var counter = 0;
+  for (var i = 0; i < fileUploads.length; i++){
+    counter += fileUploads[i].files.length;
+  }
+  return counter;
 }
 
 function uploadData(){
@@ -67,19 +99,22 @@ function uploadData(){
   } else {
     //var data = null;
     var fileUploads = $("#txtFileUpload");
+    fileCounter = getNumFiles();
+    console.log("fileCounter", fileCounter);
+
     for (var fileUploadsIdx = 0; fileUploadsIdx < fileUploads.length; fileUploadsIdx++){
+      /*console.log("fileUploadsIdx", fileUploadsIdx);*/
       var files = fileUploads[fileUploadsIdx].files;
-      var fileData = [];
-      for (var fileIdx = 0; fileIdx < files.length; fileIdx++){
-        fileData.push(uploadCSV(files[fileIdx]));
-      }
-      var userJson = {"per_stroke_data": fileData};
+      var userJson = {};
       userJson.username = $(".username")[fileUploadsIdx].value;
       userJson.boat = $("#boat")[fileUploadsIdx].value;
       jsonData.users.push(userJson);
-      console.log(jsonData);      
+      for (var fileIdx = 0; fileIdx < files.length; fileIdx++){
+        /*console.log("fileIdx", fileIdx);
+        console.log(files[fileIdx]);*/
+        uploadCSV(files[fileIdx], fileUploadsIdx, (function(j_data){return function(){sendData(j_data)}})(jsonData));
+      }  
     }
-    uploadData(jsonData);
   }
 }
 
@@ -156,7 +191,7 @@ $(document).ready(function() {
         sel[0].appendChild(opt);
          }
     });
-  document.getElementById('txtFileUpload').addEventListener('change', uploadCSV, false);
+  //document.getElementById('txtFileUpload').addEventListener('change', uploadCSV, false);
     /*document.getElementById('qbutton').addEventListener('click', getPower);*/
 });
 

@@ -306,26 +306,12 @@ function deleteWorkoutUserBoat(workoutUserBoatID){
   });
 }
 
-function deleteWorkout(workoutID){
+function deleteWorkout(workoutID, response){
   var sql = "DELETE FROM workouts where id = $1";
   conn.query(sql, [workoutID], function(err, res) {
     if (err === null) {
       console.log("removed workout");
-      return;
-    } else {
-      /*TODO: Handle Error*/
-      console.log(err);
-      return;
-    }
-  });
-}
-
-function getWorkoutUserBoatIDs(workoutID){
-  var sql = "SELECT getWorkoutUserBoatID FROM workoutUserBoat WHERE workoutID=$1";
-  var json = {};
-  conn.query(sql, [workoutID], function(err, res) {
-    if (err === null) {
-      return res.rows;
+      response.json({msg: "success"});
     } else {
       /*TODO: Handle Error*/
       console.log(err);
@@ -338,14 +324,26 @@ app.post('/workout-remove', function(request, response) {
   // definitely need to authenticate here and make sure data belongs to user
   var workoutID = escape(request.body.workoutID);
   var workoutUserBoatIDs = getWorkoutUserBoatIDs(workoutID);
-  console.log("workoutUserBoatIDs", workoutUserBoatIDs);
-  for(var i = 0; i < workoutUserBoatIDs; i++){
-    deleteData(workoutUserBoatIDs[i]);
-    deleteWorkoutUserBoat(workoutUserBoatID);
-  }
-  deleteWorkout(workoutID);
+  var sql = "SELECT getWorkoutUserBoatID FROM workoutUserBoat WHERE workoutID=$1";
+  var json = {};
+  conn.query(sql, [workoutID], function(err, res) {
+    if (err === null) {
+      var workoutUserBoatIDs = res.rows;
+      console.log("workoutUserBoatIDs", workoutUserBoatIDs);
+      for(var i = 0; i < workoutUserBoatIDs; i++){
+        deleteData(workoutUserBoatIDs[i]);
+        deleteWorkoutUserBoat(workoutUserBoatID);
+      }
+      deleteWorkout(workoutID, response);
+    } else {
+      /*TODO: Handle Error*/
+      console.log(err);
+      return;
+    }
+  });
+  
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.end("success");
+  response.json({msg: "success"})
 });
 
 app.post('/data-remove', function(request, response) {
@@ -354,38 +352,32 @@ app.post('/data-remove', function(request, response) {
   deleteData(workoutUserBoatID);
   deleteWorkoutUserBoat(workoutUserBoatID);
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.end("success");
+  response.json({msg: "success"});
 });
+
 
 app.post('/data-upload', function(request, response) {
   // 1. Authenticate user is allowed to do what they did using JWT
   // 2. Authenticate that data uploaded is valid
   // 3. Upload data to database
+  console.log('- Request received:', request.method.cyan, request.url.underline);
   var data = JSON.parse(request.body.data);
   for (var i = 0; i < data.users.length; i++){
     data.users[i].per_stroke_data = parseCsv(data.users[i].per_stroke_data);
   }
 
-  var code = Number(data.code);
-  if (code === 0) {
-    // Create New Workout
-    data.workoutID = createNewWorkout(data);
-    for (var i = 0; i < data.users.length; i++) {
-        var username = data.users[i].username;
-        data.workoutUserBoatID = createNewWorkoutUserBoat(i, username, data);
-        insertData(i, data);
-      }
-
-  } else if (code === 1) {
+  var workoutID = data.workoutID;
+  if (workoutID == -1) {
+    // Create New Workout + New boat
+    createNewWorkout(data, response);
+  } else {
     // Create New Boat for existing workout
-    for (var i = 0; i < data.users.length; i++){
-      data.workoutUserBoatID = createNewWorkoutUserBoat(i, data.users[i].username, data);
-      insertData(i, data);
+    for (var i = 0; i < data.users.length; i++) {
+      var username = data.users[i].username;
+      createNewWorkoutUserBoat(i, username, data);
     }
-  } else if (code === 2) {
-    //TODO: Update Existing Entry
+    response.json({msg: "success"})
   }
-  console.log('- Request received:', request.method.cyan, request.url.underline);
 });
 
 app.post('/:userName/personal-data-page', function(request, response) {
@@ -400,14 +392,18 @@ app.post('/:userName/personal-data-page', function(request, response) {
  * This function creates a new workout and edits the workoutId of the request's
  * JSON file. It then calls createNewBoat()
  */
-function createNewWorkout(data) {
+function createNewWorkout(data, response) {
   var sql = "INSERT INTO workouts (date, type) VALUES (?, ?)";
 
   data.users[0].per_stroke_data.startTime = changeDateFormat(data.users[0].per_stroke_data.startTime);
   conn.query(sql, [data.users[0].per_stroke_data.startTime, data.workoutType], function (err, row) {
-    if (err === null) {
-      return row.lastInsertId;
-      
+    if (err == null) {
+      data.workoutID = row.lastInsertId;
+      for (var i = 0; i < data.users.length; i++) {
+        var username = data.users[i].username;
+        createNewWorkoutUserBoat(i, username, data);
+      }
+      response.json({msg: "success"})
     } else {
       /*TODO: Handle Error */
       console.log(err);
@@ -441,16 +437,16 @@ function changeDateFormat(date) {
  * This function expects the data to contain the corresponding workout id and adds
  * data to the workoutUserBoat table.
  */
-function createNewWorkoutUserBoat(currUserInd, username, data) {
+function createNewWorkoutUserBoat(currUserInd, username, data, response) {
   var sql = "INSERT INTO workoutUserBoat (workoutID, username, boatID) VALUES (?, ?, ?)";
   conn.query(sql, [data.workoutID, username, data.boatID], function (err, row) {
-    if (err === null) {
+    if (err == null) {
       console.log(String(username) + " has new workout data!");
-      return row.lastInsertId;
+      data.workoutUserBoatID = row.lastInsertId;
+      insertData(currUserInd, data);
     } else {
       /*TODO: Handle Error*/
       console.log(err);
-      return;
     }
   });
 }
@@ -510,7 +506,7 @@ function parseCsv(data){
 function insertData(currUserInd, data) {
   var sql = "INSERT INTO data (workoutUserBoatID, interval, distanceGPS, distanceIMP, elapsedTime, splitGPS, speedGPS, splitIMP, speedIMP, strokeRate, totalStrokes, distancePerStrokeGPS, distancePerStrokeIMP, heartRateBPM, power, catch, slip, finish, wash, forceAvg, work, forceMax, maxForceAngle, GPSLat, GPSLon)" +
   " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-  for (var i = 0; i < data.users[currUserInd].per_stroke_data.data[0].length; i++) {
+  for (var i = 0; i < data.users[currUserInd].per_stroke_data.data.length; i++) {
     var toInsert = [];
     toInsert.push(data.workoutUserBoatID);
     var concatArray = data.users[currUserInd].per_stroke_data.data[i];
