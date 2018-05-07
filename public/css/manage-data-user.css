@@ -1,31 +1,36 @@
 #main-container {
   padding: 20px 20px;
+  width: 900px;
+  margin: auto;
+  /* height: 100%; */
+  text-align: center;
 }
 
 #user_workouts {
-  padding: 10px 10px;
-  width: 500px;
+    border-collapse: collapse;
+    width: 100%;
+		text-align: center;
+		margin-top: 10px;
 }
 
 #user_workouts th {
-  padding: 10px 5px;
+    padding: 8px;
+		background-color: black;
+		padding-top: 12px;
+		padding-bottom: 12px;
+		text-align: center;
+		color: white;
+    border: none;
 }
-
 
 #user_workouts td {
-  padding: 5px 5px;
-  border: 1px solid #ccc;
+	padding: 8px;
 }
 
-#workouts_id {
-  border: 1px solid #ccc;
+#user_workouts tr:hover {
+	background-color: #ddd;
 }
 
-#delete_row {
-  border: none;
-  background-color: transparent;
-}
-
-#user_workouts tr:nth-child(odd) {
-    background-color: #dddddd;
+#name_header {
+  margin-bottom: 30px;
 }
