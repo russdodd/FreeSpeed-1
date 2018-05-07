@@ -52,6 +52,7 @@ textarea {
   line-height: 100px;
   width: 100px;
   margin-right: 20px;
+  cursor: pointer;
 }
 
 .banner_button {
@@ -261,6 +262,8 @@ textarea {
 #averages_div {
   width: 100%;
   border-top: 1px solid #ccc;
+  padding: 20px 20px;
+
 }
 
 #averages_div_title {
@@ -325,4 +328,28 @@ textarea {
   float: right;
   width: 1048px;
   border-left: 1px solid #ccc;
+}
+
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(odd) {
+    background-color: #dddddd;
+}
+
+#averages_table {
+  margin: 0 auto;
+}
+
+.title_cell {
+  background-color: white;
+  border: 1px solid red;
 }
