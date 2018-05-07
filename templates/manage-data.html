@@ -2,12 +2,28 @@
 <html>
   <head>
     <title> Manage Team Data </title>
+    <link rel="stylesheet" href="/css/home.css">
     <link rel="stylesheet" href="/css/manage-data.css">
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-    <!-- Latest compiled and minified CSS --><!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"> -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="/js/manage.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <meta name="username" content="{{username}}">
+    <meta name="firstname" content="{{firstname}}">
   </head>
   <body>
+    <div id="banner">
+      <a href="/profile"><img id="banner_logo" src="/images/freespeed_logo.png"></img></a>
+      <div id="banner_right">
+        <div class="dropdown" id="profile_dropdown">
+          <button class="btn btn-primary dropdown-toggle"
+            type="button" data-toggle="dropdown" id="profile_dropdown_button">{{firstname}}<span class="caret"></span></button>
+          <ul class="dropdown-menu">
+            <a href="/auth/logout"<li id="logout_button">Log Out</li></a>
+          </ul>
+        </div>
+      </div>
+    </div>
     <div id="manage-data-container">
       <h1 id="manage-data-header">Data Center</h1>
       <div id="manage-data-subcontainer">

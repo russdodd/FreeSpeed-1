@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> Manage {{username}} </title>
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/manage-data-user.css">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="/js/manage-user.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <meta name="username" content={{username}}>
+    <meta name="firstname" content={{firstname}}>
+  </head>
+  <body>
+    <div id="banner">
+      <a href="/profile"><img id="banner_logo" src="/images/freespeed_logo.png"></img></a>
+      <a href="/manage-data"><button id="upload_button" class="banner_button">Manage Data</button></a>
+      <div id="banner_right">
+        <div class="dropdown" id="profile_dropdown">
+          <button class="btn btn-primary dropdown-toggle"
+            type="button" data-toggle="dropdown" id="profile_dropdown_button">{{firstname}}<span class="caret"></span></button>
+          <ul class="dropdown-menu">
+            <a href="/auth/logout"<li id="logout_button">Log Out</li></a>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div id="main-container">
+    </div>
+  </body>
+</html>

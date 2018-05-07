@@ -1,0 +1,36 @@
+#main-container {
+  padding: 20px 20px;
+  width: 900px;
+  margin: auto;
+  /* height: 100%; */
+  text-align: center;
+}
+
+#user_workouts {
+    border-collapse: collapse;
+    width: 100%;
+		text-align: center;
+		margin-top: 10px;
+}
+
+#user_workouts th {
+    padding: 8px;
+		background-color: black;
+		padding-top: 12px;
+		padding-bottom: 12px;
+		text-align: center;
+		color: white;
+    border: none;
+}
+
+#user_workouts td {
+	padding: 8px;
+}
+
+#user_workouts tr:hover {
+	background-color: #ddd;
+}
+
+#name_header {
+  margin-bottom: 30px;
+}
