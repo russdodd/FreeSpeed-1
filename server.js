@@ -91,7 +91,7 @@ passport.use(
 					console.log(error)
 				}else{
 					console.log("result.rows.length " + result.rows.length)
-					if(result.rows.length === 0){
+					if(result.rows.length == 0){
 						//user is not found, must be added to the database
 						console.log("user not in database");
 						var insertQuery = 'INSERT INTO googlePassportUsers (id, permission, firstname, lastname, email, organization, year) VALUES($1, $2, $3, $4, $5, $6, $7)';
@@ -108,7 +108,8 @@ passport.use(
     								firstName: firstname,
     								lastName: lastname,
     								email: email,
-   									organization: domain
+   									organization: domain,
+                    year: 3000
    								}
 								done(null, user);
 							}
@@ -131,16 +132,18 @@ app.get('/auth/google', passport.authenticate('google', {
 }));
 
 app.get('/auth/google/redirect', passport.authenticate('google'), function(request, response){
-	//hangle with passport
-	//console.log(request.user)
-
+	console.log('- Request received:', request.method.cyan, request.url.underline);
 	if(request.user.permission == 3){
 		//redirrect to the page where they choose if they're a rower or a coach
 		//this is the first time they've logged in
 		response.redirect('/selectRowingStatus')
 	} else{
-		response.send("demo profile");
+		response.redirect("/profile");
 	}
+});
+app.get('/', function(request, response){
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  response.redirect('/login');
 });
 
 app.engine('html', engines.hogan);
@@ -150,10 +153,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
-app.get('/', function(request, response){
-  console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.redirect('/login');
-});
+
 
 app.get('/login', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
@@ -170,10 +170,21 @@ app.get('/main/coach/:coachUsername', function(request, response){
 	response.render('home.html', {username: request.params.coachUsername});
 })
 
-app.get('/main/rower/:rowerUsername', function(request, response){
+app.get('/profile', authCheck, function(request, response){
 	 console.log('- Request received:', request.method.cyan, request.url.underline);
-	response.render('home.html', {username: request.params.rowerUsername});
+   var userID = request.user;
+   console.log("user ID" + userID)
+   conn.query("SELECT * FROM googlePassportUsers WHERE id=$1", [userID], function(error, result){
+ 		if(error){
+ 			console.log("error setting permission")
+ 			console.log(error)
+ 		}else{
+      //response.send("profile message" + result.rows[0].firstName);
+      response.render('home.html', {username: result.rows[0].firstName});
+ 		}
+ 	})
 })
+
 app.get('/personal-data-page', function(request, response) {
   // 1. Authenticate user is allowed to make this post
   // 2. fetch most recent workout of the user and give them all data
@@ -198,7 +209,9 @@ app.get('/selectRowingStatus', authCheck, function(request, response){
 })
 
 app.post('/updatePermission', authCheck, function(request, response){
+  console.log('- Request received:', request.method.cyan, request.url.underline);
 	var permission = request.body.permission;
+  console.log("in update permission: permission = " + request.body.permission)
 	var year = request.body.year;
 	console.log(year)
 	userID = request.user;
@@ -207,13 +220,9 @@ app.post('/updatePermission', authCheck, function(request, response){
 			console.log("error setting permission")
 			console.log(error)
 		}else{
-			response.send("demo profile")
+			response.redirect('/profile');
 		}
 	})
-})
-
-app.get('/dashboard', authCheck, function(request, response){
-
 })
 
 app.get('/auth/logout', function(request, response){
@@ -223,7 +232,7 @@ app.get('/auth/logout', function(request, response){
 });
 
 app.post('/upload-data-information', function(request, response) {
-  var sql = "SELECT email, firstName, lastName FROM googlePassportUsers";
+  var sql = "SELECT username, firstName, lastName FROM googlePassportUsers";
   var json = {};
   conn.query(sql, function(err, res) {
     if (err === null) {
@@ -553,7 +562,7 @@ app.post('/get-workout-data', function(request, response) {
 
 app.post('/get-user-data', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  var sql = 'SELECT email, firstName, lastName, year FROM googlePassportUsers';
+  var sql = 'SELECT email, firstName, lastName, email, year FROM googlePassportUsers';
 
   conn.query(sql, function(err, result) {
     if (err === null) {
@@ -691,9 +700,14 @@ app.post('/send-email', function (req, res) {
   });
 });
 
-io.on('connection', function(socket){
-
-})
+// conn.query('DELETE FROM googlePassportUsers WHERE firstName=$1', ['Alexander'], function(error, result){
+//   if(error){
+//     console.log("error removing Alexander")
+//     console.log(error)
+//   }else{
+//     console.log("alexander succesfully removed")
+//   }
+// })
 
 server.listen(8080);
 console.log('listening on 8080');
