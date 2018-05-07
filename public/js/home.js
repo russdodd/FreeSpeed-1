@@ -6,6 +6,7 @@ var toggle_types = ["Power", "Speed", "Slip", "Wash", "Stroke/Min", "Catch Angle
   "Finish Angle", "Max Force Angle", "Max Force", "Avg Force", "Work", "Distance/Stroke", "Heart Rate"];
 var toggle_vals = ["power","speedGPS","slip","wash","strokeRate","catch","finish","maxForceAngle","forceMax","forceAvg","work","distancePerStrokeGPS","heartRateBPM"];
 var toggle_workouts = [];
+var toggle_workout_vals = [];
 var results = {
     total: 0,
     bad: 0
@@ -19,6 +20,7 @@ $(document).ready(function () {
   document.getElementById('dropdown_button').value = toggle_vals[current_stat];
 
   $.post("/get-workouts", function(res) {
+    console.log(res);
     var sel = $("#workouts");
     for(var i = 0; i < res.length; i++) {
       var opt = document.createElement('li');
@@ -28,6 +30,7 @@ $(document).ready(function () {
       opt.setAttribute("id", "workout_"+res[i].id);
       opt.innerHTML = decodeURI(res[i].date) + ' ' +  decodeURI(res[i].type);
       toggle_workouts.push(decodeURI(res[i].date) + ' ' +  decodeURI(res[i].type));
+      toggle_workout_vals.push(res[i].id);
       sel[0].appendChild(opt);
     }
   $("#workouts").val($("ul#workouts li:first").val());
@@ -89,9 +92,9 @@ function toggleType(id) {
 
 function toggleWorkout(id) {
   is__workout_highlighted = id;
-  current_workout = parseInt(id);
+  current_workout = parseInt(id) - 1;
   document.getElementById('workout_button').innerHTML = toggle_workouts[current_workout] + "<span class=\"caret\"></span>";
-  // document.getElementById('workout_button').value = toggle_vals[current_stat];
+  document.getElementById('workout_button').value = toggle_workout_vals[current_workout];
 
   for (var i = 1; i < toggle_workouts.length; i++) {
     if (i == is__workout_highlighted) {
@@ -102,7 +105,8 @@ function toggleWorkout(id) {
       document.getElementById("workout_"+i).disabled = false;
     }
   }
-  updateGraph(); //function from the graph.js file
+  getData();
+  //updateGraph(); //function from the graph.js file
   return document.getElementById("workout_"+is__workout_highlighted).innerHTML;
 }
 
