@@ -328,23 +328,20 @@ textarea {
   border-left: 1px solid #ccc;
 }
 
-table {
-    font-family: arial, sans-serif;
-    border-collapse: collapse;
-}
-
-td, th {
+#averages_table td, th {
     border: 1px solid #dddddd;
     text-align: left;
     padding: 8px;
 }
 
-tr:nth-child(odd) {
+#averages_table tr:nth-child(odd) {
     background-color: #dddddd;
 }
 
 #averages_table {
   margin: 0 auto;
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
 }
 
 .title_cell {

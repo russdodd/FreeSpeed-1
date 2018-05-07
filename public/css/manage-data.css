@@ -59,6 +59,11 @@ a {
 	text-decoration: none;
 }
 
+#manage-data-container {
+	padding: 20px;
+	background-color: #f2f2f2;
+}
+
 #manage-data-header {
   font-size: 50px;
   width: 100%;
@@ -98,10 +103,8 @@ a {
   background: transparent;
   outline: none !important;
   cursor: pointer;
-  transition: all 0.3s ease;
   position: relative;
   display: inline-block;
-	background: #fff;
   border: 2px solid #000;
   transition: all 0.3s ease;
 }
