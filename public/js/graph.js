@@ -168,10 +168,12 @@ function cleanData(){
 
 function updateGraph(){
   if ($(".rower_selected").length > 0) {
+    console.log("HERERHERE");
     ind2 = $("#dropdown_button").val();
     username = $(".rower_selected")[0].id;
     $("svg :first-child").empty();
     d3Init();
+  } else {
   }
 }
 
@@ -205,9 +207,10 @@ function populateUsersList(){
           li.innerHTML = decodeURI(global_data[username][0].firstName) + ' ' +  decodeURI(global_data[username][0].lastName);
           ul.append(li);
           }
-          if ($("rowers_list").length > 0) {
+          if ($("#rowers_list").length > 0) {
+          // $("#rowers_list").first().attr('class', 'rower_selected');
+          // $("#rowers_list").first().click();
 
-          $(".rower")[0].classList.add("rower_selected");
         }
 }
 
@@ -246,9 +249,8 @@ function updateAverages(){
 
 function getData(){
     console.log("workout selected");
-    var sel = $("#workouts");
-    $.post("/get-workout-data", {workoutID: sel.val()}, function(res){
-      console.log(res);
+    var chosen_workout = $('#workout_button');
+    $.post("/get-workout-data", {workoutID: chosen_workout.val()}, function(res){
       global_raw_data = res;
       global_data = res;
       cleanData();
