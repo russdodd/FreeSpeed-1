@@ -1,0 +1,31 @@
+#main-container {
+  padding: 20px 20px;
+}
+
+#user_workouts {
+  padding: 10px 10px;
+  width: 500px;
+}
+
+#user_workouts th {
+  padding: 10px 5px;
+}
+
+
+#user_workouts td {
+  padding: 5px 5px;
+  border: 1px solid #ccc;
+}
+
+#workouts_id {
+  border: 1px solid #ccc;
+}
+
+#delete_row {
+  border: none;
+  background-color: transparent;
+}
+
+#user_workouts tr:nth-child(odd) {
+    background-color: #dddddd;
+}
