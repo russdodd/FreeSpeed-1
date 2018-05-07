@@ -619,7 +619,13 @@ app.post('/add-boat', function(req, response) {
   });
 });
 
+
 app.get('/manage-data/:username', function(req, response) {
+  console.log('- Request received:', req.method.cyan, req.url.underline);
+  response.sendFile('/public/manage-data-user.html', {root: __dirname });
+});
+
+app.post('/manage-data/:username', function(req, response) {
   console.log('- Request received:', req.method.cyan, req.url.underline);
   var username = req.params.username;
 
@@ -639,7 +645,7 @@ app.get('/manage-data/:username', function(req, response) {
         ' ON googlePassportUsers.email = workoutUserBoat.username JOIN workouts ON' +
         ' workouts.id = workoutUserBoat.workoutID WHERE googlePassportUsers.email = ?';
         conn.query(sql, [username], function(err, result) {
-          console.log(result);
+          response.json(result.rows);
         });
       }
     }
