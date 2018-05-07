@@ -544,14 +544,15 @@ app.post('/get-workouts', function(request, response) {
 
 app.post('/get-workout-data', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  var sql = 'SELECT googlePassportUsers.email, googlePassportUsers.firstName, boats.name, data.* ' +
+  var sql = 'SELECT googlePassportUsers.email, googlePassportUsers.firstName, googlePassportUsers.lastName, boats.name, data.* ' +
   'FROM workoutUserBoat JOIN googlePassportUsers ON googlePassportUsers.email = ' +
   'workoutUserBoat.username JOIN boats ON boats.id = ' +
   'workoutUserBoat.boatID JOIN data ON data.workoutUserBoatID = workoutUserBoat.id ' +
   'WHERE workoutID = ?';
 
-  conn.query(sql, [response.workoutID], function(err, result) {
+  conn.query(sql, [request.body.workoutID], function(err, result) {
     if (err === null) {
+      console.log("result is " + result.rows);
       response.json(result.rows);
     } else {
       console.log(err);
