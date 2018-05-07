@@ -57,16 +57,16 @@ function makeUserTable(response) {
   for (var i = 0; i < response.length; i++) {
     var newRow = document.createElement("tr");
     var firstElem = document.createElement("td");
-    firstElem.setAttribute("value", response[i].username);
-    firstElem.innerHTML = '<a href=#>' + response[i].firstName + " " + response[i].lastName + '</a>';
+    firstElem.setAttribute("value", response[i].email);
+    firstElem.innerHTML = '<a href="/manage-data/' + response[i].email + '">' + response[i].firstName + " " + response[i].lastName + '</a>';
     newRow.appendChild(firstElem);
     newRow.appendChild(document.createElement("td")).appendChild(document.createTextNode(response[i].year));
     newRow.appendChild(document.createElement("td")).appendChild(document.createTextNode(response[i].email));
     var editRow = document.createElement("td");
-    editRow.innerHTML = '<button onclick="openEditModal(this)"><img src="images/plus.png" height="25" width="25"></button>';
+    editRow.innerHTML = '<button onclick="openEditModal(this)"><img src="/images/plus.png" height="25" width="25"></button>';
     newRow.appendChild(editRow);
     var deleteRow = document.createElement("td");
-    deleteRow.innerHTML = '<button onclick="deleteUser(this)"><img src="images/delete.png" height="25" width="25"></button>';
+    deleteRow.innerHTML = '<button onclick="deleteUser(this)"><img src="/images/delete.png" height="25" width="25"></button>';
     newRow.appendChild(deleteRow);
     users.appendChild(newRow);
   }
@@ -100,10 +100,10 @@ function makeBoatsTable(response) {
     newRow.appendChild(firstElem).appendChild(document.createTextNode(response[i].name));
     newRow.appendChild(document.createElement("td")).appendChild(document.createTextNode(response[i].size));
     var editRow = document.createElement("td");
-    editRow.innerHTML = '<button onclick="editBoat()"><img src="images/edit.png" height="25" width="25"></button>';
+    editRow.innerHTML = '<button onclick="editBoat()"><img src="/images/edit.png" height="25" width="25"></button>';
     newRow.appendChild(editRow);
     var deleteRow = document.createElement("td");
-    deleteRow.innerHTML = '<button onclick="deleteBoat(this)"><img src="images/delete.png" height="25" width="25"></button>';
+    deleteRow.innerHTML = '<button onclick="deleteBoat(this)"><img src="/images/delete.png" height="25" width="25"></button>';
     newRow.appendChild(deleteRow);
     boats.appendChild(newRow);
   }
