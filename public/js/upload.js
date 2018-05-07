@@ -14,7 +14,7 @@ function browserSupportFileUpload() {
   return isCompatible;
 }
 function uploadData(json_data) {
-  $.post('/data-upload', json_data, function(res, err) {
+  $.post('/data-upload', {data:JSON.stringify(jsonData)}, function(res, err) {
     if (err != null){
       console.log(err);
     } else {
@@ -28,12 +28,17 @@ function deleteWorkout(){
 
 }
 
+function deleteData(){
+  return;
+}
+
 /*function createWorkout(){
   var workoutId = $("#workouts").val();
   var data = {date: , type: }
 }*/
 
 function uploadCSV(file){
+  var reader = new FileReader();
   reader.readAsText(file);
   reader.onload = function(event) {
     console.log("success");
@@ -64,20 +69,22 @@ function uploadData(){
     var fileUploads = $("#txtFileUpload");
     for (var fileUploadsIdx = 0; fileUploadsIdx < fileUploads.length; fileUploadsIdx++){
       var files = fileUploads[fileUploadsIdx].files;
-      var reader = new FileReader();
       var fileData = [];
       for (var fileIdx = 0; fileIdx < files.length; fileIdx++){
         fileData.push(uploadCSV(files[fileIdx]));
       }
-    });
+      var userJson = {"per_stroke_data": fileData};
+      userJson.username = $(".username")[fileUploadsIdx].value;
+      userJson.boat = $("#boat")[fileUploadsIdx].value;
+      jsonData.users.push(userJson);
+      console.log(jsonData);      
+    }
+    uploadData(jsonData);
   }
 }
 
-function deleteData(){
 
-}
-
-function upload(){
+/*function upload(){
   var workoutId = $("#workouts").val();
 
       if ($("#newWorkout")[0].checked){
@@ -100,10 +107,9 @@ function upload(){
       console.log(jsonData);
       var json_str = {data:JSON.stringify(jsonData)}
   uploadData(json_str);
-      
-}
+}*/
 
-function uploadCSV() {
+/*function uploadCSV() {
   if (!browserSupportFileUpload()) {
     alert('The File APIs are not fully supported in this browser!');
   } else {
@@ -118,11 +124,11 @@ function uploadCSV() {
       alert('Unable to read ' + file.fileName);
     };
   }
-}
+}*/
 
 $(document).ready(function() {
     // The event listener for the file upload
-    $('#submitUpload').on('click', upload);
+    $('#submitUpload').on('click', uploadData);
     $.post("/upload-data-information", function(res) {
       console.log(res);
       var sel = $("#username");

@@ -211,15 +211,18 @@ app.post('/data-upload', function(request, response) {
   var code = Number(data.code);
   if (code === 0) {
     // Create New Workout
-    var id = createNewWorkout(data);
+    data.workoutID = createNewWorkout(data);
     for (var i = 0; i < data.users.length; i++) {
         var username = data.users[i].username;
-        createNewWorkoutUserBoat(i, username, data);
+        data.workoutUserBoatID = createNewWorkoutUserBoat(i, username, data);
+        insertData(i, data);
       }
+
   } else if (code === 1) {
     // Create New Boat for existing workout
     for (var i = 0; i < data.users.length; i++){
-      createNewWorkoutUserBoat(i, data.users[i].username, data);
+      data.workoutUserBoatID = createNewWorkoutUserBoat(i, data.users[i].username, data);
+      insertData(i, data);
     }
     
   } else if (code === 2) {
@@ -287,11 +290,11 @@ function createNewWorkoutUserBoat(currUserInd, username, data) {
   conn.query(sql, [data.workoutID, username, data.boatID], function (err, row) {
     if (err === null) {
       console.log(String(username) + " has new workout data!");
-      data.workoutUserBoatID = row.lastInsertId;
-      insertData(currUserInd, data);
+      return row.lastInsertId;
     } else {
       /*TODO: Handle Error*/
       console.log(err);
+      return;
     }
   });
 }
@@ -360,7 +363,7 @@ function lastInsert(err, res){
 function insertData(currUserInd, data) {
   var sql = "INSERT INTO data (workoutUserBoatID, interval, distanceGPS, distanceIMP, elapsedTime, splitGPS, speedGPS, splitIMP, speedIMP, strokeRate, totalStrokes, distancePerStrokeGPS, distancePerStrokeIMP, heartRateBPM, power, catch, slip, finish, wash, forceAvg, work, forceMax, maxForceAngle, GPSLat, GPSLon)" +
   " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-  for (var i = 0; i < data.users[currUserInd].per_stroke_data.data.length; i++) {
+  for (var i = 0; i < data.users[currUserInd].per_stroke_data.data[0].length; i++) {
     var toInsert = [];
     toInsert.push(data.workoutUserBoatID);
     var concatArray = data.users[currUserInd].per_stroke_data.data[i];
