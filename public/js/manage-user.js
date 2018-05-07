@@ -1,9 +1,13 @@
+var username = "";
+
 $(document).ready(function() {
   $.post(window.location.pathname, function(res) {
     console.log(res);
     name = res[0].firstName + " " + res[0].lastName;
+    username = res[0].email;
     var header = document.createElement("h1");
     header.innerHTML = name;
+    $(header).attr("id", "name_header");
     var parent = $('#main-container');
     $(header).appendTo(parent);
     var workouts = document.createElement("table");
@@ -19,7 +23,7 @@ $(document).ready(function() {
     var workouts_headers = document.createElement("tr");
     workouts.appendChild(workouts_headers);
 
-    var headers = ["ID", "Date", "Type"];
+    var headers = ["ID", "Date", "Type", ""];
     for (var i = 0; i < headers.length; i++) {
       workouts_headers.appendChild(document.createElement("th")).appendChild(document.createTextNode(headers[i]));
     }
@@ -35,7 +39,7 @@ $(document).ready(function() {
       newRow.appendChild(document.createElement("td")).appendChild(document.createTextNode(res[i].type));
       var deleteRow = document.createElement("td");
       deleteRow.setAttribute("id", "delete_row");
-      deleteRow.innerHTML = '<button onclick="deleteUser(this)"><img src="/images/delete.png" height="25" width="25"></button>';
+      deleteRow.innerHTML = '<button onclick="deleteWorkout(this)"><img src="/images/delete.png" height="25" width="25"></button>';
       newRow.appendChild(deleteRow);
       workouts.appendChild(newRow);
     }
@@ -43,3 +47,8 @@ $(document).ready(function() {
     $(workouts).appendTo(parent);
   });
 });
+
+function deleteWorkout(elem) {
+  console.log(username);
+  console.log(elem.parentElement.parentElement.children[0].innerHTML);
+}
