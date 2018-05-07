@@ -91,7 +91,7 @@ passport.use(
 					console.log(error)
 				}else{
 					console.log("result.rows.length " + result.rows.length)
-					if(result.rows.length == 0){
+					if(result.rows.length === 0){
 						//user is not found, must be added to the database
 						console.log("user not in database");
 						var insertQuery = 'INSERT INTO googlePassportUsers (id, permission, firstname, lastname, email, organization, year) VALUES($1, $2, $3, $4, $5, $6, $7)';
@@ -614,6 +614,33 @@ app.post('/add-boat', function(req, response) {
         addBoat(req, response);
       } else {
         console.log("HERE");
+      }
+    }
+  });
+});
+
+app.get('/manage-data/:username', function(req, response) {
+  console.log('- Request received:', req.method.cyan, req.url.underline);
+  var username = req.params.username;
+
+  var sql = 'SELECT * FROM googlePassportUsers WHERE email = ?';
+
+  conn.query(sql, [username], function(err, res) {
+    console.log(res);
+    if (err != null) {
+      console.log(err);
+    } else {
+      if (res.rows.length === 0) {
+        console.log("fail");
+      }
+      else {
+        var sql = 'SELECT googlePassportUsers.email, googlePassportUsers.firstName,' +
+        ' googlePassportUsers.lastName, workouts.* FROM workoutUserBoat JOIN googlePassportUsers' +
+        ' ON googlePassportUsers.email = workoutUserBoat.username JOIN workouts ON' +
+        ' workouts.id = workoutUserBoat.workoutID WHERE googlePassportUsers.email = ?';
+        conn.query(sql, [username], function(err, result) {
+          console.log(result);
+        });
       }
     }
   });
