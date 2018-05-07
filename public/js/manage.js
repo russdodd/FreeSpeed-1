@@ -13,7 +13,6 @@ var modal = '<!-- The Modal -->'+
 '    <div class="modal-body">'+
 '    <div id="dvImportSegments" class="fileupload ">'+
 '    <fieldset>'+
-'    Create New Workout: <input id="newWorkout" type="checkbox"><br>'+
 '    Workouts:'+
 '    <select id="workouts">'+
 '     <option selected disabled>Choose Workout</option>'+
@@ -23,15 +22,16 @@ var modal = '<!-- The Modal -->'+
 '          <input type="file" name="File Upload" id="txtFileUpload" accept=".csv"/>'+
 '          <br>'+
 '          Boat:'+
-'          <select id="boat-dropdown">'+
+'          <select id="boat">'+
 '              <option selected>Choose Boat...</option>'+
 '            </select><br>'+
 '          <button id="submitUpload">submit</button>'+
+'          <input display="none" id="username">' +
+'          </input>'+
 '        </fieldset>'+
 '    </div>'+
 '  </div>'+
-'    <div class="modal-footer">'+
-'       <h3>Modal Footer</h3>'+
+'    <div id="modal-footer">'+
 '    </div>'+
 '</div>';
 
@@ -128,7 +128,6 @@ function toggleUsers() {
                    '</form>'+
                    '</div>');
       var userForm = $('#inviteUserForm').submit(sendEmail);
-      console.log(userForm);
     });
   } else {
     $('#manage-users-data-button').removeClass('manage-data-button-active').addClass('manage-data-button');
@@ -181,7 +180,6 @@ function addBoat(event) {
   var boatName = $('#boatName')[0].value;
   var capacity = $('#capacity')[0].value;
   var parent = $('#users-div');
-  console.log(boatName);
   $.post('/add-boat', {boatName: boatName, capacity: capacity},function(response) {
       $('#boats').remove();
       $('#add-boat').remove();
@@ -227,8 +225,32 @@ function deleteBoat(elem) {
   }
 }
 
+function browserSupportFileUpload() {
+  var isCompatible = false;
+  if (window.File && window.FileReader && window.FileList && window.Blob) {
+    isCompatible = true;
+  }
+  return isCompatible;
+}
+
+function uploadCSV() {
+  if (!browserSupportFileUpload()) {
+    alert('The File APIs are not fully supported in this browser!');
+  } else {
+    //var data = null;
+    var file = $("#txtFileUpload")[0].files[0];
+    var reader = new FileReader();
+    reader.readAsText(file);
+    reader.onload = function(event) {
+        data = event.target.result;
+    };
+    reader.onerror = function() {
+      alert('Unable to read ' + file.fileName);
+    };
+  }
+}
+
 function openEditModal(elem) {
-  console.log(modal);
   row = elem.parentElement.parentElement;
   username = row.children[0].attributes[0].value;
   $(modal).appendTo('#manage-data-container');
@@ -243,84 +265,32 @@ function openEditModal(elem) {
   }
   // The event listener for the file upload
   $('#submitUpload').on('click', upload);
-  $.post("/upload-data-information", function(res) {
-    console.log(res);
-    // var sel = $("#workouts");
-    // for(var i = 0; i < res.workouts.length; i++) {
-    //   var opt = document.createElement('option');
-    //   opt.value = res.workouts[i].id;
-    //   opt.innerHTML = decodeURI(res.workouts[i].date) + ' ' +  decodeURI(res.workouts[i].type);
-    //   sel[0].appendChild(opt);
-    //    }
-    // var sel = $("#boat");
-    // for(var i = 0; i < res.boats.length; i++) {
-    //   var opt = document.createElement('option');
-    //   opt.value = res.boats[i].id;
-    //   opt.innerHTML = decodeURI(res.boats[i].name) + ' ' +  "(" + res.boats[i].size + ")";
-    //   sel[0].appendChild(opt);
-    //    }
-  });
-}
-
-function sendCsv(csv, fname, lname, time) {
-  var postParameters = {csv: csv, fname: fname, lname: lname, time:time};
-  $.post("/csv", postParameters,  function(responseJSON){
-    //
-  });
-}
-
-function browserSupportFileUpload() {
-  var isCompatible = false;
-  if (window.File && window.FileReader && window.FileList && window.Blob) {
-    isCompatible = true;
-  }
-  return isCompatible;
-}
-function uploadData(json_data) {
-  $.post('/data-upload', json_data, function(res, err) {
-    if (err != null){
-      console.log(err);
-    } else {
-      console.log("success");
+ $.post("/upload-data-information", function(res) {
+    var sel = $("#workouts");
+    for (var i = 0; i < res.workouts.length; i++) {
+      var opt = document.createElement('option');
+      opt.value = res.workouts[i].id;
+      opt.innerHTML = decodeURI(res.workouts[i].date) + ' ' +  decodeURI(res.workouts[i].type);
+      sel[0].appendChild(opt);
     }
+
+    var opt = document.createElement('option');
+    opt.value = -1;
+    opt.innerHTML = 'New Workout...';
+    sel[0].appendChild(opt);
+
+    sel = $("#boat");
+    for (var i = 0; i < res.boats.length; i++) {
+      var opt = document.createElement('option');
+      opt.value = res.boats[i].id;
+      opt.innerHTML = decodeURI(res.boats[i].name) + ' ' +  "(" + res.boats[i].size + ")";
+      sel[0].appendChild(opt);
+    }
+    $("#username").val(username);
+    console.log("#username")
+    document.getElementById('txtFileUpload').addEventListener('change', uploadCSV, false);
   });
-};
 
-var csvData = [];
-function upload() {
-  if (!browserSupportFileUpload()) {
-    alert('The File APIs are not fully supported in this browser!');
-  } else {
-    var data = null;
-    var file = $("#txtFileUpload")[0].files[0];
-    var reader = new FileReader();
-    reader.readAsText(file);
-    reader.onload = function(event) {
-      var workoutId = $("#workouts").val();
-      if ($("#newWorkout")[0].checked){
-        workoutId = -1;
-      } else if ($("#workouts").val() == null) {
-        alert("No workout selected");
-        return;
-      }
-      var jsonData = {"code": !Number($("#newWorkout")[0].checked),
-              "workoutID": workoutId,
-              "workoutType": $("#workoutType").val(),
-              "boatID": $("#boat").val(),
-              "users":[]
-            };
-      csvData = event.target.result;
-      var userJson = {"per_stroke_data": csvData};
-      userJson.username = $("#username").val();
-      jsonData.users.push(userJson);
-      var json_str = {data:JSON.stringify(jsonData)}
-
-      uploadData(json_str);
-      };
-    reader.onerror = function() {
-      alert('Unable to read ' + file.fileName);
-    };
-  }
 }
 
 function sendEmail(event) {
@@ -340,6 +310,37 @@ function sendEmail(event) {
       document.getElementById('invite-user').append(message);
     }
   });
+}
+
+function uploadData(json_data) {
+  $.post('/data-upload', json_data, function(res) {
+    if (res.msg == null){
+      console.log(err);
+    } else {
+      console.log(res);
+      var bob = $('<h3> Data Uploaded! </h3>');
+      bob.appendTo('#modal-footer');
+    }
+  });
+};
+
+function upload(){
+  var workoutId = $("#workouts").val();
+  if ($("#workouts").val() == null) {
+    alert("No workout selected");
+    return;
+  }
+  var jsonData = {
+    "workoutID": workoutId,
+    "workoutType": $("#workoutType").val(),
+    "boatID": $("#boat").val(),
+    "users":[]
+  };
+  var userJson = {"per_stroke_data": data};
+  userJson.username = $("#username").val();
+  jsonData.users.push(userJson);
+  var json_str = {data:JSON.stringify(jsonData)}
+  uploadData(json_str);
 }
 
 // Close the dropdown if the user clicks outside of it
