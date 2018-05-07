@@ -198,11 +198,6 @@ app.get('/upload-data', function(request, response) {
   response.sendFile('public/upload-data.html', {root: __dirname });
 });
 
-app.get('/upload-data2', function(request, response) {
-  console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.sendFile('public/upload-data2.html', {root: __dirname });
-});
-
 app.get('/selectRowingStatus', authCheck, function(request, response){
 	console.log('- Request received:', request.method.cyan, request.url.underline);
 	response.sendFile('public/selectRowingStatus.html', {root: __dirname});
@@ -267,47 +262,42 @@ app.post('/data-upload', function(request, response) {
   // 1. Authenticate user is allowed to do what they did using JWT
   // 2. Authenticate that data uploaded is valid
   // 3. Upload data to database
+  console.log('- Request received:', request.method.cyan, request.url.underline);
   var data = JSON.parse(request.body.data);
   for (var i = 0; i < data.users.length; i++){
     data.users[i].per_stroke_data = parseCsv(data.users[i].per_stroke_data);
   }
 
-  var code = Number(data.code);
-  if (code === 0) {
+  var workoutID = data.workoutID;
+  if (workoutID == -1) {
     // Create New Workout + New boat
-    createNewWorkout(data);
-  } else if (code === 1) {
+    createNewWorkout(data, response);
+  } else {
     // Create New Boat for existing workout
-    createNewWorkoutUserBoat(data);
-  } else if (code === 2) {
-    //TODO: Update Existing Entry
+    for (var i = 0; i < data.users.length; i++) {
+      var username = data.users[i].username;
+      createNewWorkoutUserBoat(i, username, data);
+    }
+    response.json({msg: "success"})
   }
-  console.log('- Request received:', request.method.cyan, request.url.underline);
-});
-
-app.post('/:userName/personal-data-page', function(request, response) {
-  // 1. Authenticate user is allowed to make this post
-  // 2. Figure out which workout they want. If none is specified then you give
-  //    most recent workout data
-  // 3. fetch most recent workout of the user and give them all data
-  var username = request.params.userName;
 });
 
 /*
  * This function creates a new workout and edits the workoutId of the request's
  * JSON file. It then calls createNewBoat()
  */
-function createNewWorkout(data) {
+function createNewWorkout(data, response) {
   var sql = "INSERT INTO workouts (date, type) VALUES (?, ?)";
 
   data.users[0].per_stroke_data.startTime = changeDateFormat(data.users[0].per_stroke_data.startTime);
   conn.query(sql, [data.users[0].per_stroke_data.startTime, data.workoutType], function (err, row) {
-    if (err === null) {
+    if (err == null) {
       data.workoutID = row.lastInsertId;
       for (var i = 0; i < data.users.length; i++) {
         var username = data.users[i].username;
         createNewWorkoutUserBoat(i, username, data);
       }
+      response.json({msg: "success"})
     } else {
       /*TODO: Handle Error */
       console.log(err);
@@ -341,10 +331,10 @@ function changeDateFormat(date) {
  * This function expects the data to contain the corresponding workout id and adds
  * data to the workoutUserBoat table.
  */
-function createNewWorkoutUserBoat(currUserInd, username, data) {
+function createNewWorkoutUserBoat(currUserInd, username, data, response) {
   var sql = "INSERT INTO workoutUserBoat (workoutID, username, boatID) VALUES (?, ?, ?)";
   conn.query(sql, [data.workoutID, username, data.boatID], function (err, row) {
-    if (err === null) {
+    if (err == null) {
       console.log(String(username) + " has new workout data!");
       data.workoutUserBoatID = row.lastInsertId;
       insertData(currUserInd, data);

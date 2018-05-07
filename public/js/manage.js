@@ -31,9 +31,7 @@ var modal = '<!-- The Modal -->'+
 '        </fieldset>'+
 '    </div>'+
 '  </div>'+
-'    <div class="modal-footer">'+
-'       <h3> Data Uploaded! </h3>'+
-'       <h3>Modal Footer</h3>'+
+'    <div id="modal-footer">'+
 '    </div>'+
 '</div>';
 
@@ -130,7 +128,6 @@ function toggleUsers() {
                    '</form>'+
                    '</div>');
       var userForm = $('#inviteUserForm').submit(sendEmail);
-      console.log(userForm);
     });
   } else {
     $('#manage-users-data-button').removeClass('manage-data-button-active').addClass('manage-data-button');
@@ -183,7 +180,6 @@ function addBoat(event) {
   var boatName = $('#boatName')[0].value;
   var capacity = $('#capacity')[0].value;
   var parent = $('#users-div');
-  console.log(boatName);
   $.post('/add-boat', {boatName: boatName, capacity: capacity},function(response) {
       $('#boats').remove();
       $('#add-boat').remove();
@@ -317,17 +313,18 @@ function sendEmail(event) {
 }
 
 function uploadData(json_data) {
-  $.post('/data-upload', json_data, function(res, err) {
-    if (err != null){
+  $.post('/data-upload', json_data, function(res) {
+    if (res.msg == null){
       console.log(err);
     } else {
-      console.log("success");
+      console.log(res);
+      var bob = $('<h3> Data Uploaded! </h3>');
+      bob.appendTo('#modal-footer');
     }
   });
 };
 
 function upload(){
-  console.log("HERE");
   var workoutId = $("#workouts").val();
   if ($("#workouts").val() == null) {
     alert("No workout selected");
@@ -342,7 +339,6 @@ function upload(){
   var userJson = {"per_stroke_data": data};
   userJson.username = $("#username").val();
   jsonData.users.push(userJson);
-  console.log(jsonData);
   var json_str = {data:JSON.stringify(jsonData)}
   uploadData(json_str);
 }

@@ -242,7 +242,7 @@ button {
     -webkit-animation-name: animatetop;
     -webkit-animation-duration: 0.4s;
     animation-name: animatetop;
-    animation-duration: 0.4s
+    animation-duration: 0.4s;
 }
 
 /* Add Animation */
@@ -284,10 +284,11 @@ button {
 	margin: auto;
 }
 
-.modal-footer {
+#modal-footer {
     padding: 2px 16px;
     background-color: #5cb85c;
     color: white;
+		padding-bottom: 5px;
 }
 
 br {
