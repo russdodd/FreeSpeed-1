@@ -8,7 +8,8 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="/js/manage.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <meta name="username" content={{username}}>
+    <meta name="username" content="{{username}}">
+    <meta name="firstname" content="{{firstname}}">
   </head>
   <body>
     <div id="banner">
@@ -16,7 +17,7 @@
       <div id="banner_right">
         <div class="dropdown" id="profile_dropdown">
           <button class="btn btn-primary dropdown-toggle"
-            type="button" data-toggle="dropdown" id="profile_dropdown_button">{{username}}<span class="caret"></span></button>
+            type="button" data-toggle="dropdown" id="profile_dropdown_button">{{firstname}}<span class="caret"></span></button>
           <ul class="dropdown-menu">
             <a href="/auth/logout"<li id="logout_button">Log Out</li></a>
           </ul>
