@@ -167,7 +167,7 @@ app.get('/sign-up', function(request, response) {
 
 app.get('/main/coach/:coachUsername', function(request, response){
 	 console.log('- Request received:', request.method.cyan, request.url.underline);
-	response.render('home.html', {username: request.params.coachUsername});
+	response.render('home.html', {firstname: result.rows[0].firstName, username: result.rows[0].email});
 })
 
 app.get('/profile', authCheck, function(request, response){
@@ -180,7 +180,7 @@ app.get('/profile', authCheck, function(request, response){
  			console.log(error)
  		}else{
       //response.send("profile message" + result.rows[0].firstName);
-      response.render('home.html', {username: result.rows[0].firstName});
+      response.render('home.html', {firstname: result.rows[0].firstName, username: result.rows[0].email});
  		}
  	});
 })
@@ -521,7 +521,7 @@ app.get('/manage-data', function(request, response) {
      console.log("error setting permission")
      console.log(error)
    }else{
-     response.render('manage-data.html', {username: result.rows[0].firstName});
+     response.render('manage-data.html', {username: result.rows[0].email, firstname: result.rows[0].firstName});
    }
  });
 
@@ -633,7 +633,15 @@ app.post('/add-boat', function(req, response) {
 
 app.get('/manage-data/:username', function(req, response) {
   console.log('- Request received:', req.method.cyan, req.url.underline);
-  response.sendFile('/public/manage-data-user.html', {root: __dirname });
+  var userID = req.user;
+  conn.query("SELECT * FROM googlePassportUsers WHERE id=$1", [userID], function(error, result){
+   if(error){
+     console.log("error setting permission")
+     console.log(error)
+   }else{
+     response.render('manage-data-user.html', {firstname: result.rows[0].firstName, username: result.rows[0].email});
+   }
+ });
 });
 
 app.post('/manage-data/:username', function(req, response) {

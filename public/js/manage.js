@@ -203,9 +203,13 @@ function addBoat(event) {
 }
 
 function deleteUser(elem) {
-  result = window.prompt("ALERT! You are about to remove a user. Type in: YES if you want to proceed.");
   parent = elem.parentElement.parentElement;
   username = parent.children[0].attributes[0].value;
+  if (username === $('meta[name=username]').attr("content")) {
+    alert("Cannot delete yourself!");
+    return;
+  }
+  result = window.prompt("ALERT! You are about to remove a user. Type in: YES if you want to proceed.");
   if (result === "YES") {
     parent.remove();
     $.post('/remove-user', {username: username}, function(response) {
