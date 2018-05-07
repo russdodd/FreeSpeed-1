@@ -82,6 +82,7 @@ function getNumFiles(){
 }
 
 function uploadData(){
+  var workoutId = $("#workouts").val();
   if ($("#newWorkout")[0].checked){
         workoutId = -1;
       } else if ($("#workouts").val() == null) {
