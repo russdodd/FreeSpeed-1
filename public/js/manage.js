@@ -127,6 +127,7 @@ function toggleUsers() {
                    '</div>');
       var userForm = $('#inviteUserForm').submit(sendEmail);
       $('#emailAddress').attr("placeholder", "Type Email");
+      window.scrollTo(0,document.body.scrollHeight);
     });
   } else {
     $('#manage-users-data-button').removeClass('manage-data-button-active').addClass('manage-data-button');
@@ -156,6 +157,7 @@ function toggleBoats() {
       var messageForm = $('#addBoatForm').submit(addBoat);
       $('#boatName').attr("placeholder", "Boat Name");
       $('#capacity').attr("placeholder", "Capacity");
+      window.scrollTo(0,document.body.scrollHeight);
     });
   } else {
     $('#manage-boats-data-button').removeClass('manage-data-button-active').addClass('manage-data-button');
