@@ -210,7 +210,7 @@ function populateUsersList(){
           ul.append(li);
           }
           if ($("#rowers_list").length > 0) {
-           $("#rowers_list :first-child").classList.add("rower_selected");
+           $("#rowers_list :first-child")[0].classList.add("rower_selected");
           // $("#rowers_list").first().click();
 
         }
