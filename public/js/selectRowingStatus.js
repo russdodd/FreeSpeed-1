@@ -21,5 +21,7 @@ function sendResponse(){
 		year = 3000;
 	}
 
-	$.post('/updatePermission', {permission, year}, function(res){})
+	$.post('/updatePermission', {permission, year}, function(res){
+		window.location.href = "/profile";
+	})
 }
