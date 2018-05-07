@@ -1,6 +1,11 @@
 $(document).ready(function() {
   $.post(window.location.pathname, function(res) {
     console.log(res);
+    name = res[0].firstName + " " + res[0].lastName;
+    var header = document.createElement("h1");
+    header.innerHTML = name;
+    var parent = $('#main-container');
+    $(header).appendTo(parent);
     var workouts = document.createElement("table");
     workouts.setAttribute("class", "table");
     workouts.setAttribute("id", "user_workouts");
@@ -35,8 +40,6 @@ $(document).ready(function() {
       workouts.appendChild(newRow);
     }
 
-    var parent = $('#main-container');
     $(workouts).appendTo(parent);
-    console.log("YOYOYOY");
   });
 });

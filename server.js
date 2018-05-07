@@ -659,7 +659,7 @@ app.post('/manage-data/:username', function(req, response) {
         console.log("fail");
       }
       else {
-        var sql = 'SELECT googlePassportUsers.email, googlePassportUsers.firstName,' +
+        var sql = 'SELECT DISTINCT googlePassportUsers.email, googlePassportUsers.firstName,' +
         ' googlePassportUsers.lastName, workouts.* FROM workoutUserBoat JOIN googlePassportUsers' +
         ' ON googlePassportUsers.email = workoutUserBoat.username JOIN workouts ON' +
         ' workouts.id = workoutUserBoat.workoutID WHERE googlePassportUsers.email = ?';
