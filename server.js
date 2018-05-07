@@ -182,7 +182,7 @@ app.get('/profile', authCheck, function(request, response){
       //response.send("profile message" + result.rows[0].firstName);
       response.render('home.html', {username: result.rows[0].firstName});
  		}
- 	})
+ 	});
 })
 
 app.get('/personal-data-page', function(request, response) {
@@ -514,7 +514,18 @@ app.post('/add-new-user', function(request, response) {
 
 app.get('/manage-data', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.sendFile('/public/manage-data.html', {root: __dirname });
+  var userID = request.user;
+  console.log("user ID" + userID)
+  conn.query("SELECT * FROM googlePassportUsers WHERE id=$1", [userID], function(error, result){
+   if(error){
+     console.log("error setting permission")
+     console.log(error)
+   }else{
+     response.render('manage-data.html', {username: result.rows[0].firstName});
+   }
+ });
+
+
 });
 
 /// socket events
