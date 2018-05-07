@@ -323,3 +323,7 @@ br {
 	border: 2px solid black;
 	transition: all 0.3s ease;
 }
+
+#username {
+	display: none;
+}
