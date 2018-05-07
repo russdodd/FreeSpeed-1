@@ -20,14 +20,14 @@
 <body>
   <div>
     <div id="banner">
-      <img id="banner_logo" src="/images/freespeed_logo.png"></img>
-      <button id="upload_button" class="banner_button">Upload</button>
+      <img id="banner_logo" src="/images/freespeed_logo.png" href="/profile"></img>
+      <a href="/manage-data"><button id="upload_button" class="banner_button">Manage Data</button></a>
       <div id="banner_right">
         <div class="dropdown" id="profile_dropdown">
           <button class="btn btn-primary dropdown-toggle"
             type="button" data-toggle="dropdown" id="profile_dropdown_button">{{username}}<span class="caret"></span></button>
           <ul class="dropdown-menu">
-            <li class="banner_button" id="logout_button">Log Out</li>
+            <a href="/auth/logout"<li id="logout_button">Log Out</li></a>
           </ul>
         </div>
     </div>
@@ -55,53 +55,145 @@
             </li> -->
           </ul>
         </div>
-        <div id="graph_div">
-          <div id="workout_selector">
-            Workouts:
-            <select id="workouts">
-            </select>
-          <div>
-            <br/>
-            <p id="dropdown_label">Statistic:</p>
-            <div class="dropdown">
-              <button class="btn btn-primary dropdown-toggle" type="button"
-                value="get_stat()" data-toggle="dropdown" id="dropdown_button">Power
-              </button>
-              <ul class="dropdown-menu">
+        <div id="float_right_div">
 
-                <li class="type_selector_button" id='0' value="power" onclick="toggleType(0)">Power</li>
-                <li class="type_selector_button" id='1' value="speedGPS" onclick="toggleType(1)">Speed</li>
-                <li class="type_selector_button" id='2' value="slip" onclick="toggleType(2)">Slip</li>
-                <li class="type_selector_button" id='3' value="wash" onclick="toggleType(3)">Wash</li>
-                <li class="type_selector_button" id='4' value="strokeRate" onclick="toggleType(4)">Stroke/Min</li>
-                <li class="type_selector_button" id='5' value="catch" onclick="toggleType(5)">Catch Angle</li>
-                <li class="type_selector_button" id='6' value="finish" onclick="toggleType(6)">Finish Angle</li>
-                <li class="type_selector_button" id='7' value="maxForceAngle" onclick="toggleType(7)">Max Force Angle</li>
-                <li class="type_selector_button" id='8' value="forceMax" onclick="toggleType(8)">Max Force</li>
-                <li class="type_selector_button" id='9' value="forceAvg" onclick="toggleType(9)">Avg Force</li>
-                <li class="type_selector_button" id='10' value="work" onclick="toggleType(10)">Work</li>
-                <li class="type_selector_button" id='11' value="distancePerStrokeGPS" onclick="toggleType(11)">Distance/Stroke</li>
-                <li class="type_selector_button" id='12' value="heartRateBPM" onclick="toggleType(12)">Heart Rate</li>
+          <div id="stats_header">
+          <div id="choose_workout_div">
+            <div id="choose_statistic_div">
+              <br/>
+              <p id="dropdown_label">Statistic:</p>
+              <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button"
+                  value="get_stat()" data-toggle="dropdown" id="dropdown_button">Power
+                </button>
+                <ul class="dropdown-menu">
+
+                  <li class="type_selector_button" id='0' value="power" onclick="toggleType(0)">Power</li>
+                  <li class="type_selector_button" id='1' value="speedGPS" onclick="toggleType(1)">Speed</li>
+                  <li class="type_selector_button" id='2' value="slip" onclick="toggleType(2)">Slip</li>
+                  <li class="type_selector_button" id='3' value="wash" onclick="toggleType(3)">Wash</li>
+                  <li class="type_selector_button" id='4' value="strokeRate" onclick="toggleType(4)">Stroke/Min</li>
+                  <li class="type_selector_button" id='5' value="catch" onclick="toggleType(5)">Catch Angle</li>
+                  <li class="type_selector_button" id='6' value="finish" onclick="toggleType(6)">Finish Angle</li>
+                  <li class="type_selector_button" id='7' value="maxForceAngle" onclick="toggleType(7)">Max Force Angle</li>
+                  <li class="type_selector_button" id='8' value="forceMax" onclick="toggleType(8)">Max Force</li>
+                  <li class="type_selector_button" id='9' value="forceAvg" onclick="toggleType(9)">Avg Force</li>
+                  <li class="type_selector_button" id='10' value="work" onclick="toggleType(10)">Work</li>
+                  <li class="type_selector_button" id='11' value="distancePerStrokeGPS" onclick="toggleType(11)">Distance/Stroke</li>
+                  <li class="type_selector_button" id='12' value="heartRateBPM" onclick="toggleType(12)">Heart Rate</li>
+                </ul>
+              </div>
+            </div>
+            Workout Day:
+            <div id="workout_selector" class="dropdown">
+              <button class="btn btn-primary dropdown-toggle" type="button"
+                data-toggle="dropdown" id="workout_button">Big booty<span class="caret"></span>
+              </button>
+              <ul id="workouts">
               </ul>
             </div>
-          <p id="graph_title"></p>
-          <div id="d3Graph">
-          </div>
-          <div id="radioPanel">
-          <ul id="dataRadios">
-            </ul>
-          </div>
-          <!-- <img id="graph" alt="graph data" src="/images/example_graph.jpg"/> -->
+      </div>
+    </div>
+      <div id="graph_div">
+
+
+        <p id="graph_title"></p>
+        <div id="d3Graph">
         </div>
+      </div>
         <div id="averages_div">
-          <p id="averages_div_title">Team Averages</p>
-            <table id="averages_table" style="width:70%">
-</table>
+          <p id="averages_div_title">Averages</p>
+            <table id="averages_table">
+              <tr>
+                <th class="title_cell">Stat</th>
+                <th class="title_cell">Your Average</th>
+                <th class="title_cell">Team Average</th>
+                <th class="title_cell">+/-</th>
+              </tr>
+              <tr>
+                <td>Power</td>
+                <td>3000</td>
+                <td>20</td>
+                <td>Germany</td>
+              </tr>
+              <tr>
+                <td>Speed</td>
+                <td>22</td>
+                <td>88</td>
+                <td>Mexico</td>
+              </tr>
+              <tr>
+                <td>Slip</td>
+                <td>22</td>
+                <td>45</td>
+                <td>Austria</td>
+              </tr>
+              <tr>
+                <td>Wash</td>
+                <td>15 degrees</td>
+                <td>Helen Bennett</td>
+                <td>UK</td>
+              </tr>
+              <tr>
+                <td>Stroke/Min</td>
+                <td>Laughing Bacchus Winecellars</td>
+                <td>Yoshi Tannamuri</td>
+                <td>Canada</td>
+              </tr>
+              <tr>
+                <td>Catch Angle</td>
+                <td>Magazzini Alimentari Riuniti</td>
+                <td>Giovanni Rovelli</td>
+                <td>Italy</td>
+              </tr>
+              <tr>
+                <td>Finish Angle</td>
+                <td>Magazzini Alimentari Riuniti</td>
+                <td>Giovanni Rovelli</td>
+                <td>Italy</td>
+              </tr>
+              <tr>
+                <td>Max Force Angle</td>
+                <td>Magazzini Alimentari Riuniti</td>
+                <td>Giovanni Rovelli</td>
+                <td>Italy</td>
+              </tr>
+              <tr>
+                <td>Max Force</td>
+                <td>Magazzini Alimentari Riuniti</td>
+                <td>Giovanni Rovelli</td>
+                <td>Italy</td>
+              </tr>
+              <tr>
+                <td>Average Force</td>
+                <td>Magazzini Alimentari Riuniti</td>
+                <td>Giovanni Rovelli</td>
+                <td>Italy</td>
+              </tr>
+              <tr>
+                <td>Work</td>
+                <td>Magazzini Alimentari Riuniti</td>
+                <td>Giovanni Rovelli</td>
+                <td>Italy</td>
+              </tr>
+              <tr>
+                <td>Distance/Stroke</td>
+                <td>Magazzini Alimentari Riuniti</td>
+                <td>Giovanni Rovelli</td>
+                <td>Italy</td>
+              </tr>
+              <tr>
+                <td>Heart Rate</td>
+                <td>Magazzini Alimentari Riuniti</td>
+                <td>Giovanni Rovelli</td>
+                <td>Italy</td>
+              </tr>
+            </table>
           </div>
         </div>
     </div>
   </div>
+  </div>
   <script src="/js/graph.js"></script>
   <script src="/js/home.js"></script>
-  <script src="/js/test_graph.js"></script>
 </html>

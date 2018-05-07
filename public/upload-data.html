@@ -14,6 +14,9 @@
             </select>
       <div id="dvImportSegments" class="fileupload ">
         <fieldset>
+          Create New Workout: <input id="newWorkout" type="checkbox"><br>
+          <hr/>
+          Workout Type: <input id="workoutType" type="text"><br>
           Upload your CSV File
           <input type="file" name="File Upload" multiple="true" id="txtFileUpload" accept=".csv"/>
           <br><!-- 
@@ -24,16 +27,14 @@
             </div>
           </div> -->
           Username:
+
           <select id="username">
-              <option selected disabled>Choose Athlete</option>
+              <option selected>Choose Athlete...</option>
             </select><br>
           Boat:
           <select id="boat">
-              <option selected disabled>Choose Boat</option>
+              <option selected>Choose Boat...</option>
             </select><br>
-          <hr/>
-          Create New Workout: <input id="newWorkout" type="checkbox"><br>
-          Workout Type: <input id="workoutType" type="text"><br>
           <button id="submitUpload">submit</button>
         </fieldset>
       </div>

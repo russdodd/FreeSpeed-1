@@ -1,5 +1,5 @@
 var socket = io.connect();
-var socketID; 
+var socketID;
 socket.on('connect', () => {socketID = socket.id});
 
 
@@ -9,19 +9,20 @@ function sendNewUserInfo(){
 	var username = $("#username-input").val();
 	var password = $("#password-input").val();
 	var confirmPassword = $("#confirm-password-input").val();
-	var permission = 0;   
+	var permission = 0;
+	var email = $('#email-input').val();
+	var year = $('#class-year-input').val();
 	$(".login-input").css("border-color", "black");
-	$("#error-message").text(""); 
+	$("#error-message").text("");
 
 	if($('#radio-coach').is(':checked')){
-		permission = 1; 
+		permission = 1;
 	};
-
-	$.post('/add-new-user', {firstname, lastname, username, password, confirmPassword, socketID, permission}, function(res){})
+	$.post('/add-new-user', {firstname, lastname, username, password, confirmPassword, socketID, permission, email, year}, function(res){})
 }
 
 socket.on('missingFields', function(data){
-	$(".login-input").css("border-color", "red"); 
+	$(".login-input").css("border-color", "red");
 	$("#error-message").text("Please enter values for all fields");
 })
 
@@ -47,6 +48,5 @@ socket.on('usernameExists', function(data){
 })
 
 socket.on('successfulInsert', function(data){
-	location.href = '/login'; 
+	location.href = '/login';
 })
-

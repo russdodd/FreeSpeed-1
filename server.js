@@ -5,10 +5,15 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var anyDB = require('any-db');
 var bcrypt = require('bcrypt-nodejs');
-
+var passport = require('passport');
+var GoogleStrategy = require('passport-google-oauth20');
+var session = require('express-session');
+var cookieSession = require('cookie-session');
+var LocalStrategy = require('passport-local').Strategy;
+var nodemailer = require('nodemailer');
 
 var conn = anyDB.createConnection('sqlite3://freespeed.db');
-conn.query('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, permission INTEGER NOT NULL, firstName TEXT NOT NULL, lastName TEXT NOT NULL)');
+conn.query('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, permission INTEGER NOT NULL, firstName TEXT NOT NULL, lastName TEXT NOT NULL, email TEXT NOT NULL, year INTEGER NOT NULL)');
 conn.query('CREATE TABLE IF NOT EXISTS boats (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, size INTEGER NOT NULL)');
 conn.query('SELECT * FROM boats', function (err, res) {
     if (res.rowCount === 0) {
@@ -20,7 +25,7 @@ conn.query('SELECT * FROM boats', function (err, res) {
 conn.query('CREATE TABLE IF NOT EXISTS workouts (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT NOT NULL, type TEXT NOT NULL)');
 conn.query('CREATE TABLE IF NOT EXISTS workoutUserBoat (id INTEGER PRIMARY KEY AUTOINCREMENT, workoutID INTEGER NOT NULL, username TEXT NOT NULL, boatID INTEGER NOT NULL)');
 conn.query('CREATE TABLE IF NOT EXISTS data (id INTEGER PRIMARY KEY AUTOINCREMENT, workoutUserBoatID INTEGER NOT NULL, interval INTEGER, distanceGPS REAL, distanceIMP REAL, elapsedTime TEXT, splitGPS TEXT, speedGPS REAL, splitIMP REAL, speedIMP REAL, strokeRate REAL, totalStrokes INTEGER, distancePerStrokeGPS REAL,distancePerStrokeIMP REAL, heartRateBPM INTEGER, power INTEGER, catch INTEGER, slip INTEGER, finish INTEGER, wash INTEGER, forceAvg INTEGER, work INTEGER, forceMax INTEGER, maxForceAngle INTEGER, GPSLat REAL, GPSLon REAL)');
-
+conn.query('CREATE TABLE IF NOT EXISTS googlePassportUsers (id INTEGER, permission INTEGER, firstName TEXT, lastName TEXT, email TEXT, organization TEXT, year INTEGER)');
 
 var engines = require('consolidate');
 var colors = require('colors');
@@ -29,6 +34,118 @@ var app = express();
 var server = http.createServer(app);
 var io = require('socket.io').listen(server);
 
+app.use(cookieSession({
+	maxAge: 24 * 60 * 60 *1000,
+	keys: ['freespeedCookieSessionKey1320']
+}))
+
+//initialize passport and session for passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser((user, done) => {
+	console.log("in serialize user")
+	done(null, user.id);
+})
+
+passport.deserializeUser((id, done) => {
+	conn.query('SELECT * FROM googlePassportUsers WHERE id=$1', [id], function(error, result){
+		if(error){
+			console.log("error when deserializing user")
+			console.log(error)
+		}else{
+			var user = result.rows[0].id
+			done(null, user)
+		}
+	})
+})
+
+const authCheck = (request, response, next) => {
+	if(request.user){
+		//executes if user is logged in
+		next()
+	}else{
+		response.redirect('/login')
+	}
+}
+
+passport.use(
+	new GoogleStrategy({
+		callbackURL: '/auth/google/redirect',
+		clientID:'186582549927-k2u8qhib86iibneciakpptqmihqi68d7.apps.googleusercontent.com',
+		clientSecret: 'BMP666T4cOBlpbLaykZWBfYf'
+		}, (accessToken, refreshToken, profile, done) => {
+			console.log("passport callback fired")
+			console.log(profile)
+
+			var id =  profile.id
+			var firstname = profile.name.givenName
+			var lastname = profile.name.familyName
+			var email = profile.emails[0].value
+			var domainArray = email.split('@')
+			var domain = domainArray[1]
+
+			conn.query('SELECT * FROM googlePassportUsers WHERE id=$1', [id], function(error, result){
+				if(error){
+					console.log("error when finding google user from database")
+					console.log(error)
+				}else{
+					console.log("result.rows.length " + result.rows.length)
+					if(result.rows.length == 0){
+						//user is not found, must be added to the database
+						console.log("user not in database");
+						var insertQuery = 'INSERT INTO googlePassportUsers (id, permission, firstname, lastname, email, organization, year) VALUES($1, $2, $3, $4, $5, $6, $7)';
+						conn.query(insertQuery, [id, 3, firstname, lastname, email, domain, 1000], function(error, result){
+							if(error){
+								console.log("error when inserting new user")
+								console.log(error)
+							}else{
+								//console.log("successfulInsert");
+								//console.log(result.rows)
+								var user = {
+									id: id,
+    								permission: 3,
+    								firstName: firstname,
+    								lastName: lastname,
+    								email: email,
+   									organization: domain,
+                    year: 3000
+   								}
+								done(null, user);
+							}
+						})
+					}else{
+						//user is in the database
+						//console.log("user in the database")
+						//console.log(result.rows[0])
+						var user = result.rows[0]
+						done(null, user)
+					}
+				}
+			})
+
+		})
+)
+
+app.get('/auth/google', passport.authenticate('google', {
+	scope:['profile', 'email']
+}));
+
+app.get('/auth/google/redirect', passport.authenticate('google'), function(request, response){
+	console.log('- Request received:', request.method.cyan, request.url.underline);
+	if(request.user.permission == 3){
+		//redirrect to the page where they choose if they're a rower or a coach
+		//this is the first time they've logged in
+		response.redirect('/selectRowingStatus')
+	} else{
+		response.redirect("/profile");
+	}
+});
+app.get('/', function(request, response){
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  response.redirect('/login');
+});
+
 app.engine('html', engines.hogan);
 app.set('views', __dirname + '/templates');
 app.set('view engine', 'html');
@@ -36,10 +153,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
-app.get('/', function(request, response){
-  console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.redirect('/login');
-});
+
 
 app.get('/login', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
@@ -56,10 +170,21 @@ app.get('/main/coach/:coachUsername', function(request, response){
 	response.render('home.html', {username: request.params.coachUsername});
 })
 
-app.get('/main/rower/:rowerUsername', function(request, response){
+app.get('/profile', authCheck, function(request, response){
 	 console.log('- Request received:', request.method.cyan, request.url.underline);
-	response.render('home.html', {username: request.params.rowerUsername});
+   var userID = request.user;
+   console.log("user ID" + userID)
+   conn.query("SELECT * FROM googlePassportUsers WHERE id=$1", [userID], function(error, result){
+ 		if(error){
+ 			console.log("error setting permission")
+ 			console.log(error)
+ 		}else{
+      //response.send("profile message" + result.rows[0].firstName);
+      response.render('home.html', {username: result.rows[0].firstName});
+ 		}
+ 	})
 })
+
 app.get('/personal-data-page', function(request, response) {
   // 1. Authenticate user is allowed to make this post
   // 2. fetch most recent workout of the user and give them all data
@@ -73,8 +198,41 @@ app.get('/upload-data', function(request, response) {
   response.sendFile('public/upload-data.html', {root: __dirname });
 });
 
+app.get('/upload-data2', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  response.sendFile('public/upload-data2.html', {root: __dirname });
+});
+
+app.get('/selectRowingStatus', authCheck, function(request, response){
+	console.log('- Request received:', request.method.cyan, request.url.underline);
+	response.sendFile('public/selectRowingStatus.html', {root: __dirname});
+})
+
+app.post('/updatePermission', authCheck, function(request, response){
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+	var permission = request.body.permission;
+  console.log("in update permission: permission = " + request.body.permission)
+	var year = request.body.year;
+	console.log(year)
+	userID = request.user;
+	conn.query("UPDATE googlePassportUsers SET permission=$1, year=$2 WHERE id=$3", [permission, year, userID], function(error, result){
+		if(error){
+			console.log("error setting permission")
+			console.log(error)
+		}else{
+			response.redirect('/profile');
+		}
+	})
+})
+
+app.get('/auth/logout', function(request, response){
+	//hangle with passport
+	request.logout()
+	response.redirect('/');
+});
+
 app.post('/upload-data-information', function(request, response) {
-  var sql = "SELECT username, firstName, lastName FROM users";
+  var sql = "SELECT email, firstName, lastName FROM googlePassportUsers";
   var json = {};
   conn.query(sql, function(err, res) {
     if (err === null) {
@@ -224,12 +382,10 @@ app.post('/data-upload', function(request, response) {
       data.workoutUserBoatID = createNewWorkoutUserBoat(i, data.users[i].username, data);
       insertData(i, data);
     }
-    
   } else if (code === 2) {
     //TODO: Update Existing Entry
   }
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.end("success");
 });
 
 app.post('/:userName/personal-data-page', function(request, response) {
@@ -351,15 +507,6 @@ function parseCsv(data){
   return jsonData;
 }
 
-function lastInsert(err, res){
-  if (err === null) {
-        console.log("Records succesfully added");
-      } else {
-        /*TODO: Handle Error*/
-        console.log(err);
-      }
-}
-
 function insertData(currUserInd, data) {
   var sql = "INSERT INTO data (workoutUserBoatID, interval, distanceGPS, distanceIMP, elapsedTime, splitGPS, speedGPS, splitIMP, speedIMP, strokeRate, totalStrokes, distancePerStrokeGPS, distancePerStrokeIMP, heartRateBPM, power, catch, slip, finish, wash, forceAvg, work, forceMax, maxForceAngle, GPSLat, GPSLon)" +
   " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -373,25 +520,21 @@ function insertData(currUserInd, data) {
       }
     }
     toInsert = toInsert.concat(concatArray);
-    if (i == data.users[currUserInd].per_stroke_data.data.length - 1){
-      conn.query(sql, toInsert, lastInsert);
-    } else {
-      conn.query(sql, toInsert, function(err, res) {
-        if (err === null) {
-          //console.log("Records succesfully added");
-        } else {
-          /*TODO: Handle Error*/
-          console.log(err);
-        }
-      });
-    }
+    conn.query(sql, toInsert, function(err, res) {
+      if (err === null) {
+        console.log("Records succesfully added");
+      } else {
+        /*TODO: Handle Error*/
+        console.log(err);
+      }
+    });
   }
 }
 
 app.post('/validate-login-credetials', function(request, response){
 	var username = escape(request.body.username);
 	var password = escape(request.body.password);
-	conn.query('SELECT * FROM users WHERE username=$1', [username], function(error, result){
+	conn.query('SELECT * FROM googlePassportUsers WHERE email=$1', [username], function(error, result){
 		if(error){
 			console.log(error);
 		}else{
@@ -430,6 +573,10 @@ app.post('/add-new-user', function(request, response) {
 	var password = escape(request.body.password);
 	var confirmPassword = escape(request.body.confirmPassword);
 	var permission = request.body.permission;
+  var email = request.body.email;
+  var year = request.body.year;
+  console.log('YEAR');
+  console.log(year);
 	console.log(permission)
 
 	//check if any of the values are empty
@@ -445,7 +592,7 @@ app.post('/add-new-user', function(request, response) {
 		io.to(request.body.socketID).emit('passwordTooShort', {});
 	} else{
 		//check if the username already exists
-		conn.query("SELECT * FROM users WHERE username=$1", username, function(error, result){
+		conn.query("SELECT * FROM googlePassportUsers WHERE email=$1", username, function(error, result){
 			if(error){
 				console.log(error);
 			}else{
@@ -459,8 +606,8 @@ app.post('/add-new-user', function(request, response) {
 							console.log(err);
 						} else {
 							console.log(hash);
-	 						conn.query('INSERT INTO users (username, password, permission, firstname, lastname) VALUES($1, $2, $3, $4, $5)',
-	 						[username, hash, permission, firstName, lastName], function(error, result){
+	 						conn.query('INSERT INTO users (username, password, permission, firstname, lastname, email, year) VALUES($1, $2, $3, $4, $5, $6, $7)',
+	 						[username, hash, permission, firstName, lastName, email, year], function(error, result){
 								if (error) {
 									console.log(error);
 								} else {
@@ -474,6 +621,13 @@ app.post('/add-new-user', function(request, response) {
 		})
 	}
 })
+
+app.get('/manage-data', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  response.sendFile('/public/manage-data.html', {root: __dirname });
+});
+
+/// socket events
 
 app.post('/get-workouts', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
@@ -490,13 +644,13 @@ app.post('/get-workouts', function(request, response) {
 
 app.post('/get-workout-data', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  var sql = 'SELECT users.username, users.firstName, users.lastName, boats.name, data.* ' +
-  'FROM workoutUserBoat JOIN users ON users.username = ' +
+  var sql = 'SELECT googlePassportUsers.email, googlePassportUsers.firstName, boats.name, data.* ' +
+  'FROM workoutUserBoat JOIN googlePassportUsers ON googlePassportUsers.email = ' +
   'workoutUserBoat.username JOIN boats ON boats.id = ' +
   'workoutUserBoat.boatID JOIN data ON data.workoutUserBoatID = workoutUserBoat.id ' +
   'WHERE workoutID = ?';
 
-  conn.query(sql, [request.body.workoutID], function(err, result) {
+  conn.query(sql, [response.workoutID], function(err, result) {
     if (err === null) {
       response.json(result.rows);
     } else {
@@ -506,11 +660,154 @@ app.post('/get-workout-data', function(request, response) {
 
 });
 
-/// socket events
+app.post('/get-user-data', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  var sql = 'SELECT email, firstName, lastName, email, year FROM googlePassportUsers';
 
-io.on('connection', function(socket){
+  conn.query(sql, function(err, result) {
+    if (err === null) {
+      response.json(result.rows);
+    } else {
+      console.log(err);
+    }
+  });
+});
 
-})
+app.post('/get-boat-data', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  var sql = 'SELECT * FROM boats';
+
+  conn.query(sql, function(err, result) {
+    if (err === null) {
+      response.json(result.rows);
+    } else {
+      console.log(err);
+    }
+  });
+});
+
+app.post('/remove-user', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  var sql = 'DELETE FROM googlePassportUsers WHERE email = ?';
+
+  conn.query(sql, request.body.username,function(err, result) {
+    if (err === null) {
+      response.json([]);
+    } else {
+      console.log(err);
+    }
+  });
+});
+
+app.post('/remove-boat', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  var sql = 'DELETE FROM boats WHERE id = ?';
+
+  conn.query(sql, request.body.boatID, function(err, result) {
+    if (err === null) {
+      response.json([]);
+    } else {
+      console.log(err);
+    }
+  });
+});
+
+app.post('/add-boat', function(req, response) {
+  var sql = 'SELECT * FROM boats WHERE name = ?';
+
+  conn.query(sql, [req.body.boatName], function(err, res) {
+    if (err != null) {
+      console.log(err);
+    } else {
+      if (res.rows.length == 0) {
+        addBoat(req, response);
+      } else {
+        console.log("HERE");
+      }
+    }
+  });
+});
+
+app.get('/manage-data/:username', function(req, response) {
+  console.log('- Request received:', req.method.cyan, req.url.underline);
+  var username = req.params.username;
+
+  var sql = 'SELECT * FROM googlePassportUsers WHERE email = ?';
+
+  conn.query(sql, [username], function(err, res) {
+    console.log(res);
+    if (err != null) {
+      console.log(err);
+    } else {
+      if (res.rows.length === 0) {
+        console.log("fail");
+      }
+      else {
+        var sql = 'SELECT googlePassportUsers.email, googlePassportUsers.firstName,' +
+        ' googlePassportUsers.lastName, workouts.* FROM workoutUserBoat JOIN googlePassportUsers' +
+        ' ON googlePassportUsers.email = workoutUserBoat.username JOIN workouts ON' +
+        ' workouts.id = workoutUserBoat.workoutID WHERE googlePassportUsers.email = ?';
+        conn.query(sql, [username], function(err, result) {
+          console.log(result);
+        });
+      }
+    }
+  });
+});
+
+function addBoat(req, response) {
+  var sql = 'INSERT INTO boats (name, size) VALUES (?, ?)';
+
+  conn.query(sql, [req.body.boatName, req.body.capacity], function(err, result) {
+      if (err != null) {
+          console.log(err);
+      }
+      else {
+        sql = 'SELECT * FROM boats';
+        conn.query(sql, function(err, res) {
+          if (err != null) {
+            console.log(err);
+          }
+          response.json(res.rows);
+        });
+      }
+  });
+}
+
+app.post('/send-email', function (req, res) {
+  var transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+      user: 'brownfreespeed@gmail.com',
+      pass: 'Freespeed!'
+    }
+  });
+  var text = 'Here is the signup link: http://localhost:8080/sign-up';
+  var mailOptions = {
+    from: 'brownfreespeed@gmail.com',
+    to: req.body.email,
+    subject: 'Sign Up For Brown Freespeed!',
+    text: text
+  }
+  transporter.sendMail(mailOptions, function(error, info) {
+    if (error) {
+      console.log(error);
+      res.json({yo: 'error'});
+    } else {
+      console.log('Message sent:' + info.response);
+      res.json({yo: info.response});
+    }
+  });
+});
+
+// conn.query('DELETE FROM googlePassportUsers WHERE firstName=$1', ['Alexander'], function(error, result){
+//   if(error){
+//     console.log("error removing Alexander")
+//     console.log(error)
+//   }else{
+//     console.log("alexander succesfully removed")
+//   }
+// })
 
 server.listen(8080);
 console.log('listening on 8080');

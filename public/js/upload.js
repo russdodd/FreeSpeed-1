@@ -107,7 +107,9 @@ function uploadData(){
       console.log(jsonData);
       var json_str = {data:JSON.stringify(jsonData)}
   uploadData(json_str);
+
 }*/
+
 
 /*function uploadCSV() {
   if (!browserSupportFileUpload()) {
@@ -134,7 +136,7 @@ $(document).ready(function() {
       var sel = $("#username");
        for(var i = 0; i < res.users.length; i++) {
           var opt = document.createElement('option');
-          opt.value = res.users[i].username;
+          opt.value = res.users[i].email;
           opt.innerHTML = decodeURI(res.users[i].firstName) + ' ' +  decodeURI(res.users[i].lastName);
           sel[0].appendChild(opt);
           }
