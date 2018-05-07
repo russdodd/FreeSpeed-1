@@ -232,7 +232,7 @@ app.get('/auth/logout', function(request, response){
 });
 
 app.post('/upload-data-information', function(request, response) {
-  var sql = "SELECT username, firstName, lastName FROM googlePassportUsers";
+  var sql = "SELECT email, firstName, lastName FROM googlePassportUsers";
   var json = {};
   conn.query(sql, function(err, res) {
     if (err === null) {
