@@ -10,6 +10,19 @@
     <meta name="username" content={{username}}>
   </head>
   <body>
+    <div id="banner">
+      <a href="/profile"><img id="banner_logo" src="/images/freespeed_logo.png"></img></a>
+      <a href="/manage-data"><button id="upload_button" class="banner_button">Manage Data</button></a>
+      <div id="banner_right">
+        <div class="dropdown" id="profile_dropdown">
+          <button class="btn btn-primary dropdown-toggle"
+            type="button" data-toggle="dropdown" id="profile_dropdown_button">{{username}}<span class="caret"></span></button>
+          <ul class="dropdown-menu">
+            <a href="/auth/logout"<li id="logout_button">Log Out</li></a>
+          </ul>
+        </div>
+      </div>
+    </div>
     <div id="main-container">
       <h1>firstName lastName</h1>
       <table>
