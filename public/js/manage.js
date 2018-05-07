@@ -2,7 +2,7 @@ var showUsers = false;
 var showBoats = false;
 var showWorkouts = false;
 var modal = '<!-- The Modal -->'+
-'<div id="myModal" class="modal">'+
+'<div id="myModal" class="usermodal">'+
 ''+
 '  <!-- Modal content -->'+
 '  <div class="modal-content">'+
@@ -32,6 +32,7 @@ var modal = '<!-- The Modal -->'+
 '    </div>'+
 '  </div>'+
 '    <div id="modal-footer">'+
+'       <h3> Data Uploaded! </h3>' +
 '    </div>'+
 '</div>';
 
@@ -78,7 +79,7 @@ function makeBoatsTable(response) {
   var boats = document.createElement("table");
   boats.setAttribute("class", "table");
   boats.setAttribute("id", "boats");
-  var colWidths = ["25%", "25%", "25%", "25%"];
+  var colWidths = ["25%", "25%", "25%"];
   for (var i = 0; i < colWidths.length; i++) {
     var col = document.createElement("col");
     col.setAttribute("width", colWidths[i]);
@@ -88,7 +89,7 @@ function makeBoatsTable(response) {
   var boatsheaders = document.createElement("tr");
   boats.appendChild(boatsheaders);
 
-  var headers = ["Name", "Capacity", "", ""];
+  var headers = ["Name", "Capacity", ""];
   for (var i = 0; i < headers.length; i++) {
     boatsheaders.appendChild(document.createElement("th")).appendChild(document.createTextNode(headers[i]));
   }
@@ -99,9 +100,6 @@ function makeBoatsTable(response) {
     firstElem.setAttribute("value", response[i].id);
     newRow.appendChild(firstElem).appendChild(document.createTextNode(response[i].name));
     newRow.appendChild(document.createElement("td")).appendChild(document.createTextNode(response[i].size));
-    var editRow = document.createElement("td");
-    editRow.innerHTML = '<button onclick="editBoat()"><img src="/images/edit.png" height="25" width="25"></button>';
-    newRow.appendChild(editRow);
     var deleteRow = document.createElement("td");
     deleteRow.innerHTML = '<button onclick="deleteBoat(this)"><img src="/images/delete.png" height="25" width="25"></button>';
     newRow.appendChild(deleteRow);
@@ -128,6 +126,8 @@ function toggleUsers() {
                    '</form>'+
                    '</div>');
       var userForm = $('#inviteUserForm').submit(sendEmail);
+      $('#emailAddress').attr("placeholder", "Type Email");
+      window.scrollTo(0,document.body.scrollHeight);
     });
   } else {
     $('#manage-users-data-button').removeClass('manage-data-button-active').addClass('manage-data-button');
@@ -145,7 +145,8 @@ function toggleBoats() {
       var boats = makeBoatsTable(response);
       $('#manage-boats-data-button').removeClass('manage-data-button').addClass('manage-data-button-active');
       $(boats).hide().appendTo(parent).show('slow');
-      $(parent).append('<div id="add-boat">'+
+      $(parent).append('<hr id="boatLine">'+
+        '<div id="add-boat">'+
                   '  Add Boat:'+
                   '<form action="/add-boat" method="post" id="addBoatForm">'+
                   '  <input id="boatName" type="text"> </input>'+
@@ -154,10 +155,14 @@ function toggleBoats() {
                   '</form>'+
                   '</div>');
       var messageForm = $('#addBoatForm').submit(addBoat);
+      $('#boatName').attr("placeholder", "Boat Name");
+      $('#capacity').attr("placeholder", "Capacity");
+      window.scrollTo(0,document.body.scrollHeight);
     });
   } else {
     $('#manage-boats-data-button').removeClass('manage-data-button-active').addClass('manage-data-button');
     $('#boats').remove();
+    $('#boatLine').remove();
     $('#add-boat').remove();
   }
 }
@@ -197,14 +202,14 @@ function addBoat(event) {
   });
 }
 
-function editBoat() {
-
-}
-
 function deleteUser(elem) {
-  result = window.prompt("ALERT! You are about to remove a user. Type in: YES if you want to proceed.");
   parent = elem.parentElement.parentElement;
   username = parent.children[0].attributes[0].value;
+  if (username === $('meta[name=username]').attr("content")) {
+    alert("Cannot delete yourself!");
+    return;
+  }
+  result = window.prompt("ALERT! You are about to remove a user. Type in: YES if you want to proceed.");
   if (result === "YES") {
     parent.remove();
     $.post('/remove-user', {username: username}, function(response) {
@@ -254,6 +259,7 @@ function openEditModal(elem) {
   row = elem.parentElement.parentElement;
   username = row.children[0].attributes[0].value;
   $(modal).appendTo('#manage-data-container');
+  $('#modal-footer').hide();
   var span = document.getElementsByClassName("close")[0];
   span.onclick = function() {
     $('#myModal').remove();
@@ -318,13 +324,13 @@ function uploadData(json_data) {
       console.log(err);
     } else {
       console.log(res);
-      var bob = $('<h3> Data Uploaded! </h3>');
-      bob.appendTo('#modal-footer');
+      $('#modal-footer').show('slow');
     }
   });
 };
 
 function upload(){
+  $('#modal-footer').hide();
   var workoutId = $("#workouts").val();
   if ($("#workouts").val() == null) {
     alert("No workout selected");

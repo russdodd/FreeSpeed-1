@@ -15,17 +15,18 @@
   <link rel="stylesheet" href="/css/home.css">
   <title>FreeSpeed</title>
   <meta name="username" content={{username}}>
+  <meta name="firstname" content={{firstname}}>
 </head>
 
 <body>
   <div>
     <div id="banner">
-      <img id="banner_logo" src="/images/freespeed_logo.png" href="/profile"></img>
+      <a href="/profile"><img id="banner_logo" src="/images/freespeed_logo.png"></img></a>
       <a href="/manage-data"><button id="upload_button" class="banner_button">Manage Data</button></a>
       <div id="banner_right">
         <div class="dropdown" id="profile_dropdown">
           <button class="btn btn-primary dropdown-toggle"
-            type="button" data-toggle="dropdown" id="profile_dropdown_button">{{username}}<span class="caret"></span></button>
+            type="button" data-toggle="dropdown" id="profile_dropdown_button">{{firstname}}<span class="caret"></span></button>
           <ul class="dropdown-menu">
             <a href="/auth/logout"<li id="logout_button">Log Out</li></a>
           </ul>
