@@ -545,7 +545,7 @@ app.post('/get-workouts', function(request, response) {
 
 app.post('/get-workout-data', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  var sql = 'SELECT googlePassportUsers.email, googlePassportUsers.firstName, googlePassportUsers.lastName, boats.name, data.* ' +
+  var sql = 'SELECT DISTINCT googlePassportUsers.email, googlePassportUsers.firstName, googlePassportUsers.lastName, boats.name, data.* ' +
   'FROM workoutUserBoat JOIN googlePassportUsers ON googlePassportUsers.email = ' +
   'workoutUserBoat.username JOIN boats ON boats.id = ' +
   'workoutUserBoat.boatID JOIN data ON data.workoutUserBoatID = workoutUserBoat.id ' +

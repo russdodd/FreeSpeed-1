@@ -2,7 +2,7 @@ var showUsers = false;
 var showBoats = false;
 var showWorkouts = false;
 var modal = '<!-- The Modal -->'+
-'<div id="myModal" class="modal">'+
+'<div id="myModal" class="usermodal">'+
 ''+
 '  <!-- Modal content -->'+
 '  <div class="modal-content">'+
