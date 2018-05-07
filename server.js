@@ -198,11 +198,6 @@ app.get('/upload-data', function(request, response) {
   response.sendFile('public/upload-data.html', {root: __dirname });
 });
 
-app.get('/upload-data2', function(request, response) {
-  console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.sendFile('public/upload-data2.html', {root: __dirname });
-});
-
 app.get('/selectRowingStatus', authCheck, function(request, response){
 	console.log('- Request received:', request.method.cyan, request.url.underline);
 	response.sendFile('public/selectRowingStatus.html', {root: __dirname});
@@ -640,14 +635,15 @@ app.post('/get-workouts', function(request, response) {
 
 app.post('/get-workout-data', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  var sql = 'SELECT googlePassportUsers.email, googlePassportUsers.firstName, boats.name, data.* ' +
+  var sql = 'SELECT googlePassportUsers.email, googlePassportUsers.firstName, googlePassportUsers.lastName, boats.name, data.* ' +
   'FROM workoutUserBoat JOIN googlePassportUsers ON googlePassportUsers.email = ' +
   'workoutUserBoat.username JOIN boats ON boats.id = ' +
   'workoutUserBoat.boatID JOIN data ON data.workoutUserBoatID = workoutUserBoat.id ' +
   'WHERE workoutID = ?';
 
-  conn.query(sql, [response.workoutID], function(err, result) {
+  conn.query(sql, [request.body.workoutID], function(err, result) {
     if (err === null) {
+      console.log("result is " + result.rows);
       response.json(result.rows);
     } else {
       console.log(err);
@@ -724,7 +720,13 @@ app.post('/add-boat', function(req, response) {
   });
 });
 
+
 app.get('/manage-data/:username', function(req, response) {
+  console.log('- Request received:', req.method.cyan, req.url.underline);
+  response.sendFile('/public/manage-data-user.html', {root: __dirname });
+});
+
+app.post('/manage-data/:username', function(req, response) {
   console.log('- Request received:', req.method.cyan, req.url.underline);
   var username = req.params.username;
 
@@ -744,7 +746,7 @@ app.get('/manage-data/:username', function(req, response) {
         ' ON googlePassportUsers.email = workoutUserBoat.username JOIN workouts ON' +
         ' workouts.id = workoutUserBoat.workoutID WHERE googlePassportUsers.email = ?';
         conn.query(sql, [username], function(err, result) {
-          console.log(result);
+          response.json(result.rows);
         });
       }
     }
