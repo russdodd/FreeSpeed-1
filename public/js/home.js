@@ -7,6 +7,8 @@ var toggle_types = ["Power", "Speed", "Slip", "Wash", "Stroke/Min", "Catch Angle
 var toggle_vals = ["power","speedGPS","slip","wash","strokeRate","catch","finish","maxForceAngle","forceMax","forceAvg","work","distancePerStrokeGPS","heartRateBPM"];
 var toggle_workouts = [];
 var toggle_workout_vals = [];
+var toggle_workout_ids = [];
+
 var results = {
     total: 0,
     bad: 0
@@ -31,6 +33,7 @@ $(document).ready(function () {
       opt.innerHTML = decodeURI(res[i].date) + ' ' +  decodeURI(res[i].type);
       toggle_workouts.push(decodeURI(res[i].date) + ' ' +  decodeURI(res[i].type));
       toggle_workout_vals.push(res[i].id);
+
       sel[0].appendChild(opt);
     }
   $("#workouts").val($("ul#workouts li:first").val());
@@ -96,7 +99,7 @@ function toggleWorkout(id) {
   document.getElementById('workout_button').innerHTML = toggle_workouts[current_workout] + "<span class=\"caret\"></span>";
   document.getElementById('workout_button').value = toggle_workout_vals[current_workout];
 
-  for (var i = 1; i <= toggle_workouts.length; i++) {
+  for (var i = 0; i < toggle_workouts.length; i++) {
     if (i == parseInt(is__workout_highlighted)) {
       console.log("yosafkhs");
       document.getElementById("workout_"+i).className = "type_selector_button_selected";
