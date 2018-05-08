@@ -7,7 +7,7 @@ var modal = '<!-- The Modal -->'+
 '  <!-- Modal content -->'+
 '  <div class="modal-content">'+
 '    <div class="modal-header">'+
-'      <span class="close">×</span>'+
+'      <span class="closeModal">×</span>'+
 '      <h2>Upload Workout Data</h2>'+
 '    </div>'+
 '    <div class="modal-body">'+
@@ -18,7 +18,7 @@ var modal = '<!-- The Modal -->'+
 '     <option selected disabled>Choose Workout</option>'+
 '    </select><br>'+
 '          Workout Type: <input id="workoutType" type="text"><br>'+
-'          Upload your CSV File'+
+'          Upload your CSV File:'+
 '          <input type="file" name="File Upload" id="txtFileUpload" accept=".csv"/>'+
 '          <br>'+
 '          Boat:'+
@@ -352,7 +352,7 @@ function openEditModal(elem) {
   username = row.children[0].attributes[0].value;
   $(modal).appendTo('#manage-data-container');
   $('#modal-footer').hide();
-  var span = document.getElementsByClassName("close")[0];
+  var span = document.getElementsByClassName("closeModal")[0];
   span.onclick = function() {
     $('#myModal').remove();
   }
