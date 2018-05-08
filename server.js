@@ -349,15 +349,50 @@ app.post('/remove-workout', function(request, response) {
 });
 
 app.post('/remove-user-workout', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
   var workoutID = request.body.workoutID;
   var username = request.body.username;
-  console.log(workoutID);
-  console.log(username);
-  // TODO: GET workoutUserBoatID
-  // TODO: DELETE ROW FROM workoutUserBoat
-  // TODO: DELETE ROWS FROM data
-  // TODO: CHECK IF workoutUserBoat of workoutID is still there
-  // TODO: IF NOT, DELETE workout from workouts
+  var sql = "SELECT id FROM workoutUserBoat WHERE username = ? AND workoutID = ?";
+  conn.query(sql, [username, workoutID], function(err, res) {
+    if (err == null) {
+      var workoutUserBoatID = res.rows[0]['id'];
+      sql = "DELETE FROM workoutUserBoat WHERE id = ?";
+      conn.query(sql, [workoutUserBoatID], function(err, res) {
+        if (err == null) {
+          sql = "DELETE FROM data WHERE workoutUserBoatID = ?";
+          conn.query(sql, [workoutUserBoatID], function(err, res) {
+            if (err == null) {
+              sql = "SELECT * FROM workoutUserBoat WHERE workoutID = ?";
+              if (err == null) {
+                if (res.rows.length == 0) {
+                  sql = "DELETE FROM workouts WHERE id = ?";
+                  conn.query(sql, [workoutID], function(err, res) {
+                    if (err != null) {
+                      console.log(err);
+                    } else {
+                      console.log("Record succesfully Deleted");
+                      response.json([]);
+                    }
+                  });
+                } else {
+                  console.log("Record succesfully Deleted");
+                  response.json([]);
+                }
+              } else {
+                console.log(err);
+              }
+            } else {
+              console.log(err);
+            }
+          });
+        } else {
+          console.log(err);
+        }
+      });
+    } else {
+      console.log(err);
+    }
+  });
 });
 
 app.post('/data-remove', function(request, response) {
@@ -629,7 +664,6 @@ app.post('/get-boat-data', function(request, response) {
 app.post('/remove-user', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
   var sql = 'DELETE FROM googlePassportUsers WHERE email = ?';
-
   conn.query(sql, request.body.username,function(err, result) {
     if (err === null) {
       // Remove user from the email list may give issues?
@@ -646,7 +680,7 @@ app.post('/remove-boat', function(request, response) {
   var sql = 'DELETE FROM boats WHERE id = ?';
 
   conn.query(sql, request.body.boatID, function(err, result) {
-    if (err === null) {
+    if (err == null) {
       response.json([]);
     } else {
       console.log(err);
@@ -743,7 +777,7 @@ app.post('/send-email', function (req, res) {
 
   emailBank.push(req.body.email)
 
-  var text = '<p>You\'ve been invited to join Freespeed by Brown University crew! </p><br> <p> Login with <span style=\"color:blue\">' + req.body.email + "</span>" + 
+  var text = '<p>You\'ve been invited to join Freespeed by Brown University crew! </p><br> <p> Login with <span style=\"color:blue\">' + req.body.email + "</span>" +
   ' at the link <a href=\"http://localhost:8080/sign-up\">Here</a>';
   var mailOptions = {
     from: 'brownfreespeed@gmail.com',
