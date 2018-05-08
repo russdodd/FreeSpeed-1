@@ -316,6 +316,20 @@ button {
 		padding-bottom: 5px;
 }
 
+#modal-footer-boat-success {
+    padding: 2px 8px;
+    background-color: #5cb85c;
+    color: white;
+		padding-bottom: 5px;
+}
+
+#modal-footer-boat-failure {
+    padding: 2px 8px;
+    background-color: red;
+    color: white;
+		padding-bottom: 5px;
+}
+
 br {
 	display: block;
 	margin: 5px 0;
