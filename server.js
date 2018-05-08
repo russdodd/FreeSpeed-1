@@ -407,12 +407,8 @@ app.post('/data-upload', function(request, response) {
     // Create New Boat for existing workout
     for (var i = 0; i < data.users.length; i++) {
       var username = data.users[i].username;
-      var sql = "SELECT * FROM workouts JOIN workoutUserBoat ON workout.id = workoutUserBoat.workoutID " +
-      "JOIN googlePassportUsers ON googlePassportUsers.email = workoutUserBoat.username " +
-      "WHERE workout.id = ? AND workoutUserBoat.username = ?";
-      createNewWorkoutUserBoat(i, username, data);
+      createNewWorkoutUserBoat(i, username, data, response);
     }
-    response.json({msg: "success"})
   }
 });
 
@@ -429,9 +425,8 @@ function createNewWorkout(data, response) {
       data.workoutID = row.lastInsertId;
       for (var i = 0; i < data.users.length; i++) {
         var username = data.users[i].username;
-        createNewWorkoutUserBoat(i, username, data);
+        createNewWorkoutUserBoat(i, username, data, response);
       }
-      response.json({msg: "success"})
     } else {
       /*TODO: Handle Error */
       console.log(err);
@@ -466,14 +461,28 @@ function changeDateFormat(date) {
  * data to the workoutUserBoat table.
  */
 function createNewWorkoutUserBoat(currUserInd, username, data, response) {
-  var sql = "INSERT INTO workoutUserBoat (workoutID, username, boatID) VALUES (?, ?, ?)";
-  conn.query(sql, [data.workoutID, username, data.boatID], function (err, row) {
+  var sql = "SELECT * FROM workouts JOIN workoutUserBoat ON workouts.id = workoutUserBoat.workoutID " +
+  "WHERE workouts.id = ? AND workoutUserBoat.username = ?";
+  conn.query(sql, [data.workoutID, username], function(err, res) {
+    console.log(res);
     if (err == null) {
-      console.log(String(username) + " has new workout data!");
-      data.workoutUserBoatID = row.lastInsertId;
-      insertData(currUserInd, data);
+      if (res.rows.length != 0) {
+        response.json({msg: "Cannot upload data for same workout!"});
+      } else {
+        var sql = "INSERT INTO workoutUserBoat (workoutID, username, boatID) VALUES (?, ?, ?)";
+        conn.query(sql, [data.workoutID, username, data.boatID], function (err, row) {
+          if (err == null) {
+            console.log(String(username) + " has new workout data!");
+            data.workoutUserBoatID = row.lastInsertId;
+            response.json({msg: "Success"});
+            insertData(currUserInd, data);
+          } else {
+            /*TODO: Handle Error*/
+            console.log(err);
+          }
+        });
+      }
     } else {
-      /*TODO: Handle Error*/
       console.log(err);
     }
   });

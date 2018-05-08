@@ -31,8 +31,11 @@ var modal = '<!-- The Modal -->'+
 '        </fieldset>'+
 '    </div>'+
 '  </div>'+
-'    <div id="modal-footer-user">'+
+'    <div id="modal-footer-user-success">'+
 '       Data Uploaded!' +
+'    </div>'+
+'    <div id="modal-footer-user-failure">'+
+'       Cannot add data to existing workout!' +
 '    </div>'+
 '</div>';
 
@@ -352,7 +355,8 @@ function openEditModal(elem) {
   row = elem.parentElement.parentElement;
   username = row.children[0].attributes[0].value;
   $(modal).appendTo('#manage-data-container');
-  $('#modal-footer-user').hide();
+  $('#modal-footer-user-success').hide();
+  $('#modal-footer-user-failure').hide();
   var span = document.getElementsByClassName("closeModal")[0];
   span.onclick = function() {
     $('#myModal').remove();
@@ -413,17 +417,19 @@ function sendEmail(event) {
 
 function uploadData(json_data) {
   $.post('/data-upload', json_data, function(res) {
-    if (res.msg == null){
-      console.log(err);
+    console.log(res);
+    if (res.msg == "Success"){
+      $('#modal-footer-user-success').show('slow');
     } else {
       console.log(res);
-      $('#modal-footer-user').show('slow');
+      $('#modal-footer-user-failure').show('slow');
     }
   });
 };
 
 function upload(){
-  $('#modal-footer-user').hide();
+  $('#modal-footer-user-success').hide();
+  $('#modal-footer-user-failure').hide();
   var workoutId = $("#workouts").val();
   if ($("#workouts").val() == null) {
     alert("No workout selected");
