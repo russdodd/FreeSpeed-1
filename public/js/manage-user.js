@@ -49,6 +49,8 @@ $(document).ready(function() {
 });
 
 function deleteWorkout(elem) {
-  console.log(username);
-  console.log(elem.parentElement.parentElement.children[0].innerHTML);
+  var workoutID = elem.parentElement.parentElement.children[0].innerHTML;
+  $.post('/remove-user-workout', {username: username, workoutID: workoutID}, function(res) {
+    console.log(res);
+  });
 }
