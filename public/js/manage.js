@@ -435,7 +435,7 @@ function upload(){
     "boatID": $("#boat").val(),
     "users":[]
   };
-  var userJson = {"per_stroke_data": data};
+  var userJson = {"per_stroke_data": [data]};
   userJson.username = $("#username").val();
   jsonData.users.push(userJson);
   var json_str = {data:JSON.stringify(jsonData)}
