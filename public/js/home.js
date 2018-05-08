@@ -26,8 +26,8 @@ $(document).ready(function () {
       var opt = document.createElement('li');
       opt.className = "type_selector_button";
       opt.value = res[i].id;
-      opt.setAttribute("onClick", "toggleWorkout(" + opt.value + ")");
-      opt.setAttribute("id", "workout_"+res[i].id);
+      opt.setAttribute("onClick", "toggleWorkout(" + i + ")");
+      opt.setAttribute("id", "workout_"+i);
       opt.innerHTML = decodeURI(res[i].date) + ' ' +  decodeURI(res[i].type);
       toggle_workouts.push(decodeURI(res[i].date) + ' ' +  decodeURI(res[i].type));
       toggle_workout_vals.push(res[i].id);
@@ -35,8 +35,8 @@ $(document).ready(function () {
     }
   $("#workouts").val($("ul#workouts li:first").val());
   document.getElementById('workout_button').innerHTML = $("ul#workouts li:first")[0].innerHTML + "<span class=\"caret\"></span>";
-  document.getElementById('workout_button').value = $("ul#workouts li:first")[0].value;
-  document.getElementById("workout_" + is_workout_highlighted).className = "type_selector_button_selected";
+  document.getElementById('workout_button').value = toggle_workout_vals[$("ul#workouts li:first")[0].value];
+  document.getElementById("workout_0").className = "type_selector_button_selected";
   getData();
   // $("#rowers_list").first().attr('class', 'rower_selected');
   });
@@ -92,7 +92,7 @@ function toggleType(id) {
 
 function toggleWorkout(id) {
   is__workout_highlighted = id;
-  current_workout = parseInt(id) - 1;
+  current_workout = parseInt(id);
   document.getElementById('workout_button').innerHTML = toggle_workouts[current_workout] + "<span class=\"caret\"></span>";
   document.getElementById('workout_button').value = toggle_workout_vals[current_workout];
 

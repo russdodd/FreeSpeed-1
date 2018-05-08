@@ -12,7 +12,7 @@ for (var i = 0; i < toggle_vals.length; i++){
   cur_averages.push(0);
 }
 
-var margin = {top: 20, right: 100, bottom: 30, left: 50},
+var margin = {top: 50, right: 100, bottom: 30, left: 50},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
@@ -103,7 +103,8 @@ function d3Init(){
       .attr("r", 4.5);
 
   focus.append("text")
-      .attr("x", 9)
+      .attr("x", -50)
+      .attr("y", -40)
       .attr("dy", ".35em");
 
   svg.append("rect")
@@ -209,7 +210,8 @@ function populateUsersList(){
           li.innerHTML = decodeURI(global_data[username][0].firstName) + ' ' +  decodeURI(global_data[username][0].lastName);
           ul.append(li);
           }
-          if ($("#rowers_list").length > 0) {
+
+          if ($("#rowers_list :first-child")[0]) {
            $("#rowers_list :first-child")[0].classList.add("rower_selected");
           // $("#rowers_list").first().click();
 
