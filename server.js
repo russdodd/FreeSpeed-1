@@ -619,8 +619,9 @@ app.post('/remove-user', function(request, response) {
 
   conn.query(sql, request.body.username,function(err, result) {
     if (err === null) {
-      emailBank.remove(request.body.username);
-      response.json([]);
+      // Remove user from the email list may give issues?
+        emailBank.filter(x => x !== request.body.username)
+        response.json([]);
     } else {
       console.log(err);
     }
