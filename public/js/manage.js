@@ -236,6 +236,7 @@ function toggleWorkouts() {
     $('#workouts').remove();
     $('#workoutLine').remove();
     $('#add-workout').remove();
+    $('#addWorkoutForm').remove();
   }
 }
 function addWorkout(event) {
