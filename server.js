@@ -395,6 +395,8 @@ app.post('/data-upload', function(request, response) {
   // 3. Upload data to database
   console.log('- Request received:', request.method.cyan, request.url.underline);
   var data = JSON.parse(request.body.data);
+  //console.log(data);
+  //console.log(data.users[0].per_stroke_data);
   for (var i = 0; i < data.users.length; i++){
     data.users[i].per_stroke_data = parseCsv(data.users[i].per_stroke_data[0]);
   }
@@ -591,11 +593,12 @@ app.post('/get-workout-data', function(request, response) {
   'workoutUserBoat.username JOIN boats ON boats.id = ' +
   'workoutUserBoat.boatID JOIN data ON data.workoutUserBoatID = workoutUserBoat.id ' +
   'WHERE workoutID = ?';
+  console.log("workoutID",request.body.workoutID);
 
   conn.query(sql, [request.body.workoutID], function(err, result) {
     if (err === null) {
-     // console.log("result is " + result.rows);
-      response.json(result.rows);
+     console.log("result is " + result.rows);
+      response.json({data: result.rows});
     } else {
       console.log(err);
     }

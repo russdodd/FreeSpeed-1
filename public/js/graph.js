@@ -258,10 +258,10 @@ function getData(){
     console.log("workout selected");
     var chosen_workout = $('#workout_button');
     $.post("/get-workout-data", {workoutID: chosen_workout.val()}, function(res){
-      console.log(JSON.parse(res.data));
-      console.log(res);
-      global_raw_data = JSON.parse(res.data);
-      global_data = JSON.parse(res.data);
+      console.log(res.data);
+      //console.log(res);
+      global_raw_data = res.data;
+      global_data = res.data;
       cleanData();
       groupByUsername();
       $("#rowers_list").empty();
