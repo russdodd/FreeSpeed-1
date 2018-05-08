@@ -54,8 +54,11 @@ var modal2 = '<!-- The Modal -->'+
 '    <div id="dvTables" class="fileupload ">'+
 '    </div>'+
 '  </div>'+
-'    <div id="modal-footer-user2">'+
+'    <div id="modal-footer-boat-success">'+
 '       Data Uploaded!' +
+'    </div>'+
+'    <div id="modal-footer-boat-failure">'+
+'       Cannot add data to existing workout!' +
 '    </div>'+
 '</div>';
 
@@ -232,7 +235,7 @@ function makeWorkoutsModalTable(workoutID) {
   workouts.setAttribute("id", "workouts");
   $.post("/get-workout-info", {workoutID: workoutID}, function(res) {
       console.log(res);
-      var data = groupByBoat(res.data); 
+      var data = groupByBoat(res.data);
       for (var boat in data){
         var boatLabel = '<strong>' + boat + '</strong>';
         $('#dvTables').append(boatLabel);
@@ -246,7 +249,7 @@ function makeWorkoutsModalTable(workoutID) {
 
 
         $.each(data[boat], function (i, row) {
-            trHTML += '<tr value="' + row.email + '"><td>' + row.firstName + '</td><td>' + row.lastName + 
+            trHTML += '<tr value="' + row.email + '"><td>' + row.firstName + '</td><td>' + row.lastName +
             '</td><td><button onclick="deleteUsersData(' + workoutID + ',' + '&#39;' + row.email + '&#39;'+ ')"><img src="/images/delete.png" height="25" width="25"></button></td></tr>';
         });
         trHTML += '</table>'
@@ -265,11 +268,11 @@ function makeWorkoutsModalTable(workoutID) {
         '<select id="username2" class="username">' +
               '<option selected>Choose Athlete...</option>' +
             '</select>' +
-            '</td><td>' + 
+            '</td><td>' +
             '<select id="boat">' +
               '<option selected>Choose Boat...</option>' +
-            '</select>' + 
-            '</td><td>' + 
+            '</select>' +
+            '</td><td>' +
             '<input type="file" name="File Upload" multiple="true" id="txtFileUpload2" accept=".csv"/>' +
             '</td><td><button onclick="upload2(' + workoutID + ')"><img src="/images/plus.png" height="25" width="25"></button></td></tr>';
             trHTML += '</table>';
@@ -390,7 +393,8 @@ function makeWorkoutsTable(response) {
 }
 function openWorkoutsModal(workoutID) {
   $(modal2).appendTo('#manage-data-container');
-  $('#modal-footer-user').hide();
+  $('#modal-footer-boat-success').hide();
+  $('#modal-footer-boat-failure').hide();
   var span = document.getElementsByClassName("closeModal")[0];
   span.onclick = function() {
     $('#myModal2').remove();
@@ -452,11 +456,11 @@ $.post("/upload-data-information", function(res) {
         '<select id="username3" class="username">' +
               '<option selected>Choose Athlete...</option>' +
             '</select>' +
-            '</td><td>' + 
+            '</td><td>' +
             '<select id="boat2">' +
               '<option selected>Choose Boat...</option>' +
-            '</select>' + 
-            '</td><td>' + 
+            '</select>' +
+            '</td><td>' +
             '<input type="file" name="File Upload" multiple="true" id="txtFileUpload3" accept=".csv"/>' +
             '</td><td><button onclick="upload3()"><img src="/images/plus.png" height="25" width="25"></button></td></tr>';
             trHTML += '</table>';
@@ -717,11 +721,11 @@ function uploadData(json_data) {
 };
 function uploadData2(json_data) {
   $.post('/data-upload', json_data, function(res) {
-    if (res.msg == null){
-      console.log(err);
+    if (res.msg == "Success"){
+      $('#modal-footer-boat-success').show('slow');
     } else {
       console.log(res);
-      $('#modal-footer-user2').show('slow');
+      $('#modal-footer-boat-failure').show('slow');
     }
   });
 };
