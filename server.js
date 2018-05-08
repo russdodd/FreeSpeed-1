@@ -347,6 +347,18 @@ app.post('/remove-workout', function(request, response) {
 
 });
 
+app.post('/remove-user-workout', function(request, response) {
+  var workoutID = request.body.workoutID;
+  var username = request.body.username;
+  console.log(workoutID);
+  console.log(username);
+  // TODO: GET workoutUserBoatID
+  // TODO: DELETE ROW FROM workoutUserBoat
+  // TODO: DELETE ROWS FROM data
+  // TODO: CHECK IF workoutUserBoat of workoutID is still there
+  // TODO: IF NOT, DELETE workout from workouts
+});
+
 app.post('/data-remove', function(request, response) {
   // definitely need to authenticate here and make sure data belongs to user
   var workoutUserBoatID = escape(request.body.workoutUserBoatID);
