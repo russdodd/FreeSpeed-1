@@ -186,6 +186,7 @@ textarea {
 
 #rowers_title_div {
   padding: 20px 0;
+  height: 63px;
   border-bottom: 1px solid #ccc;
 }
 
@@ -205,30 +206,34 @@ textarea {
   border-bottom: 1px solid #ccc;
 }
 
-#rowers_list li:hover {
-  background-color: #ADD8E6;
+/* #rowers_list li:hover {
+  background-color: white;
   cursor: pointer;
-  color: white;
+  color: #ccc;
+} */
+
+.rower:hover {
+  background-color: white;
+  cursor: pointer;
+  color: steelblue;
 }
 
 .rower_selected {
-  background-color: #ADD8E6;
-  color: white;
-}
-
-.rower_selected:hover {
-  background-color: white;
-  color: black;
+  color: steelblue;
+  text-decoration: underline;
 }
 
 #graph_div {
   width: 100%;
-  padding: 20px 0;
+  padding: 20px 20px;
+  padding-top: 0;
 }
 
 #graph_title {
   text-align: center;
   padding: 20px 20px;
+  padding-bottom: 0;
+  font-weight: 600;
 }
 
 #graph {
@@ -347,4 +352,21 @@ textarea {
 .title_cell {
   background-color: white;
   border: 1px solid red;
+}
+
+#d3Graph {
+  margin: 0 auto;
+}
+
+#graph_x_axis {
+  text-align: center;
+  font-weight: 600;
+}
+
+#positive {
+  color: green;
+}
+
+#negative {
+  color: red;
 }
