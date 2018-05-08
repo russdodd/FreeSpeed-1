@@ -278,25 +278,21 @@ function deleteData(workoutUserBoatID) {
   conn.query(sql,[workoutUserBoatID], function(err, res) {
     if (err === null) {
       console.log("removed data");
-      return;
     } else {
       /*TODO: Handle Error*/
       console.log(err);
-      return;
     }
   });
 }
 
 function deleteWorkoutUserBoat(workoutUserBoatID){
-  var sql = "DELETE FROM workoutUserBoatID where id = $1";
+  var sql = "DELETE FROM workoutUserBoat where id = $1";
   conn.query(sql, [workoutUserBoatID], function(err, res) {
     if (err === null) {
       console.log("removed workoutUserBoatID");
-      return;
     } else {
       /*TODO: Handle Error*/
       console.log(err);
-      return;
     }
   });
 }
@@ -310,35 +306,32 @@ function deleteWorkout(workoutID, response){
     } else {
       /*TODO: Handle Error*/
       console.log(err);
-      return;
     }
   });
 }
 
-app.post('/workout-remove', function(request, response) {
+app.post('/remove-workout', function(request, response) {
   // definitely need to authenticate here and make sure data belongs to user
   var workoutID = escape(request.body.workoutID);
-  var workoutUserBoatIDs = getWorkoutUserBoatIDs(workoutID);
-  var sql = "SELECT getWorkoutUserBoatID FROM workoutUserBoat WHERE workoutID=$1";
+  var sql = "SELECT id FROM workoutUserBoat WHERE workoutID=$1";
   var json = {};
   conn.query(sql, [workoutID], function(err, res) {
     if (err === null) {
       var workoutUserBoatIDs = res.rows;
       console.log("workoutUserBoatIDs", workoutUserBoatIDs);
-      for(var i = 0; i < workoutUserBoatIDs; i++){
-        deleteData(workoutUserBoatIDs[i]);
-        deleteWorkoutUserBoat(workoutUserBoatID);
+      for(var i = 0; i < workoutUserBoatIDs.length; i++){
+        deleteData(workoutUserBoatIDs[i].id);
+        deleteWorkoutUserBoat(workoutUserBoatIDs[i].id);
       }
       deleteWorkout(workoutID, response);
     } else {
       /*TODO: Handle Error*/
       console.log(err);
-      return;
     }
   });
   
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.json({msg: "success"})
+
 });
 
 app.post('/data-remove', function(request, response) {
