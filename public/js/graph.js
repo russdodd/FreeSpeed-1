@@ -170,7 +170,6 @@ function cleanData(){
 
 function updateGraph(){
   if ($(".rower_selected").length > 0) {
-    console.log("HERERHERE");
     ind2 = $("#dropdown_button").val();
     username = $(".rower_selected")[0].id;
     $("svg :first-child").empty();
@@ -226,11 +225,15 @@ function updateCurAverages(){
     }
   }
   var trHTML = '';
-    trHTML += '<tr><th>Stat</th><th>Workout Average</th><th>Your Average</th></tr>';
+    trHTML += '<tr><th>Stat</th><th>Workout Average</th><th>Your Average</th><th>+/-</th></tr>';
 
   for(var j = 0; j < toggle_vals.length; j++){
     cur_averages[j]/= global_data[username].length;
-    trHTML += '<tr><td>' + toggle_types[j] + '</td><td>' + averages[j].toFixed(2) + '</td><td>' + cur_averages[j].toFixed(2) + '</td></tr>';
+    var difference = (Math.round((cur_averages[j].toFixed(2) - averages[j].toFixed(2)) * 100) / 100);
+    difference = calcDifference(difference);
+    trHTML += '<tr><td>' + toggle_types[j] + '</td><td>' + averages[j].toFixed(2)
+      + '</td><td>' + cur_averages[j].toFixed(2) + '</td><td id=\"' + difference.sign + '\">' +
+      difference.difference + '</td></tr>';
 
   }
   $('#averages_table').empty();
@@ -290,3 +293,11 @@ $( document ).ready(function() {
 
 
 });
+
+function calcDifference(difference) {
+  if (difference > 0) {
+    return {difference: "+" + difference, sign : "positive"};
+  } else {
+    return {difference: difference, sign: "negative"};
+  }
+}
