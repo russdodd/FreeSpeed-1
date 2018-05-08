@@ -12,7 +12,7 @@ var cookieSession = require('cookie-session');
 var LocalStrategy = require('passport-local').Strategy;
 var nodemailer = require('nodemailer');
 
-var emailBank = ['brownfreespeed@gmail.com', 'fifejames99@gmail.com']
+var emailBank = ['brownfreespeed@gmail.com', 'fifejames99@gmail.com', 'russell.dodd15@gmail.com'];
 var conn = anyDB.createConnection('sqlite3://freespeed.db');
 conn.query('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, permission INTEGER NOT NULL, firstName TEXT NOT NULL, lastName TEXT NOT NULL, email TEXT NOT NULL, year INTEGER NOT NULL)');
 conn.query('CREATE TABLE IF NOT EXISTS boats (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, size INTEGER NOT NULL)');
@@ -396,7 +396,7 @@ app.post('/data-upload', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
   var data = JSON.parse(request.body.data);
   for (var i = 0; i < data.users.length; i++){
-    data.users[i].per_stroke_data = parseCsv(data.users[i].per_stroke_data);
+    data.users[i].per_stroke_data = parseCsv(data.users[i].per_stroke_data[0]);
   }
 
   var workoutID = data.workoutID;
