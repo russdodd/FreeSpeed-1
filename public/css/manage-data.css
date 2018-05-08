@@ -288,8 +288,8 @@ button {
 	margin: auto;
 }
 
-#modal-footer {
-    padding: 2px 16px;
+#modal-footer-user {
+    padding: 2px 8px;
     background-color: #5cb85c;
     color: white;
 		padding-bottom: 5px;
