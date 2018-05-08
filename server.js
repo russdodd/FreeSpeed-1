@@ -191,8 +191,7 @@ app.get('/login', authCheck2, function(request, response) {
 
 app.get('/sign-up', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  request.logout();
-  response.redirect('/');
+  response.sendFile('public/signup.html', {root: __dirname });
 });
 
 app.get('/main/coach/:coachUsername', function(request, response){
@@ -705,7 +704,7 @@ app.post('/manage-data/:username', function(req, response) {
         console.log("fail");
       }
       else {
-        var sql = 'SELECT googlePassportUsers.email, googlePassportUsers.firstName,' +
+        var sql = 'SELECT DISTINCT googlePassportUsers.email, googlePassportUsers.firstName,' +
         ' googlePassportUsers.lastName, workouts.* FROM workoutUserBoat JOIN googlePassportUsers' +
         ' ON googlePassportUsers.email = workoutUserBoat.username JOIN workouts ON' +
         ' workouts.id = workoutUserBoat.workoutID WHERE googlePassportUsers.email = ?';
@@ -749,13 +748,12 @@ app.post('/send-email', function (req, res) {
 
   emailBank.push(req.body.email)
 
-  var text = '<p>You\'ve been invited to join Freespeed by Brown University crew! </p><br> <p> Login with <span style=\"color:blue\">' + req.body.email + "</span>" +
-  ' at the link <a href=\"http://localhost:8080/sign-up\">Here</a>';
+  var text = 'Here is the signup link: http://localhost:8080/sign-up';
   var mailOptions = {
     from: 'brownfreespeed@gmail.com',
     to: req.body.email,
     subject: 'Sign Up For Brown Freespeed!',
-    html: text
+    text: text
   }
   transporter.sendMail(mailOptions, function(error, info) {
     if (error) {
