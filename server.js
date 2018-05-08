@@ -192,11 +192,6 @@ app.get('/sign-up', function(request, response) {
   response.sendFile('public/signup.html', {root: __dirname });
 });
 
-app.get('/main/coach/:coachUsername', function(request, response){
-	 console.log('- Request received:', request.method.cyan, request.url.underline);
-	response.render('home.html', {firstname: result.rows[0].firstName, username: result.rows[0].email});
-})
-
 app.get('/errorPage', function(request, response){
 
 	conn.query('DELETE FROM googlePassportUsers WHERE id=$1', [request.user], function(error, result){
@@ -225,14 +220,6 @@ app.get('/profile', authCheck, function(request, response){
  		}
  	});
 })
-
-app.get('/personal-data-page', function(request, response) {
-  // 1. Authenticate user is allowed to make this post
-  // 2. fetch most recent workout of the user and give them all data
-  console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.sendFile('public/personal_page.html', {root: __dirname });
-});
-
 
 app.get('/upload-data', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
@@ -292,22 +279,6 @@ app.post('/upload-data-information', function(request, response) {
           console.log(err);
         }
       });
-    } else {
-      /*TODO: Handle Error*/
-      console.log(err);
-    }
-  });
-});
-
-
-app.post('/get-users', function(request, response) {
-  var sql = "SELECT username, firstName, lastName FROM users";
-  var json = {};
-  conn.query(sql, function(err, res) {
-    if (err === null) {
-      json.users = res.rows;
-      console.log(json);
-      response.json(json);
     } else {
       /*TODO: Handle Error*/
       console.log(err);
@@ -565,7 +536,7 @@ function insertData(currUserInd, data) {
 }
 
 
-app.get('/manage-data', function(request, response) {
+app.get('/manage-data', authCheck, function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
   var userID = request.user;
   console.log("user ID" + userID)
@@ -648,6 +619,7 @@ app.post('/remove-user', function(request, response) {
 
   conn.query(sql, request.body.username,function(err, result) {
     if (err === null) {
+      emailBank.remove(request.body.username);
       response.json([]);
     } else {
       console.log(err);
@@ -685,7 +657,7 @@ app.post('/add-boat', function(req, response) {
 });
 
 
-app.get('/manage-data/:username', function(req, response) {
+app.get('/manage-data/:username', authCheck, function(req, response) {
   console.log('- Request received:', req.method.cyan, req.url.underline);
   var userID = req.user;
   conn.query("SELECT * FROM googlePassportUsers WHERE id=$1", [userID], function(error, result){
