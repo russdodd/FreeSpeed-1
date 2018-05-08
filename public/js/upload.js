@@ -88,7 +88,7 @@ function uploadData(){
         alert("No workout selected");
         return;
       }
-      var jsonData = {"code": !Number($("#newWorkout")[0].checked),
+      var jsonData = {
               "workoutID": workoutId,
               "workoutType": $("#workoutType").val(),
               "boatID": $("#boat").val(),
