@@ -1,6 +1,9 @@
 var showUsers = false;
 var showBoats = false;
 var showWorkouts = false;
+var data = [];
+var data2 = [];
+var data3 = [];
 var modal = '<!-- The Modal -->'+
 '<div id="myModal" class="usermodal">'+
 ''+
@@ -33,6 +36,23 @@ var modal = '<!-- The Modal -->'+
 '  </div>'+
 '    <div id="modal-footer">'+
 '       <h3> Data Uploaded! </h3>' +
+'    </div>'+
+'</div>';
+var modal2 = '<!-- The Modal -->'+
+'<div id="myModal2" class="usermodal2">'+
+''+
+'  <!-- Modal content -->'+
+'  <div class="modal-content">'+
+'    <div class="modal-header">'+
+'      <span class="closeModal">×</span>'+
+'      <h2>Manage Workout</h2>'+
+'    </div>'+
+'    <div class="modal-body">'+
+'    <div id="dvTables" class="fileupload ">'+
+'    </div>'+
+'  </div>'+
+'    <div id="modal-footer-user2">'+
+'       Data Uploaded!' +
 '    </div>'+
 '</div>';
 
@@ -157,6 +177,19 @@ function toggleBoats() {
       var messageForm = $('#addBoatForm').submit(addBoat);
       $('#boatName').attr("placeholder", "Boat Name");
       $('#capacity').attr("placeholder", "Capacity");
+      $.post("/upload-data-information", function(res) {
+      console.log(res);
+
+      var sel = $("#boat");
+      for(var i = 0; i < res.boats.length; i++) {
+        var opt = document.createElement('option');
+        opt.value = res.boats[i].id;
+        opt.innerHTML = decodeURI(res.boats[i].name) + ' ' +  "(" + res.boats[i].size + ")";
+        sel[0].appendChild(opt);
+         }
+         document.getElementById('txtFileUpload2').addEventListener('change', uploadCSV2, false);
+    });
+
       window.scrollTo(0,document.body.scrollHeight);
     });
   } else {
@@ -167,7 +200,122 @@ function toggleBoats() {
   }
 }
 
-function makeWorkoutsTable(response) {
+function groupByBoat(data) {
+  var partitionedData = {};
+  for (var i = 0 ; i < data.length; i++){
+    if (!partitionedData[data[i].name]){
+      partitionedData[data[i].name] = [];
+    }
+    partitionedData[data[i].name].push(data[i]);
+  }
+  return partitionedData;
+}
+
+function deleteUsersData(workoutID, email){
+  console.log("stuff", workoutID, email);
+  $.post('/remove-data-workoutId', {workoutID: workoutID, email: email}, function(res) {
+    console.log(res);
+    makeWorkoutsModalTable(workoutID);
+  });
+}
+function addDataToWorkout(){
+  var email = $("#username2").val();
+}
+
+function makeWorkoutsModalTable(workoutID) {
+  $("#dvTables").empty();
+  var workouts = document.createElement("table");
+  workouts.setAttribute("class", "table");
+  workouts.setAttribute("id", "workouts");
+  $.post("/get-workout-info", {workoutID: workoutID}, function(res) {
+      console.log(res);
+      var data = groupByBoat(res.data); 
+      for (var boat in data){
+        var boatLabel = '<strong>' + boat + '</strong>';
+        $('#dvTables').append(boatLabel);
+
+        var trHTML = '';
+        trHTML += '<table class="table" style="">'
+        for (var i = 0; i < 3; i++) {
+          trHTML += '<col width="25%">'
+        }
+
+
+
+        $.each(data[boat], function (i, row) {
+            trHTML += '<tr value="' + row.email + '"><td>' + row.firstName + '</td><td>' + row.lastName + 
+            '</td><td><button onclick="deleteUsersData(' + workoutID + ',' + '&#39;' + row.email + '&#39;'+ ')"><img src="/images/delete.png" height="25" width="25"></button></td></tr>';
+        });
+        trHTML += '</table>'
+        $('#dvTables').append(trHTML)
+      }
+      $.post("/upload-data-information", function(res) {
+      console.log(res);
+
+      var trHTML = '';
+        trHTML += '<table class="table" style="">'
+        var widths = ["20%", "20%", "30%", "6%"];
+        for (var i = 0; i < 4; i++) {
+          trHTML += '<col width="'+ widths[i] +'">';
+        }
+        trHTML += '<tr><td>' +
+        '<select id="username2" class="username">' +
+              '<option selected>Choose Athlete...</option>' +
+            '</select>' +
+            '</td><td>' + 
+            '<select id="boat">' +
+              '<option selected>Choose Boat...</option>' +
+            '</select>' + 
+            '</td><td>' + 
+            '<input type="file" name="File Upload" multiple="true" id="txtFileUpload2" accept=".csv"/>' +
+            '</td><td><button onclick="upload2(' + workoutID + ')"><img src="/images/plus.png" height="25" width="25"></button></td></tr>';
+            trHTML += '</table>';
+        $('#dvTables').append(trHTML);
+      var sel = $("#username2");
+       for(var i = 0; i < res.users.length; i++) {
+          var opt = document.createElement('option');
+          opt.value = res.users[i].email;
+          opt.innerHTML = decodeURI(res.users[i].firstName) + ' ' +  decodeURI(res.users[i].lastName);
+          sel[0].appendChild(opt);
+          }
+
+      var sel = $("#boat");
+      for(var i = 0; i < res.boats.length; i++) {
+        var opt = document.createElement('option');
+        opt.value = res.boats[i].id;
+        opt.innerHTML = decodeURI(res.boats[i].name) + ' ' +  "(" + res.boats[i].size + ")";
+        sel[0].appendChild(opt);
+         }
+         document.getElementById('txtFileUpload2').addEventListener('change', uploadCSV2, false);
+    });
+      /*
+      var sel = $("#username");
+       for(var i = 0; i < res.users.length; i++) {
+          var opt = document.createElement('option');
+          opt.value = res.users[i].email;
+          opt.innerHTML = decodeURI(res.users[i].firstName) + ' ' +  decodeURI(res.users[i].lastName);
+          sel[0].appendChild(opt);
+          }
+      var sel = $("#workouts");
+      for(var i = 0; i < res.workouts.length; i++) {
+        var opt = document.createElement('option');
+        opt.value = res.workouts[i].id;
+        opt.innerHTML = decodeURI(res.workouts[i].date) + ' ' +  decodeURI(res.workouts[i].type);
+        sel[0].appendChild(opt);
+         }
+         */
+
+     /* var sel = $("#boat");
+      for(var i = 0; i < res.boats.length; i++) {
+        var opt = document.createElement('option');
+        opt.value = res.boats[i].id;
+        opt.innerHTML = decodeURI(res.boats[i].name) + ' ' +  "(" + res.boats[i].size + ")";
+        sel[0].appendChild(opt);
+         }*/
+    });
+}
+
+/*function makeWorkoutsModalTable(response) {
   var workouts = document.createElement("table");
   workouts.setAttribute("class", "table");
   workouts.setAttribute("id", "workouts");
@@ -199,6 +347,72 @@ function makeWorkoutsTable(response) {
   }
 
   return workouts;
+}*/
+
+function makeWorkoutsTable(response) {
+  var workouts = document.createElement("table");
+  workouts.setAttribute("class", "table");
+  workouts.setAttribute("id", "workouts");
+  var colWidths = ["25%", "25%", "25%"];
+  for (var i = 0; i < colWidths.length; i++) {
+    var col = document.createElement("col");
+    col.setAttribute("width", colWidths[i]);
+    workouts.appendChild(col);
+  }
+
+  var workoutsheaders = document.createElement("tr");
+  workouts.appendChild(workoutsheaders);
+
+  var headers = ["Date", "Type", ""];
+  for (var i = 0; i < headers.length; i++) {
+    workoutsheaders.appendChild(document.createElement("th")).appendChild(document.createTextNode(headers[i]));
+  }
+  console.log(response);
+  for (var i = 0; i < response.length; i++) {
+    var newRow = document.createElement("tr");
+    $(newRow).val(response[i].id);
+    var firstElem = document.createElement("td");
+    var secElem = document.createElement("td");
+    firstElem.classList.add('clickable');
+    secElem.classList.add('clickable');
+    newRow.appendChild(firstElem).appendChild(document.createTextNode(response[i].date));
+    newRow.appendChild(secElem).appendChild(document.createTextNode(response[i].type));
+    var deleteRow = document.createElement("td");
+    deleteRow.innerHTML = '<button onclick="deleteWorkout($(this))"><img src="/images/delete.png" height="25" width="25"></button>';
+    newRow.appendChild(deleteRow);
+    workouts.appendChild(newRow);
+  }
+
+  return workouts;
+}
+function openWorkoutsModal(workoutID) {
+  $(modal2).appendTo('#manage-data-container');
+  $('#modal-footer-user').hide();
+  var span = document.getElementsByClassName("closeModal")[0];
+  span.onclick = function() {
+    $('#myModal2').remove();
+  }
+  window.onclick = function(event) {
+    if (event.target === document.getElementById('myModal2')) {
+      $('#myModal2').remove();
+    }
+  }
+  makeWorkoutsModalTable(workoutID);
+}
+
+function addRowHandlers() {
+  var rows = $("#workouts > tr")
+  for (i = 0; i < rows.length; i++) {
+    var currentRow = rows[i];
+    var createClickHandler = function(row) {
+      return function() {
+        //alert("ayy");
+        openWorkoutsModal($(row).val());
+
+      };
+    };
+    currentRow.onclick = createClickHandler(currentRow);
+  }
 }
 
 function toggleWorkouts() {
@@ -219,17 +433,56 @@ function toggleWorkouts() {
       var workouts = makeWorkoutsTable(response);
       $('#manage-workouts-data-button').removeClass('manage-data-button').addClass('manage-data-button-active');
       $(workouts).hide().appendTo(parent).show('slow');
-      $(parent).append('<hr id="workoutLine">'+
-        '<div id="workout-boat">'+
-                  '  Add Workout:'+
-                  '<form action="/add-workout" method="post" id="addWorkoutForm">'+
-                  '  <input id="workoutType" type="text"> </input>'+
-                  '  <input type="submit" value="Submit">'+
-                  '</form>'+
-                  '</div>');
-      var messageForm = $('#addWorkoutForm').submit(addWorkout);
-      $('#workoutType').attr("placeholder", "Workout Type");
+
+$.post("/upload-data-information", function(res) {
+      console.log(res);
+
+      var trHTML = '';
+        trHTML += '<table id="add_workout_table" class="table" style="">'
+        var widths = ["20%", "20%", "20%", "30%", "6%"];
+        for (var i = 0; i < 4; i++) {
+          trHTML += '<col width="'+ widths[i] +'">';
+        }
+        trHTML += '<tr><td>' +
+        '<input id="workoutType2" placeholder="enter type" type="text">' +
+        '</td><td>' +
+        '<select id="username3" class="username">' +
+              '<option selected>Choose Athlete...</option>' +
+            '</select>' +
+            '</td><td>' + 
+            '<select id="boat2">' +
+              '<option selected>Choose Boat...</option>' +
+            '</select>' + 
+            '</td><td>' + 
+            '<input type="file" name="File Upload" multiple="true" id="txtFileUpload3" accept=".csv"/>' +
+            '</td><td><button onclick="upload3()"><img src="/images/plus.png" height="25" width="25"></button></td></tr>';
+            trHTML += '</table>';
+        $(parent).append(trHTML);
+      var sel = $("#username3");
+       for(var i = 0; i < res.users.length; i++) {
+          var opt = document.createElement('option');
+          opt.value = res.users[i].email;
+          opt.innerHTML = decodeURI(res.users[i].firstName) + ' ' +  decodeURI(res.users[i].lastName);
+          sel[0].appendChild(opt);
+          }
+
+      var sel = $("#boat2");
+      for(var i = 0; i < res.boats.length; i++) {
+        var opt = document.createElement('option');
+        opt.value = res.boats[i].id;
+        opt.innerHTML = decodeURI(res.boats[i].name) + ' ' +  "(" + res.boats[i].size + ")";
+        sel[0].appendChild(opt);
+         }
+         document.getElementById('txtFileUpload3').addEventListener('change', uploadCSV3, false);
+    });
+
+
       window.scrollTo(0,document.body.scrollHeight);
+      //addRowHandlers();
+      $(".clickable").click(function(){
+        openWorkoutsModal($(this).parent().val());
+      });
+
     });
   } else {
     $('#manage-workouts-data-button').removeClass('manage-data-button-active').addClass('manage-data-button');
@@ -237,6 +490,8 @@ function toggleWorkouts() {
     $('#workoutLine').remove();
     $('#add-workout').remove();
     $('#addWorkoutForm').remove();
+    $('#workoutType').remove();
+    $("#add_workout_table").remove();
   }
 }
 function addWorkout(event) {
@@ -312,9 +567,10 @@ function deleteBoat(elem) {
 }
 
 function deleteWorkout(elem) {
-  result = window.prompt("ALERT! You are about to remove a workout. Type in: YES if you want to proceed.");
-  parent = elem.parentElement.parentElement;
-  workoutID = parent.children[0].attributes[0].value;
+  console.log("elem",elem);
+  var result = window.prompt("ALERT! You are about to remove a workout. Type in: YES if you want to proceed.");
+  var parent = elem.parent().parent();
+  var workoutID = parent.val();
   if (result === "YES") {
     parent.remove();
   $.post('/remove-workout', {workoutID: workoutID}, function(response) {
@@ -341,6 +597,39 @@ function uploadCSV() {
     reader.readAsText(file);
     reader.onload = function(event) {
         data = event.target.result;
+    };
+    reader.onerror = function() {
+      alert('Unable to read ' + file.fileName);
+    };
+  }
+}
+function uploadCSV2() {
+  if (!browserSupportFileUpload()) {
+    alert('The File APIs are not fully supported in this browser!');
+  } else {
+    //var data = null;
+    var file = $("#txtFileUpload2")[0].files[0];
+    var reader = new FileReader();
+    reader.readAsText(file);
+    reader.onload = function(event) {
+        data2 = event.target.result;
+    };
+    reader.onerror = function() {
+      alert('Unable to read ' + file.fileName);
+    };
+  }
+}
+
+function uploadCSV3() {
+  if (!browserSupportFileUpload()) {
+    alert('The File APIs are not fully supported in this browser!');
+  } else {
+    //var data = null;
+    var file = $("#txtFileUpload3")[0].files[0];
+    var reader = new FileReader();
+    reader.readAsText(file);
+    reader.onload = function(event) {
+        data3 = event.target.result;
     };
     reader.onerror = function() {
       alert('Unable to read ' + file.fileName);
@@ -421,6 +710,26 @@ function uploadData(json_data) {
     }
   });
 };
+function uploadData2(json_data) {
+  $.post('/data-upload', json_data, function(res) {
+    if (res.msg == null){
+      console.log(err);
+    } else {
+      console.log(res);
+      $('#modal-footer-user2').show('slow');
+    }
+  });
+};
+
+function uploadData3(json_data) {
+  $.post('/data-upload', json_data, function(res) {
+    if (res.msg == null){
+      console.log(err);
+    } else {
+      console.log(res);
+    }
+  });
+};
 
 function upload(){
   $('#modal-footer').hide();
@@ -440,6 +749,39 @@ function upload(){
   jsonData.users.push(userJson);
   var json_str = {data:JSON.stringify(jsonData)}
   uploadData(json_str);
+}
+function upload2(workoutId){
+  $('#modal-footer-user2').hide();
+  var jsonData = {
+    "workoutID": workoutId,
+    "boatID": $("#boat").val(),
+    "users":[]
+  };
+  var userJson = {"per_stroke_data": [data2]};
+  userJson.username = $("#username2").val();
+  jsonData.users.push(userJson);
+  console.log(jsonData);
+  var json_str = {data:JSON.stringify(jsonData)}
+  uploadData2(json_str);
+  makeWorkoutsModalTable(workoutId);
+}
+
+function upload3(){
+  var jsonData = {
+    "workoutID": -1,
+    "workoutType": $("#workoutType2").val(),
+    "boatID": $("#boat2").val(),
+    "users":[]
+  };
+  var userJson = {"per_stroke_data": [data3]};
+  userJson.username = $("#username3").val();
+  jsonData.users.push(userJson);
+  console.log(jsonData);
+  var json_str = {data:JSON.stringify(jsonData)}
+  uploadData3(json_str);
+  $('#users-div').empty();
+  showWorkouts = !showWorkouts;
+  toggleWorkouts();
 }
 
 // Close the dropdown if the user clicks outside of it

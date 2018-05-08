@@ -313,6 +313,7 @@ function deleteWorkout(workoutID, response){
 app.post('/remove-workout', function(request, response) {
   // definitely need to authenticate here and make sure data belongs to user
   var workoutID = escape(request.body.workoutID);
+  console.log("workoutID", workoutID);
   var sql = "SELECT id FROM workoutUserBoat WHERE workoutID=$1";
   var json = {};
   conn.query(sql, [workoutID], function(err, res) {
@@ -343,6 +344,27 @@ app.post('/data-remove', function(request, response) {
   response.json({msg: "success"});
 });
 
+app.post('/remove-data-workoutId', function(request, response) {
+  // definitely need to authenticate here and make sure data belongs to user
+  var workoutID = escape(request.body.workoutID);
+  var email = escape(request.body.email);
+  var sql = "SELECT id FROM workoutUserBoat WHERE workoutID=$1 and username=$2";
+  var json = {};
+  conn.query(sql, [workoutID, email], function(err, res) {
+    if (err === null) {
+      var workoutUserBoatID = res.rows[0].id;
+      console.log("workoutUserBoatIDs", workoutUserBoatID);
+      deleteData(workoutUserBoatID);
+      deleteWorkoutUserBoat(workoutUserBoatID);
+    } else {
+      /*TODO: Handle Error*/
+      console.log(err);
+    }
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  response.json({msg: "success"});
+  });
+});
+
 
 app.post('/data-upload', function(request, response) {
   // 1. Authenticate user is allowed to do what they did using JWT
@@ -368,13 +390,6 @@ app.post('/data-upload', function(request, response) {
   }
 });
 
-app.post('/:userName/personal-data-page', function(request, response) {
-  // 1. Authenticate user is allowed to make this post
-  // 2. Figure out which workout they want. If none is specified then you give
-  //    most recent workout data
-  // 3. fetch most recent workout of the user and give them all data
-  var username = request.params.userName;
-});
 
 /*
  * This function creates a new workout and edits the workoutId of the request's
@@ -636,6 +651,26 @@ app.post('/get-workouts', function(request, response) {
       console.log(err);
     }
   });
+});
+
+app.post('/get-workout-info', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  var sql = 'SELECT googlePassportUsers.email, googlePassportUsers.firstName, googlePassportUsers.lastName, boats.name ' +
+  'FROM workoutUserBoat JOIN googlePassportUsers ON googlePassportUsers.email = ' +
+  'workoutUserBoat.username JOIN boats ON boats.id = ' +
+  'workoutUserBoat.boatID ' +
+  'WHERE workoutUserBoat.workoutID = $1';
+  console.log("workoutID",request.body.workoutID);
+
+  conn.query(sql, [request.body.workoutID], function(err, result) {
+    if (err === null) {
+     console.log("result is " + result.rows);
+      response.json({data: result.rows});
+    } else {
+      console.log(err);
+    }
+  });
+
 });
 
 app.post('/get-workout-data', function(request, response) {
