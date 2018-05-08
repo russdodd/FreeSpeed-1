@@ -167,6 +167,40 @@ function toggleBoats() {
   }
 }
 
+function makeWorkoutsTable(response) {
+  var workouts = document.createElement("table");
+  workouts.setAttribute("class", "table");
+  workouts.setAttribute("id", "workouts");
+  var colWidths = ["25%", "25%", "25%"];
+  for (var i = 0; i < colWidths.length; i++) {
+    var col = document.createElement("col");
+    col.setAttribute("width", colWidths[i]);
+    workouts.appendChild(col);
+  }
+
+  var workoutsheaders = document.createElement("tr");
+  workouts.appendChild(workoutsheaders);
+
+  var headers = ["Date", "Type", ""];
+  for (var i = 0; i < headers.length; i++) {
+    workoutsheaders.appendChild(document.createElement("th")).appendChild(document.createTextNode(headers[i]));
+  }
+
+  for (var i = 0; i < response.length; i++) {
+    var newRow = document.createElement("tr");
+    var firstElem = document.createElement("td");
+    firstElem.setAttribute("value", response[i].id);
+    newRow.appendChild(firstElem).appendChild(document.createTextNode(response[i].date));
+    newRow.appendChild(document.createElement("td")).appendChild(document.createTextNode(response[i].type));
+    var deleteRow = document.createElement("td");
+    deleteRow.innerHTML = '<button onclick="deleteWorkout(this)"><img src="/images/delete.png" height="25" width="25"></button>';
+    newRow.appendChild(deleteRow);
+    workouts.appendChild(newRow);
+  }
+
+  return workouts;
+}
+
 function toggleWorkouts() {
   // showWorkouts = !showWorkouts;
   // var parent = $('#users-div');
@@ -178,6 +212,52 @@ function toggleWorkouts() {
   //   $('#users').remove();
   //   $('#invite-user').remove();
   // }
+  showWorkouts = !showWorkouts;
+  var parent = $('#users-div');
+  if (showWorkouts) {
+    $.post('/get-workouts', function(response) {
+      var workouts = makeWorkoutsTable(response);
+      $('#manage-workouts-data-button').removeClass('manage-data-button').addClass('manage-data-button-active');
+      $(workouts).hide().appendTo(parent).show('slow');
+      $(parent).append('<hr id="workoutLine">'+
+        '<div id="workout-boat">'+
+                  '  Add Workout:'+
+                  '<form action="/add-workout" method="post" id="addWorkoutForm">'+
+                  '  <input id="workoutType" type="text"> </input>'+
+                  '  <input type="submit" value="Submit">'+
+                  '</form>'+
+                  '</div>');
+      var messageForm = $('#addWorkoutForm').submit(addWorkout);
+      $('#workoutType').attr("placeholder", "Workout Type");
+      window.scrollTo(0,document.body.scrollHeight);
+    });
+  } else {
+    $('#manage-workouts-data-button').removeClass('manage-data-button-active').addClass('manage-data-button');
+    $('#workouts').remove();
+    $('#workoutLine').remove();
+    $('#add-workout').remove();
+  }
+}
+function addWorkout(event) {
+  event.preventDefault();
+  var boatName = $('#boatName')[0].value;
+  var capacity = $('#capacity')[0].value;
+  var parent = $('#users-div');
+  $.post('/add-boat', {boatName: boatName, capacity: capacity},function(response) {
+      $('#boats').remove();
+      $('#add-boat').remove();
+      var boats = makeBoatsTable(response);
+      $(boats).hide().appendTo(parent).show('slow');
+      $(parent).append('<div id="add-boat">'+
+                  '  Add Boat:'+
+                  '<form action="/add-boat" method="post" id="addBoatForm">'+
+                  '  <input id="boatName" type="text"> </input>'+
+                  '  <input id="capacity" type="number"> </input>'+
+                  '  <input type="submit" value="Submit">'+
+                  '</form>'+
+                  '</div>');
+      var messageForm = $('#addBoatForm').submit(addBoat);
+  });
 }
 
 function addBoat(event) {
@@ -225,6 +305,18 @@ function deleteBoat(elem) {
   if (result === "YES") {
     parent.remove();
   $.post('/remove-boat', {boatID: boatID}, function(response) {
+    console.log(response);
+  });
+  }
+}
+
+function deleteWorkout(elem) {
+  result = window.prompt("ALERT! You are about to remove a workout. Type in: YES if you want to proceed.");
+  parent = elem.parentElement.parentElement;
+  workoutID = parent.children[0].attributes[0].value;
+  if (result === "YES") {
+    parent.remove();
+  $.post('/remove-workout', {workoutID: workoutID}, function(response) {
     console.log(response);
   });
   }
