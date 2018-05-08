@@ -38,7 +38,7 @@ $(document).ready(function () {
     }
   $("#workouts").val($("ul#workouts li:first").val());
   document.getElementById('workout_button').innerHTML = $("ul#workouts li:first")[0].innerHTML + "<span class=\"caret\"></span>";
-  document.getElementById('workout_button').value = toggle_workout_vals[$("ul#workouts li:first")[0].value];
+  document.getElementById('workout_button').value = res[0].id;
   document.getElementById("workout_0").className = "type_selector_button_selected";
   getData();
   // $("#rowers_list").first().attr('class', 'rower_selected');
