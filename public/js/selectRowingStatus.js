@@ -16,11 +16,6 @@ function sendResponse(){
 		year = 2018;
 	}
 
-	if($('#radio-coach').is(':checked')){
-		permission = 1;
-		year = 3000;
-	}
-
 	$.post('/updatePermission', {permission, year}, function(res){
 		window.location.href = "/profile";
 	})
