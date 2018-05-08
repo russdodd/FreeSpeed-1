@@ -288,9 +288,16 @@ button {
 	margin: auto;
 }
 
-#modal-footer-user {
+#modal-footer-user-success {
     padding: 2px 8px;
     background-color: #5cb85c;
+    color: white;
+		padding-bottom: 5px;
+}
+
+#modal-footer-user-failure {
+    padding: 2px 8px;
+    background-color: red;
     color: white;
 		padding-bottom: 5px;
 }
