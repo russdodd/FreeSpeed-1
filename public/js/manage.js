@@ -31,8 +31,8 @@ var modal = '<!-- The Modal -->'+
 '        </fieldset>'+
 '    </div>'+
 '  </div>'+
-'    <div id="modal-footer">'+
-'       <h3> Data Uploaded! </h3>' +
+'    <div id="modal-footer-user">'+
+'       Data Uploaded!' +
 '    </div>'+
 '</div>';
 
@@ -351,7 +351,7 @@ function openEditModal(elem) {
   row = elem.parentElement.parentElement;
   username = row.children[0].attributes[0].value;
   $(modal).appendTo('#manage-data-container');
-  $('#modal-footer').hide();
+  $('#modal-footer-user').hide();
   var span = document.getElementsByClassName("closeModal")[0];
   span.onclick = function() {
     $('#myModal').remove();
@@ -416,13 +416,13 @@ function uploadData(json_data) {
       console.log(err);
     } else {
       console.log(res);
-      $('#modal-footer').show('slow');
+      $('#modal-footer-user').show('slow');
     }
   });
 };
 
 function upload(){
-  $('#modal-footer').hide();
+  $('#modal-footer-user').hide();
   var workoutId = $("#workouts").val();
   if ($("#workouts").val() == null) {
     alert("No workout selected");
