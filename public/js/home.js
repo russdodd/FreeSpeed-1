@@ -96,8 +96,9 @@ function toggleWorkout(id) {
   document.getElementById('workout_button').innerHTML = toggle_workouts[current_workout] + "<span class=\"caret\"></span>";
   document.getElementById('workout_button').value = toggle_workout_vals[current_workout];
 
-  for (var i = 1; i < toggle_workouts.length; i++) {
-    if (i == is__workout_highlighted) {
+  for (var i = 1; i <= toggle_workouts.length; i++) {
+    if (i == parseInt(is__workout_highlighted)) {
+      console.log("yosafkhs");
       document.getElementById("workout_"+i).className = "type_selector_button_selected";
       document.getElementById("workout_"+i).disabled = true;
     } else {
@@ -116,9 +117,10 @@ function selectRower(id) {
   if (element.className == "rower") {
     $(".rower_selected").addClass("rower").removeClass("rower_selected");
     element.className = "rower_selected";
-  } else {
-    element.className = "rower";
   }
+  // } else {
+  //   element.className = "rower";
+  // }
   updateGraph();
   updateCurAverages();
 }
