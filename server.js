@@ -409,6 +409,7 @@ app.post('/data-upload', function(request, response) {
     // Create New Boat for existing workout
     for (var i = 0; i < data.users.length; i++) {
       var username = data.users[i].username;
+      var sql = "SELECT * FROM workouts"
       createNewWorkoutUserBoat(i, username, data);
     }
     response.json({msg: "success"})
@@ -575,7 +576,7 @@ app.get('/manage-data', function(request, response) {
 
 app.post('/get-workouts', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  var sql = 'SELECT * FROM workouts';
+  var sql = 'SELECT * FROM workouts ORDER BY date ASC';
   conn.query(sql, function(err, result) {
     if (err === null) {
       response.json(result.rows);
