@@ -12,6 +12,7 @@ var cookieSession = require('cookie-session');
 var LocalStrategy = require('passport-local').Strategy;
 var nodemailer = require('nodemailer');
 
+var emailBank = ['brownfreespeed@gmail.com', 'fifejames99@gmail.com']
 var conn = anyDB.createConnection('sqlite3://freespeed.db');
 conn.query('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, permission INTEGER NOT NULL, firstName TEXT NOT NULL, lastName TEXT NOT NULL, email TEXT NOT NULL, year INTEGER NOT NULL)');
 conn.query('CREATE TABLE IF NOT EXISTS boats (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, size INTEGER NOT NULL)');
@@ -62,10 +63,35 @@ passport.deserializeUser((id, done) => {
 
 const authCheck = (request, response, next) => {
 	if(request.user){
-		//executes if user is logged in
-		next()
+		console.log("in auth check")
+		conn.query('SELECT * FROM googlePassportUsers WHERE id=$1', [request.user], function(error, result){
+			if(error){
+				console.log("error in authcheck")
+				console.log(error)
+			}else{
+				var emailToCheck = result.rows[0].email
+				console.log("email to check is " + emailToCheck)
+				if(emailBank.indexOf(emailToCheck) > -1){
+					next()
+				}else{
+					request.logout();
+					response.redirect('/errorPage');
+				}
+			}
+		})
 	}else{
 		response.redirect('/login')
+	}
+}
+
+const authCheck2 = (request, response, next) => {
+	console.log("in authcheck2")
+	if(request.user){
+		console.log("authCheck2 success")
+		response.redirect('/profile')
+	}else{
+		request.logout()
+		next();
 	}
 }
 
@@ -109,7 +135,7 @@ passport.use(
     								lastName: lastname,
     								email: email,
    									organization: domain,
-                    year: 3000
+                   					 year: 3000
    								}
 								done(null, user);
 							}
@@ -123,6 +149,9 @@ passport.use(
 					}
 				}
 			})
+
+
+			
 
 		})
 )
@@ -155,7 +184,7 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 
 
-app.get('/login', function(request, response) {
+app.get('/login', authCheck2, function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
   response.sendFile('public/login.html', {root: __dirname });
 });
@@ -168,6 +197,20 @@ app.get('/sign-up', function(request, response) {
 app.get('/main/coach/:coachUsername', function(request, response){
 	 console.log('- Request received:', request.method.cyan, request.url.underline);
 	response.render('home.html', {firstname: result.rows[0].firstName, username: result.rows[0].email});
+})
+
+app.get('/errorPage', function(request, response){
+	
+	conn.query('DELETE FROM googlePassportUsers WHERE id=$1', [request.user], function(error, result){
+		if(error){
+			console.log('issue when removing uninvied user');
+			console.log(error)
+		}else{
+			request.logout();
+			response.sendFile('public/errorPage.html', {root: __dirname });
+		}
+	})
+
 })
 
 app.get('/profile', authCheck, function(request, response){
@@ -258,99 +301,6 @@ app.post('/upload-data-information', function(request, response) {
   });
 });
 
-app.post('/get-users', function(request, response) {
-  var sql = "SELECT username, firstName, lastName FROM users";
-  var json = {};
-  conn.query(sql, function(err, res) {
-    if (err === null) {
-      json.users = res.rows;
-      console.log(json);
-      response.json(json);
-    } else {
-      /*TODO: Handle Error*/
-      console.log(err);
-    }
-  });
-});
-
-function deleteData(workoutUserBoatID) {
-  var sql = "DELETE FROM data where workoutUserBoatID = $1";
-  conn.query(sql,[workoutUserBoatID], function(err, res) {
-    if (err === null) {
-      console.log("removed data");
-      return;
-    } else {
-      /*TODO: Handle Error*/
-      console.log(err);
-      return;
-    }
-  });
-}
-
-function deleteWorkoutUserBoat(workoutUserBoatID){
-  var sql = "DELETE FROM workoutUserBoatID where id = $1";
-  conn.query(sql, [workoutUserBoatID], function(err, res) {
-    if (err === null) {
-      console.log("removed workoutUserBoatID");
-      return;
-    } else {
-      /*TODO: Handle Error*/
-      console.log(err);
-      return;
-    }
-  });
-}
-
-function deleteWorkout(workoutID, response){
-  var sql = "DELETE FROM workouts where id = $1";
-  conn.query(sql, [workoutID], function(err, res) {
-    if (err === null) {
-      console.log("removed workout");
-      response.json({msg: "success"});
-    } else {
-      /*TODO: Handle Error*/
-      console.log(err);
-      return;
-    }
-  });
-}
-
-app.post('/workout-remove', function(request, response) {
-  // definitely need to authenticate here and make sure data belongs to user
-  var workoutID = escape(request.body.workoutID);
-  var workoutUserBoatIDs = getWorkoutUserBoatIDs(workoutID);
-  var sql = "SELECT getWorkoutUserBoatID FROM workoutUserBoat WHERE workoutID=$1";
-  var json = {};
-  conn.query(sql, [workoutID], function(err, res) {
-    if (err === null) {
-      var workoutUserBoatIDs = res.rows;
-      console.log("workoutUserBoatIDs", workoutUserBoatIDs);
-      for(var i = 0; i < workoutUserBoatIDs; i++){
-        deleteData(workoutUserBoatIDs[i]);
-        deleteWorkoutUserBoat(workoutUserBoatID);
-      }
-      deleteWorkout(workoutID, response);
-    } else {
-      /*TODO: Handle Error*/
-      console.log(err);
-      return;
-    }
-  });
-  
-  console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.json({msg: "success"})
-});
-
-app.post('/data-remove', function(request, response) {
-  // definitely need to authenticate here and make sure data belongs to user
-  var workoutUserBoatID = escape(request.body.workoutUserBoatID);
-  deleteData(workoutUserBoatID);
-  deleteWorkoutUserBoat(workoutUserBoatID);
-  console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.json({msg: "success"});
-});
-
-
 app.post('/data-upload', function(request, response) {
   // 1. Authenticate user is allowed to do what they did using JWT
   // 2. Authenticate that data uploaded is valid
@@ -358,7 +308,7 @@ app.post('/data-upload', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
   var data = JSON.parse(request.body.data);
   for (var i = 0; i < data.users.length; i++){
-    data.users[i].per_stroke_data = parseCsv(data.users[i].per_stroke_data[0]);
+    data.users[i].per_stroke_data = parseCsv(data.users[i].per_stroke_data);
   }
 
   var workoutID = data.workoutID;
@@ -373,14 +323,6 @@ app.post('/data-upload', function(request, response) {
     }
     response.json({msg: "success"})
   }
-});
-
-app.post('/:userName/personal-data-page', function(request, response) {
-  // 1. Authenticate user is allowed to make this post
-  // 2. Figure out which workout they want. If none is specified then you give
-  //    most recent workout data
-  // 3. fetch most recent workout of the user and give them all data
-  var username = request.params.userName;
 });
 
 /*
@@ -522,96 +464,6 @@ function insertData(currUserInd, data) {
   }
 }
 
-app.post('/validate-login-credetials', function(request, response){
-	var username = escape(request.body.username);
-	var password = escape(request.body.password);
-	conn.query('SELECT * FROM googlePassportUsers WHERE email=$1', [username], function(error, result){
-		if(error){
-			console.log(error);
-		}else{
-			if(result.rows.length == 0){
-				io.to(request.body.socketID).emit('usernameNotFound', {});
-			}else{
-				var hashedPassword = result.rows[0].password;
-				bcrypt.compare(password, hashedPassword, function(err, res) {
-   					 if(res){
-   					 	//password was correct
-   					 	var permission = result.rows[0].permission;
-   					 	if(permission == 1){
-   					 		//verified coach
-   					 		//eventually attach a token here
-   					 		io.to(request.body.socketID).emit('validCredentials', {permission: 1, username: username});
-   					 		//response.redirect('/main/coach/' + username);
-   					 		//io.to(request.body.socketID).emit('usernameNotFoun', {});
-   					 	}else{
-   					 		//verified rower
-   					 		//eventually attach a token here
-   					 		io.to(request.body.socketID).emit('validCredentials', {permission: 0, username: username});
-   					 	}
-   					 }else{
-   					 	io.to(request.body.socketID).emit('incorrectPassword', {});
-   					 }
-				});
-			}
-		}
-	})
-})
-
-app.post('/add-new-user', function(request, response) {
-	var username = escape(request.body.username);
-	var firstName = escape(request.body.firstname);
-	var lastName = escape(request.body.lastname);
-	var password = escape(request.body.password);
-	var confirmPassword = escape(request.body.confirmPassword);
-	var permission = request.body.permission;
-  var email = request.body.email;
-  var year = request.body.year;
-  console.log('YEAR');
-  console.log(year);
-	console.log(permission)
-
-	//check if any of the values are empty
-	if (username === '' || password === '' || lastName === '' || firstName === '' || confirmPassword === ''){
-		console.log("missing fields inside if satement");
-		io.to(request.body.socketID).emit('missingFields', {});
-	//check if passwords do not match
-	} else if(password !== confirmPassword){
-		console.log("in unequal passwords")
-		console.log(request.body.socketID)
-		io.to(request.body.socketID).emit('unequalPasswords', {});
-	} else if(password.length < 8){
-		io.to(request.body.socketID).emit('passwordTooShort', {});
-	} else{
-		//check if the username already exists
-		conn.query("SELECT * FROM googlePassportUsers WHERE email=$1", username, function(error, result){
-			if(error){
-				console.log(error);
-			}else{
-				//username already exists
-				if(result.rowCount != 0){
-					io.to(request.body.socketID).emit('usernameExists', {});
-				//username does not exist, add it to the database
-				}else{
-					bcrypt.hash(password, bcrypt.genSaltSync(10), null, function(err, hash){
-						if(err){
-							console.log(err);
-						} else {
-							console.log(hash);
-	 						conn.query('INSERT INTO users (username, password, permission, firstname, lastname, email, year) VALUES($1, $2, $3, $4, $5, $6, $7)',
-	 						[username, hash, permission, firstName, lastName, email, year], function(error, result){
-								if (error) {
-									console.log(error);
-								} else {
-									io.to(request.body.socketID).emit('successfulInsert', {username: username, permission: permission});
-								}
-							})
-						}
-					});
-				}
-			}
-		})
-	}
-})
 
 app.get('/manage-data', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
@@ -636,7 +488,6 @@ app.post('/get-workouts', function(request, response) {
   var sql = 'SELECT * FROM workouts';
   conn.query(sql, function(err, result) {
     if (err === null) {
-      console.log("workouts", result.rows);
       response.json(result.rows);
     } else {
       /*TODO: Handle Error*/
@@ -647,20 +498,16 @@ app.post('/get-workouts', function(request, response) {
 
 app.post('/get-workout-data', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-
-  var sql = 'SELECT DISTINCT googlePassportUsers.email, googlePassportUsers.firstName, googlePassportUsers.lastName, boats.name, data.* ' +
-
+  var sql = 'SELECT googlePassportUsers.email, googlePassportUsers.firstName, googlePassportUsers.lastName, boats.name, data.* ' +
   'FROM workoutUserBoat JOIN googlePassportUsers ON googlePassportUsers.email = ' +
   'workoutUserBoat.username JOIN boats ON boats.id = ' +
   'workoutUserBoat.boatID JOIN data ON data.workoutUserBoatID = workoutUserBoat.id ' +
-  'WHERE workoutID = $1';
+  'WHERE workoutID = ?';
 
   conn.query(sql, [request.body.workoutID], function(err, result) {
     if (err === null) {
-      console.log("result is " + JSON.stringify(result.rows));
-      console.log("result len " + result.rows.length);
-      console.log("result 0 " + JSON.stringify(result.rows[0]));
-      response.json({data: JSON.stringify(result.rows)});
+     // console.log("result is " + result.rows);
+      response.json(result.rows);
     } else {
       console.log(err);
     }
@@ -670,7 +517,7 @@ app.post('/get-workout-data', function(request, response) {
 
 app.post('/get-user-data', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  var sql = 'SELECT email, firstName, lastName, email, year FROM googlePassportUsers';
+  var sql = 'SELECT email, firstName, lastName, email, year FROM googlePassportUsers WHERE NOT year=1000';
 
   conn.query(sql, function(err, result) {
     if (err === null) {
@@ -765,7 +612,7 @@ app.post('/manage-data/:username', function(req, response) {
         console.log("fail");
       }
       else {
-        var sql = 'SELECT DISTINCT googlePassportUsers.email, googlePassportUsers.firstName,' +
+        var sql = 'SELECT googlePassportUsers.email, googlePassportUsers.firstName,' +
         ' googlePassportUsers.lastName, workouts.* FROM workoutUserBoat JOIN googlePassportUsers' +
         ' ON googlePassportUsers.email = workoutUserBoat.username JOIN workouts ON' +
         ' workouts.id = workoutUserBoat.workoutID WHERE googlePassportUsers.email = ?';
@@ -804,6 +651,11 @@ app.post('/send-email', function (req, res) {
       pass: 'Freespeed!'
     }
   });
+  
+  ////// ADDS THE USER TO THE LIST OF AUTHENTICATED EMAILS
+
+  emailBank.push(req.body.email)
+
   var text = 'Here is the signup link: http://localhost:8080/sign-up';
   var mailOptions = {
     from: 'brownfreespeed@gmail.com',
@@ -822,12 +674,14 @@ app.post('/send-email', function (req, res) {
   });
 });
 
-// conn.query('DELETE FROM googlePassportUsers WHERE firstName=$1', ['Alexander'], function(error, result){
+// conn.query('DELETE FROM googlePassportUsers WHERE year=$1', [1000], function(error, result){
 //   if(error){
 //     console.log("error removing Alexander")
 //     console.log(error)
 //   }else{
-//     console.log("alexander succesfully removed")
+//     conn.query('SELECT * FROM googlePassportUsers', function(error, result){
+//     	console.log(result.rows)
+//     })
 //   }
 // })
 
