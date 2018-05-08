@@ -191,7 +191,8 @@ app.get('/login', authCheck2, function(request, response) {
 
 app.get('/sign-up', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  response.sendFile('public/signup.html', {root: __dirname });
+  request.logout();
+  response.redirect('/');
 });
 
 app.get('/main/coach/:coachUsername', function(request, response){
@@ -747,12 +748,13 @@ app.post('/send-email', function (req, res) {
 
   emailBank.push(req.body.email)
 
-  var text = 'Here is the signup link: http://localhost:8080/sign-up';
+  var text = '<p>You\'ve been invited to join Freespeed by Brown University crew! </p><br> <p> Login with <span style=\"color:blue\">' + req.body.email + "</span>" + 
+  ' at the link <a href=\"http://localhost:8080/sign-up\">Here</a>';
   var mailOptions = {
     from: 'brownfreespeed@gmail.com',
     to: req.body.email,
     subject: 'Sign Up For Brown Freespeed!',
-    text: text
+    html: text
   }
   transporter.sendMail(mailOptions, function(error, info) {
     if (error) {
