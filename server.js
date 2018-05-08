@@ -151,7 +151,7 @@ passport.use(
 			})
 
 
-			
+
 
 		})
 )
@@ -201,7 +201,7 @@ app.get('/main/coach/:coachUsername', function(request, response){
 })
 
 app.get('/errorPage', function(request, response){
-	
+
 	conn.query('DELETE FROM googlePassportUsers WHERE id=$1', [request.user], function(error, result){
 		if(error){
 			console.log('issue when removing uninvied user');
@@ -374,7 +374,7 @@ app.post('/remove-workout', function(request, response) {
       console.log(err);
     }
   });
-  
+
   console.log('- Request received:', request.method.cyan, request.url.underline);
 
 });
@@ -577,7 +577,7 @@ app.get('/manage-data', function(request, response) {
 
 app.post('/get-workouts', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
-  var sql = 'SELECT * FROM workouts ORDER BY date ASC';
+  var sql = 'SELECT * FROM workouts ORDER BY date DESC';
   conn.query(sql, function(err, result) {
     if (err === null) {
       response.json(result.rows);
@@ -744,12 +744,12 @@ app.post('/send-email', function (req, res) {
       pass: 'Freespeed!'
     }
   });
-  
+
   ////// ADDS THE USER TO THE LIST OF AUTHENTICATED EMAILS
 
   emailBank.push(req.body.email)
 
-  var text = '<p>You\'ve been invited to join Freespeed by Brown University crew! </p><br> <p> Login with <span style=\"color:blue\">' + req.body.email + "</span>" + 
+  var text = '<p>You\'ve been invited to join Freespeed by Brown University crew! </p><br> <p> Login with <span style=\"color:blue\">' + req.body.email + "</span>" +
   ' at the link <a href=\"http://localhost:8080/sign-up\">Here</a>';
   var mailOptions = {
     from: 'brownfreespeed@gmail.com',
