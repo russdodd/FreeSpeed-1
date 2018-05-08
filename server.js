@@ -661,14 +661,46 @@ app.post('/get-boat-data', function(request, response) {
   });
 });
 
+function makeIds(rows) {
+  var toReturn = [];
+  for (var i = 0; i < rows.length; i++) {
+    toReturn.push(rows[i]['id']);
+  }
+  return toReturn;
+}
+
 app.post('/remove-user', function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
   var sql = 'DELETE FROM googlePassportUsers WHERE email = ?';
-  conn.query(sql, request.body.username,function(err, result) {
+
+  conn.query(sql, [request.body.username], function(err, result) {
     if (err === null) {
-      // Remove user from the email list may give issues?
+        // Remove user from the email list may give issues?
         emailBank.filter(x => x !== request.body.username)
-        response.json([]);
+        sql = 'SELECT id FROM workoutUserBoat WHERE username = ?';
+        conn.query(sql, [request.body.username], function(err, res) {
+          if (err == null) {
+            console.log(res.rows);
+            var workoutUserBoatIDs = makeIds(res.rows);
+            console.log(workoutUserBoatIDs)
+            sql1 = 'DELETE FROM data WHERE workoutUserBoatID = ?';
+            sql2 = 'DELETE FROM workoutUserBoat WHERE id = ?';
+            for (var i = 0; i < workoutUserBoatIDs.length; i++) {
+              conn.query(sql1, workoutUserBoatIDs[i], function(err, res) {
+                if (err != null) {
+                  console.log(err);
+                }
+              });
+              conn.query(sql2, workoutUserBoatIDs[i], function(err, res) {
+                if (err != null) {
+                  console.log(err);
+                }
+              });
+            }
+          } else {
+            console.log(err);
+          }
+        });
     } else {
       console.log(err);
     }
