@@ -182,8 +182,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
-
-
 app.get('/login', authCheck2, function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
   response.sendFile('public/login.html', {root: __dirname });
@@ -409,7 +407,9 @@ app.post('/data-upload', function(request, response) {
     // Create New Boat for existing workout
     for (var i = 0; i < data.users.length; i++) {
       var username = data.users[i].username;
-      var sql = "SELECT * FROM workouts"
+      var sql = "SELECT * FROM workouts JOIN workoutUserBoat ON workout.id = workoutUserBoat.workoutID " +
+      "JOIN googlePassportUsers ON googlePassportUsers.email = workoutUserBoat.username " +
+      "WHERE workout.id = ? AND workoutUserBoat.username = ?";
       createNewWorkoutUserBoat(i, username, data);
     }
     response.json({msg: "success"})
