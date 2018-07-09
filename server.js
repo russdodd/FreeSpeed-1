@@ -1,4 +1,5 @@
-//94THoF 2 seat 20180417 0706am
+//piece types:
+//0 - distance, 1 - time, 2 - strokes
 
 var http = require('http');
 var express = require('express');
@@ -11,8 +12,16 @@ var session = require('express-session');
 var cookieSession = require('cookie-session');
 var LocalStrategy = require('passport-local').Strategy;
 var nodemailer = require('nodemailer');
+const { spawn } = require('child_process');
+var zerorpc = require("zerorpc");
 
-var emailBank = ['brownfreespeed@gmail.com', 'fifejames99@gmail.com', 'russell.dodd15@gmail.com'];
+var client = new zerorpc.Client();
+client.connect("tcp://127.0.0.1:4242");
+client.on("error", function(error) {
+    console.error("RPC client error:", error);
+  });
+
+var emailBank = ['brownfreespeed@gmail.com', 'fifejames99@gmail.com', 'russell.dodd15@gmail.com', 'russell_dodd@brown.edu'];
 var conn = anyDB.createConnection('sqlite3://freespeed.db');
 conn.query('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, permission INTEGER NOT NULL, firstName TEXT NOT NULL, lastName TEXT NOT NULL, email TEXT NOT NULL, year INTEGER NOT NULL)');
 conn.query('CREATE TABLE IF NOT EXISTS boats (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, size INTEGER NOT NULL)');
@@ -23,6 +32,7 @@ conn.query('SELECT * FROM boats', function (err, res) {
       conn.query('INSERT INTO boats (name, size) values ("94", 8)');
     }
 });
+conn.query('CREATE TABLE IF NOT EXISTS intervals (id INTEGER PRIMARY KEY AUTOINCREMENT, workoutUserBoatID INTEGER NOT NULL, start INTEGER NOT NULL, end INTEGER NOT NULL)');//, interval TEXT NOT NULL, type INTEGER NOT NULL)');
 conn.query('CREATE TABLE IF NOT EXISTS workouts (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT NOT NULL, type TEXT NOT NULL)');
 conn.query('CREATE TABLE IF NOT EXISTS workoutUserBoat (id INTEGER PRIMARY KEY AUTOINCREMENT, workoutID INTEGER NOT NULL, username TEXT NOT NULL, boatID INTEGER NOT NULL)');
 conn.query('CREATE TABLE IF NOT EXISTS data (id INTEGER PRIMARY KEY AUTOINCREMENT, workoutUserBoatID INTEGER NOT NULL, interval INTEGER, distanceGPS REAL, distanceIMP REAL, elapsedTime TEXT, splitGPS TEXT, speedGPS REAL, splitIMP REAL, speedIMP REAL, strokeRate REAL, totalStrokes INTEGER, distancePerStrokeGPS REAL,distancePerStrokeIMP REAL, heartRateBPM INTEGER, power INTEGER, catch INTEGER, slip INTEGER, finish INTEGER, wash INTEGER, forceAvg INTEGER, work INTEGER, forceMax INTEGER, maxForceAngle INTEGER, GPSLat REAL, GPSLon REAL)');
@@ -426,7 +436,51 @@ app.post('/remove-data-workoutId', function(request, response) {
   });
 });
 
+app.post('/test-python2', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  var data_res = request.body;
+  data_res.data = parseCsv(data_res.data);
+  console.time("python");
+  client.on("error", function(error) {
+    console.error("RPC client error:", error);
+  });
+  client.invoke("combineProduceIntervals", JSON.stringify(data_res.data), data_res.pieces, data_res.gaps, data_res.intIdx, data_res.threshold, function(error, res, more) {
+      console.log(res);
+      console.timeEnd("python");
+      response.send(res);
+  });
+  
+  /*"python/testParse.py", JSON.stringify(data_res.data), data_res.gaps, data_res.intIdx, data_res.pieces, data_res.threshold]);
+  console.timeEnd("python");*/
+  
 
+}); 
+
+app.post('/test-python', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  var data_res = request.body;
+  data_res.data = parseCsv(data_res.data);
+  console.time("python");
+  let runPy = new Promise(function(sucess, nosuccess) {
+    //const pythonProcess = spawn('python',["python/getIntervals.py", JSON.stringify(data_res.data), data_res.gaps, data_res.intIdx, data_res.pieces, data_res.threshold]);
+    const pythonProcess = spawn('python',["python/testParse.py", JSON.stringify(data_res.data), data_res.gaps, data_res.intIdx, data_res.pieces, data_res.threshold]);
+    
+  var pyData = ""
+  pythonProcess.stdout.on('data', function (data){
+    pyData += data;
+  });
+  pythonProcess.stderr.on('data', (data) => {
+    console.log(`stderr: ${data}`);
+  });
+
+  pythonProcess.on('close', (code) => {
+    console.timeEnd("python");
+    response.send(pyData);
+    console.log(`child process exited with code ${code}`);
+  });
+});
+
+}); 
 
 app.post('/data-upload', function(request, response) {
   // 1. Authenticate user is allowed to do what they did using JWT
@@ -496,6 +550,30 @@ function changeDateFormat(date) {
   return time;
 }
 
+function insertIntervals(currUserInd, data){
+  console.time("python");
+  client.invoke("combineProduceIntervals", JSON.stringify(data_res.data), data_res.pieces, data_res.gaps, data_res.intIdx, data_res.threshold, function(error, res, more) {
+      console.log(res);
+      if (!res) // in the case that the python server has an error
+        res = [];
+      var gaps = JSON.parse(res);
+      for (var i = 0; i < res.length; i++){
+      var cur_gap = gaps[i];
+      var sql = "INSERT INTO gaps (workoutUserBoatID, start, end, index) VALUES (?, ?, ?, ?)";
+        conn.query(sql, [data.workoutUserBoatID, cur_gap[0], cur_gap[1], i], function (err, row) {
+          if (err == null) {
+            console.log("added new gap");
+          } else {
+            /*TODO: Handle Error*/
+            console.log(err);
+          }
+        });
+      }
+      console.timeEnd("python");
+  });
+
+}
+
 
 /*
  * This function expects the data to contain the corresponding workout id and adds
@@ -516,6 +594,7 @@ function createNewWorkoutUserBoat(currUserInd, username, data, response) {
             console.log(String(username) + " has new workout data!");
             data.workoutUserBoatID = row.lastInsertId;
             response.json({msg: "Success"});
+            //insertIntervals(currUserInd, data);
             insertData(currUserInd, data);
           } else {
             /*TODO: Handle Error*/
@@ -582,10 +661,17 @@ function parseCsv(data){
 }
 
 function insertData(currUserInd, data) {
+  var size = 30;
+  var counter = data.users[currUserInd].per_stroke_data.data.length;
+  console.log("counter",counter);
+  var i_global = 0;
+  while(!((counter - size) <=0)){
+    //console.log("iteration", i_global);
   var sql = "INSERT INTO data (workoutUserBoatID, interval, distanceGPS, distanceIMP, elapsedTime, splitGPS, speedGPS, splitIMP, speedIMP, strokeRate, totalStrokes, distancePerStrokeGPS, distancePerStrokeIMP, heartRateBPM, power, catch, slip, finish, wash, forceAvg, work, forceMax, maxForceAngle, GPSLat, GPSLon)" +
-  " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-  for (var i = 0; i < data.users[currUserInd].per_stroke_data.data.length; i++) {
-    var toInsert = [];
+  " VALUES";
+  var toInsert = [];
+  //console.log("i_global", i_global);
+  for (var i = i_global*size; i < (i_global+1)*size; i++) {
     toInsert.push(data.workoutUserBoatID);
     var concatArray = data.users[currUserInd].per_stroke_data.data[i];
     for (var j = 0; j < 24; j++) {
@@ -594,7 +680,22 @@ function insertData(currUserInd, data) {
       }
     }
     toInsert = toInsert.concat(concatArray);
-    conn.query(sql, toInsert, function(err, res) {
+    sql +=  " (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    if (i != (i_global+1)*size - 1){
+      sql +=  ", ";
+    }
+  
+  }
+  i_global+=1;
+  counter -= size;
+  //sql += "COMMIT; "
+  /*
+  console.log("sql", sql);*/
+  /*
+  console.log("toInsert",toInsert);
+  console.log("toInsert length",toInsert.length);*/
+  //console.log("toInsert",toInsert);
+  conn.query(sql, toInsert, function(err, res) {
       if (err === null) {
         console.log("Records succesfully added");
       } else {
@@ -603,6 +704,33 @@ function insertData(currUserInd, data) {
       }
     });
   }
+  var sql = "INSERT INTO data (workoutUserBoatID, interval, distanceGPS, distanceIMP, elapsedTime, splitGPS, speedGPS, splitIMP, speedIMP, strokeRate, totalStrokes, distancePerStrokeGPS, distancePerStrokeIMP, heartRateBPM, power, catch, slip, finish, wash, forceAvg, work, forceMax, maxForceAngle, GPSLat, GPSLon)" +
+  " VALUES";
+  var toInsert = [];
+  for (; counter >0; counter--) {
+    toInsert.push(data.workoutUserBoatID);
+    var concatArray = data.users[currUserInd].per_stroke_data.data[i];
+    for (var j = 0; j < 24; j++) {
+      if (j != 3 & j != 4 & j != 6) {
+        concatArray[j] = Number(concatArray[j]);
+      }
+    }
+    toInsert = toInsert.concat(concatArray);
+    sql +=  " (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    if (counter != 1){
+      sql +=  ", ";
+    }
+  }
+  //console.log("toInsert length",toInsert.length);
+  conn.query(sql, toInsert, function(err, res) {
+      if (err === null) {
+        console.log("Records succesfully added");
+
+      } else {
+        /*TODO: Handle Error*/
+        console.log(err);
+      }
+    });
 }
 
 
@@ -644,6 +772,25 @@ app.post('/get-workout-info', function(request, response) {
   'workoutUserBoat.username JOIN boats ON boats.id = ' +
   'workoutUserBoat.boatID ' +
   'WHERE workoutUserBoat.workoutID = $1';
+  console.log("workoutID",request.body.workoutID);
+
+  conn.query(sql, [request.body.workoutID], function(err, result) {
+    if (err === null) {
+     console.log("result is " + result.rows);
+      response.json({data: result.rows});
+    } else {
+      console.log(err);
+    }
+  });
+
+});
+
+app.post('/get-workout-data-gaps', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  var sql = 'SELECT googlePassportUsers.email, gaps.* ' +
+  'FROM workoutUserBoat JOIN googlePassportUsers ON googlePassportUsers.email = ' +
+  'workoutUserBoat.username JOIN gaps ON gaps.workoutUserBoatID = workoutUserBoat.id' +
+  'WHERE workoutID = ?';
   console.log("workoutID",request.body.workoutID);
 
   conn.query(sql, [request.body.workoutID], function(err, result) {
