@@ -3,6 +3,8 @@ var ind2 = "power";
 var username = ""
 var global_data = [];
 var global_raw_data = [];
+var global_gaps_data = [];
+var global_gaps = [];
 var toggle_vals = ["power","speedGPS","slip","wash","strokeRate","catch","finish","maxForceAngle","forceMax","forceAvg","work","distancePerStrokeGPS","heartRateBPM"];
 var toggle_types = ["Power", "Speed", "Slip", "Wash", "Stroke/Min", "Catch Angle", "Finish Angle", "Max Force Angle", "Max Force", "Avg Force", "Work", "Distance/Stroke", "Heart Rate"];
 var averages = [];
@@ -12,33 +14,49 @@ for (var i = 0; i < toggle_vals.length; i++){
   cur_averages.push(0);
 }
 
+/*$.post("/test-python", {"data": data3, "gaps": "2000", "intIdx": "distance", "pieces": "2", "threshold": "0.1"}, function(res){
+      console.log(res);
+}); for 5/9 2x2k */
+
 var margin = {top: 50, right: 100, bottom: 30, left: 50},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
-var parseDate = d3.time.format("%H:%M:%S.%L").parse,
+var parseDate = d3.timeParse("%H:%M:%S.%L"),
     bisectDate = d3.bisector(function(d) { return d[ind1]; }).left,
     formatValue = d3.format(",.2f"),
-    formatTime = d3.time.format("%H:%M:%S"),
+    formatTime = d3.timeFormat("%H:%M:%S"),
     formatCurrency = function(d) { return formatValue(d); };
 
-var x = d3.time.scale()
+var x = d3.scaleTime()
     .range([0, width]);
 
-var y = d3.scale.linear()
+var y = d3.scaleLinear()
     .range([height, 0]);
 
-var xAxis = d3.svg.axis()
-    .scale(x)
-    .orient("bottom");
+var xAxis = d3.axisBottom()
+    .scale(x);
 
-var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left");
+var yAxis = d3.axisLeft()
+    .scale(y);
 
-var line = d3.svg.line()
+var line = d3.line()
     .x(function(d) { return x(d[ind1]); })
     .y(function(d) { return y(d[ind2]); });
+
+function getIntervals(){
+  var gaps = global_gaps[username];
+  var data = [];
+  for (var j = 0; j < gaps.length; j++){
+    var cur_gap = gaps[j];
+    var gap_data = [];
+    for (var i = cur_gap[0]; i < cur_gap[1]+ 1; i++){
+      gap_data.push(global_data[username][i]);
+    }
+    data.push(gap_data);
+  }
+  global_gaps_data = data;
+}
 
 function d3Init(){
   var data = [];
@@ -49,7 +67,9 @@ function d3Init(){
   } else {
     data = global_data[n];
   }*/
+  //data = [].concat.apply([], global_gaps_data);
   data = global_data[username];
+
   console.log("data", data);
   //console.log(username);
   //console.log(data);
@@ -172,7 +192,7 @@ function updateGraph(){
   if ($(".rower_selected").length > 0) {
     ind2 = $("#dropdown_button").val();
     username = $(".rower_selected")[0].id;
-    $("svg :first-child").empty();
+    $("#svg1 :first-child").empty();
     d3Init();
   } else {
   }
@@ -274,6 +294,7 @@ function getData(){
 
 $( document ).ready(function() {
     var svg = d3.select("#d3Graph").append("svg")
+    .attr("id", "svg1")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
