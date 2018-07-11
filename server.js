@@ -108,8 +108,8 @@ const authCheck2 = (request, response, next) => {
 passport.use(
 	new GoogleStrategy({
 		callbackURL: '/auth/google/redirect',
-		clientID:'186582549927-k2u8qhib86iibneciakpptqmihqi68d7.apps.googleusercontent.com',
-		clientSecret: 'BMP666T4cOBlpbLaykZWBfYf'
+		clientID:'500155261938-rkv4mdgumottjv65s4rhtlgoc47d9isv.apps.googleusercontent.com',
+		clientSecret: 'eJVp2uuai9g2slPb-ksWInfi'
 		}, (accessToken, refreshToken, profile, done) => {
 			console.log("passport callback fired")
 			console.log(profile)
