@@ -428,7 +428,6 @@ app.post('/remove-data-workoutId', function(request, response) {
       deleteData(workoutUserBoatID);
       deleteWorkoutUserBoat(workoutUserBoatID);
     } else {
-      /*TODO: Handle Error*/
       console.log(err);
     }
   console.log('- Request received:', request.method.cyan, request.url.underline);
