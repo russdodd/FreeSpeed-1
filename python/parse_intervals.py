@@ -3,7 +3,7 @@ import json
 import numpy as np
 import csvToJson
 #python testscoring2.py /Users/russelldodd/Documents/freespeed/data/04\,10\,18/94/94THoF\ 7\ seat\ 20180410\ 0451pm.csv  23,33 strokes,strokes 24,6 0.1
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 # import sys
 # import time
 from testConvolve import getStep, filterData
@@ -198,17 +198,17 @@ class GetIntervals(object):
 		return sorted_on_finish, OPT[len(sorted_on_finish) - 1]
 
 	def combineProduceIntervals(self, data, topN, gap, intervalIdx, threshold):
-		topN = [int(arg) for arg in topN.split(",")]
-		data = loads(data)
-		gap = gap.split(",")
-		intervalIdxs = {"strokes": 9, "distance": 1, "time": 3}
-		intervalIdx = [intervalIdxs[arg] for arg in intervalIdx.split(",")]
-		for i in range(len(intervalIdx)):
-			if intervalIdx[i] == 3:
-				gap[i] = csvToJson.elapsedTimeToSec("00:" + gap[i] + ".0")
-			else:
-				gap[i] = int(gap[i])
-		threshold = float(threshold)
+		# topN = [int(arg) for arg in topN.split(",")]
+		# data = loads(data)
+		# gap = gap.split(",")
+		# intervalIdxs = {"strokes": 9, "distance": 1, "time": 3}
+		# intervalIdx = [intervalIdxs[arg] for arg in intervalIdx.split(",")]
+		# for i in range(len(intervalIdx)):
+		# 	if intervalIdx[i] == 3:
+		# 		gap[i] = csvToJson.elapsedTimeToSec("00:" + gap[i] + ".0")
+		# 	else:
+		# 		gap[i] = int(gap[i])
+		# threshold = float(threshold)
 		self.reformatArray(data)
 		data["data"][13] = self.parseColumn(data["data"][13], int)
 		data["data"][9] = self.parseColumn(data["data"][9], int)
@@ -242,46 +242,48 @@ class GetIntervals(object):
 			groupsToUse += groupings[grouping_idx][interval[2]].tolist()
 
 		return groupsToUse
+		#for test
+	def getIntervals(self):
+		topN = [int(arg) for arg in sys.argv[4].split(",")]
+		#print(topN)
+		path = sys.argv[1]
+		data = csvToJson.parseCsv(path)
+		gap = sys.argv[2].split(",")
+		intervalIdxs = {"strokes": 9, "distance": 1, "time": 3}
+		intervalIdx = [intervalIdxs[arg] for arg in sys.argv[3].split(",")]
+		for i in range(len(intervalIdx)):
+			if intervalIdx[i] == 3:
+				gap[i] = csvToJson.elapsedTimeToSec("00:" + gap[i] + ".0")
+			else:
+				gap[i] = int(gap[i])
+		threshold = 0.1
+		if len(sys.argv) == 6:
+			threshold = float(sys.argv[5])
+		return self.combineProduceIntervals(data, topN, gap, intervalIdx, threshold)
 
-		def printIntervals():
-			topN = [int(arg) for arg in sys.argv[4].split(",")]
-			print(topN)
-			path = sys.argv[1]
-			data = csvToJson.parseCsv(path)
-			gap = sys.argv[2].split(",")
-			intervalIdxs = {"strokes": 9, "distance": 1, "time": 3}
-			intervalIdx = [intervalIdxs[arg] for arg in sys.argv[3].split(",")]
-			for i in range(len(intervalIdx)):
-				if intervalIdx[i] == 3:
-					gap[i] = csvToJson.elapsedTimeToSec("00:" + gap[i] + ".0")
-				else:
-					gap[i] = int(gap[i])
-			threshold = 0.1
-			if len(sys.argv) == 6:
-				threshold = float(sys.argv[5])
+	# for production
+	def sendIntervals(self, data, topN, gap, intervalIdx, threshold="0.1"):
+		topN = [int(arg) for arg in topN.split(",")]
+		data = loads(data)
+		gap = gap.split(",")
+		intervalIdxs = {"strokes": 9, "distance": 1, "time": 3}
+		intervalIdx = [intervalIdxs[arg] for arg in intervalIdx.split(",")]
+		for i in range(len(intervalIdx)):
+			if intervalIdx[i] == 3:
+				gap[i] = csvToJson.elapsedTimeToSec("00:" + gap[i] + ".0")
+			else:
+				gap[i] = int(gap[i])
+		threshold = float(threshold)
+		return dumps(self.combineProduceIntervals(data, topN, gap, intervalIdx, threshold))
 
-			return combineProduceIntervals(data, topN, gap, intervalIdx, threshold)
-
-		def returnIntervals(self, data, topN, gap, intervalIdx, threshold="0.1"):
-			topN = [int(arg) for arg in topN.split(",")]
-			data = loads(data)
-			gap = gap.split(",")
-			intervalIdxs = {"strokes": 9, "distance": 1, "time": 3}
-			intervalIdx = [intervalIdxs[arg] for arg in intervalIdx.split(",")]
-			for i in range(len(intervalIdx)):
-				if intervalIdx[i] == 3:
-					gap[i] = csvToJson.elapsedTimeToSec("00:" + gap[i] + ".0")
-				else:
-					gap[i] = int(gap[i])
-			threshold = float(threshold)
-			return dumps(combineProduceIntervals(data, topN, gap, intervalIdx, threshold))
-
-		def main():
-			printIntervals()
 
 
 if __name__ == "__main__":
-	main()
+	getInts = GetIntervals()
+	ints = np.array(getInts.getIntervals())
+	plt.plot(data)
+	plt.plot(dY1[4: -4],'-bD', markevery=ints.flatten())
+	plt.show()
 
 
 

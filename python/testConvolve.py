@@ -49,9 +49,9 @@ def getStep(isRise, data, threshold=0.4):
 	peak_indexes = indexes(dY1Peaks, thres=threshold, min_dist=2) - 4
 	peak_indexes[peak_indexes < 0] = 0
 	peak_indexes[peak_indexes > (len(data)-1)] -=1 
-	plt.plot(data)
-	plt.plot(dY1[4: -4],'-bD', markevery=indexes.tolist())
-	plt.show()
+	# plt.plot(data)
+	# plt.plot(dY1[4: -4],'-bD', markevery=peak_indexes.tolist())
+	# plt.show()
 	return peak_indexes #brings points inwards
 
 def stringToSecs(timeStr):
