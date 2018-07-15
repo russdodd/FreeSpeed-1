@@ -4,6 +4,7 @@ import numpy as np
 import csvToJson
 #python testscoring2.py /Users/russelldodd/Documents/freespeed/data/04\,10\,18/94/94THoF\ 7\ seat\ 20180410\ 0451pm.csv  23,33 strokes,strokes 24,6 0.1
 import matplotlib.pyplot as plt
+import interval_scheduling as intshdl
 # import sys
 # import time
 from testConvolve import getStep, filterData
@@ -11,6 +12,7 @@ from itertools import combinations
 from json import loads,dumps
 
 class GetIntervals(object):
+
 	def calcScoresWithCandidates(self, candidates, endIdx, gap, intervalData, powerData):
 		scores = [] # array of [aveWatts, variance] pairs
 		for candidate in candidates:
@@ -25,7 +27,7 @@ class GetIntervals(object):
 			newCol[i] = csvToJson.elapsedTimeToSec(col[i])
 		return newCol[:]
 
-	def parseColumn(self, col, parseType):
+	def parseColumn(self, col, lam, parseType):
 		# print(col)
 		# print(col[np.where(col == "---")])
 		idxs = np.where(col == "---")[0]
@@ -39,7 +41,8 @@ class GetIntervals(object):
 				col[i] = str((parseType(col[i-1]) + parseType(col[i+1]))/2)
 		# col[np.where(col == "---")] = "0"
 		# print(col)
-		col = col.astype(parseType)
+		vfunc = np.vectorize(lam)
+		col = vfunc(col)
 		return col[:]
 
 	#thres is percent distance from expected start
@@ -136,6 +139,13 @@ class GetIntervals(object):
 			intervals.append([score, [cur_intervals[0], cur_intervals[-1]], np_comb, idx])
 		return intervals
 
+	def createScoreGroupingCandidates(self, scores, groupings, idx):
+		comboScores = self.getCombinedScores(scores)
+		intervals = []
+		for i in range(len(groupings)):
+			intervals.append([comboScores[i], idx, groupings[i][0], groupings[i][1]])
+		return intervals
+
 	def getCombinedScores(self, scores):
 		scoreCopy = np.empty_like(scores)
 		# print(scores)
@@ -165,9 +175,10 @@ class GetIntervals(object):
 		scores = np.array(scores)
 		groupings, scores = self.getIntervals(falls, scores, candidates)
 
-		orderings = self.chooseN(scores, groupings, topN, idx)
-		sorted_orderings = sorted(orderings, key=lambda x: x[0], reverse=True)
-		return sorted_orderings, groupings
+		#orderings = self.chooseN(scores, groupings, topN, idx)
+		orderings = self.createScoreGroupingCandidates(scores, groupings, idx)
+		#sorted_orderings = sorted(orderings, key=lambda x: x[0], reverse=True)
+		return orderings, groupings #sorted_orderings, groupings
 
 	def computeP(self, sorted_on_finish):
 		# p = [0] * (len(sorted_on_finish) + 1)
@@ -210,9 +221,9 @@ class GetIntervals(object):
 		# 		gap[i] = int(gap[i])
 		# threshold = float(threshold)
 		self.reformatArray(data)
-		data["data"][13] = self.parseColumn(data["data"][13], int)
-		data["data"][9] = self.parseColumn(data["data"][9], int)
-		data["data"][1] = self.parseColumn(data["data"][1], float)
+		data["data"][13] = self.parseColumn(data["data"][13], lambda x: int(float(x)), int)
+		data["data"][9] = self.parseColumn(data["data"][9], lambda x: int(float(x)), int)
+		data["data"][1] = self.parseColumn(data["data"][1], lambda x: float(x), float)
 		data["data"][3] = self.parseElapsedTime(data["data"][3])
 		#note to self, I think there are cases where I am zeroing a "---" for power and it ruins the variance
 		#also look into an alternative for variance that allows for one or two out liers without skewing the result?
@@ -232,18 +243,24 @@ class GetIntervals(object):
 			cur_sorted_orderings, cur_groupings = self.getSortedOrderings(falls, rises, intervalIdx[i], gap[i], data, filtPower,threshold, topN[i], i)
 			groupings[i] = cur_groupings
 			sorted_orderings += cur_sorted_orderings
-
-		groupsToUse = []
-		sorted_on_finish, opt = self.getBestSchedule(sorted_orderings)
-
-		for i in range(len(opt[1])):
-			interval = sorted_on_finish[opt[1][i]]
-			grouping_idx = interval[3]
-			groupsToUse += groupings[grouping_idx][interval[2]].tolist()
-
-		return groupsToUse
+		print("sorted_orderings", sorted_orderings)
+		print("topN", topN)
+		scheduler = intshdl.OptimalSchedule(sorted_orderings, topN)
+		opt = scheduler.returnBestSchedule()
+		groupsToUse = np.array(opt[1])
+		print("groupsToUse", groupsToUse)
+		intervals = groupsToUse[:,[2,3]]
+		print("np groupsToUse", intervals)
+		# for group in groupsToUse:
+		# 	interval = sorted_on_finish[opt[1][i]]
+		# 	grouping_idx = interval[3]
+		# 	groupsToUse += groupings[grouping_idx][interval[2]].tolist()
+		if __name__ == "__main__":
+			return data, intervals
+		else:
+			return intervals
 		#for test
-	def getIntervals(self):
+	def returnIntervals(self):
 		topN = [int(arg) for arg in sys.argv[4].split(",")]
 		#print(topN)
 		path = sys.argv[1]
@@ -280,9 +297,10 @@ class GetIntervals(object):
 
 if __name__ == "__main__":
 	getInts = GetIntervals()
-	ints = np.array(getInts.getIntervals())
-	plt.plot(data)
-	plt.plot(dY1[4: -4],'-bD', markevery=ints.flatten())
+	data, ints = getInts.returnIntervals()
+	ints = np.array(ints)
+	print("ints", ints.flatten().astype(int))
+	plt.plot(data["data"][13],'-bD', markevery=ints.flatten().astype(int).tolist())
 	plt.show()
 
 
