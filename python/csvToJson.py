@@ -1,18 +1,18 @@
 import csv
 def parseCsv(filename):
-	with open(filename, 'rb') as csvfile:
+	with open(filename, 'rt') as csvfile:
 		jsonData = {"data": []}
-	 	reader = csv.reader(csvfile)
-	 	for row in reader:
-	 		if len(row) > 0 and row[0] == "Start Time:":
-	 			jsonData['startTime'] = row[1]
-	 			break
-	 	for row in reader:
-	 		if len(row) > 0 and row[0] == "Per-Stroke Data:":
-	 			break
-		reader.next()
-		reader.next()
-		reader.next()
+		reader = csv.reader(csvfile)
+		for row in reader:
+			if len(row) > 0 and row[0] == "Start Time:":
+				jsonData['startTime'] = row[1]
+				break
+		for row in reader:
+			if len(row) > 0 and row[0] == "Per-Stroke Data:":
+				break
+		next(reader)
+		next(reader)
+		next(reader)
 		for row in reader:
 			if not(row[3] == "---"):
 				jsonData['data'].append(row);
