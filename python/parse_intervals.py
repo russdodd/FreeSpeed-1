@@ -181,17 +181,18 @@ class GetIntervals(object):
 			cur_sorted_orderings, cur_groupings = self.getSortedOrderings(falls, rises, intervalIdx[i], gap[i], data, filtPower,threshold, topN[i], i)
 			groupings[i] = cur_groupings
 			sorted_orderings += cur_sorted_orderings
-		print("sorted_orderings", sorted_orderings)
-		print("topN", topN)
+		# print("sorted_orderings", sorted_orderings)
+		# print("topN", topN)
 		scheduler = intshdl.OptimalSchedule(sorted_orderings, topN)
 		opt = scheduler.returnBestSchedule()
 		groupsToUse = np.array(opt[1])
-		print("groupsToUse", groupsToUse)
+		# print("groupsToUse", groupsToUse)
 		intervals = []
-		maxType = np.amax(groupsToUse[:,1])
-		intervals = [groupsToUse[np.where(groupsToUse[:,1] == x)][:,[2,3]] for x in range(int(maxType) + 1)]
+		if len(groupsToUse) > 0:
+			maxType = np.amax(groupsToUse[:,1])
+			intervals = [groupsToUse[np.where(groupsToUse[:,1] == x)][:,[2,3]] for x in range(int(maxType) + 1)]
 		# intervals = groupsToUse[:,[2,3]]
-		print("np groupsToUse", intervals)
+		# print("np groupsToUse", intervals)
 		if __name__ == "__main__":
 			return data, intervals
 		else:
@@ -234,15 +235,8 @@ class GetIntervals(object):
 
 if __name__ == "__main__":
 	getInts = GetIntervals()
-	path = sys.argv[1]
-	data = csvToJson.parseCsv(path)
-	getInts.reformatArray(data)
-	data["data"][13] = getInts.parseColumn(data["data"][13], lambda x: int(float(x)), int)
-	data["data"][9] = getInts.parseColumn(data["data"][9], lambda x: int(float(x)), int)
-	data["data"][1] = getInts.parseColumn(data["data"][1], lambda x: float(x), float)
-	data["data"][3] = getInts.parseElapsedTime(data["data"][3])
-	plt.plot(data["data"][13],'-g')#ints.flatten().astype(int).tolist())
-	plt.show()
+	# plt.plot(data["data"][13],'-g')#ints.flatten().astype(int).tolist())
+	# plt.show()
 	data, ints = getInts.returnIntervals()
 	# ints = np.array(ints)
 	intsFlat = []
@@ -250,10 +244,19 @@ if __name__ == "__main__":
 	for intLst in ints:
 		intsFlat += intLst.flatten().astype(int).tolist()
 		sizes.append(len(intLst))
-	print("ints", intsFlat)
+	# print("ints", intsFlat)
 	print("count ints", sizes)
+
 	# print("ints", ints.flatten().astype(int))
-	plt.plot(data["data"][13],'-bD', markevery=intsFlat)#ints.flatten().astype(int).tolist())
+	plt.plot(filterData(data["data"][13]),'-b', zorder=1)#ints.flatten().astype(int).tolist())
+	# plt.plot(data["data"][13],'-b', zorder=1)#ints.flatten().astype(int).tolist())
+	if len(ints) > 0:
+		rises = np.array(intsFlat)[::2]
+		falls = np.array(intsFlat)[1::2]
+
+		plt.scatter(rises,data["data"][13][rises], color='g', marker='d', zorder=2)
+		plt.scatter(falls,data["data"][13][falls], color='r', marker='d', zorder=3)
+	
 	plt.show()
 
 
