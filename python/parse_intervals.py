@@ -88,57 +88,6 @@ class GetIntervals(object):
 			bestpairs.append([candidateGroup[argMax], fall])
 		return np.array(bestpairs), scoresFilt
 
-	def getRankedScores(self, scores):
-		scoreCopy = np.empty_like(scores)
-		# print(scores)
-		scoreCopy[:] = scores
-		scoreCopy[:,0] /= np.max(scoreCopy[:,0])
-		scoreCopy[:,1] /= np.max(scoreCopy[:,1])
-		p = 0.5
-		q = 1 - p
-		scoresScalarLst = (1 - scoreCopy[:,1])*p + scoreCopy[:,0]*q
-		order = np.flip(np.argsort(scoresScalarLst),0)
-		print(order)
-		print(scoresScalarLst[order])
-
-	def getTopNScoresArgs(self, n, scores):
-		scoreCopy = np.empty_like(scores)
-		scoreCopy[:] = scores
-		scoreCopy[:,0] /= np.max(scoreCopy[:,0])
-		scoreCopy[:,1] /= np.max(scoreCopy[:,1])
-		p = 0.5
-		q = 1 - p
-		scoresScalarLst = (1 - scoreCopy[:,1])*p + scoreCopy[:,0]*q
-		order = np.flip(np.argsort(scoresScalarLst),0)
-		return order[:n]
-
-	def is_sorted(self, a):
-	    for i in range(len(a)-1):
-	         if a[i+1] < a[i]:
-	               return False
-	    return True
-
-	#returns [score, [orderingArgs]]
-	def chooseN(self, scores, groupings, n, idx):
-		comboScores = self.getCombinedScores(scores)
-		# print("len scores", range(len(comboScores)))
-		# print("n", n)
-		combs = combinations(range(len(comboScores)), n)
-		intervals = []
-		x = 0
-		for comb in combs:
-			# print("iter", x)
-			# x+=1
-			np_comb = np.array(comb)
-			cur_intervals = groupings[np_comb]
-			cur_intervals = np.array(cur_intervals).flatten()
-			if self.is_sorted(cur_intervals):
-				score = np.sum(comboScores[np_comb])/len(comboScores)
-			else:
-				score = 0.0
-			intervals.append([score, [cur_intervals[0], cur_intervals[-1]], np_comb, idx])
-		return intervals
-
 	def createScoreGroupingCandidates(self, scores, groupings, idx):
 		comboScores = self.getCombinedScores(scores)
 		intervals = []
@@ -209,17 +158,6 @@ class GetIntervals(object):
 		return sorted_on_finish, OPT[len(sorted_on_finish) - 1]
 
 	def combineProduceIntervals(self, data, topN, gap, intervalIdx, threshold):
-		# topN = [int(arg) for arg in topN.split(",")]
-		# data = loads(data)
-		# gap = gap.split(",")
-		# intervalIdxs = {"strokes": 9, "distance": 1, "time": 3}
-		# intervalIdx = [intervalIdxs[arg] for arg in intervalIdx.split(",")]
-		# for i in range(len(intervalIdx)):
-		# 	if intervalIdx[i] == 3:
-		# 		gap[i] = csvToJson.elapsedTimeToSec("00:" + gap[i] + ".0")
-		# 	else:
-		# 		gap[i] = int(gap[i])
-		# threshold = float(threshold)
 		self.reformatArray(data)
 		data["data"][13] = self.parseColumn(data["data"][13], lambda x: int(float(x)), int)
 		data["data"][9] = self.parseColumn(data["data"][9], lambda x: int(float(x)), int)
@@ -249,12 +187,11 @@ class GetIntervals(object):
 		opt = scheduler.returnBestSchedule()
 		groupsToUse = np.array(opt[1])
 		print("groupsToUse", groupsToUse)
-		intervals = groupsToUse[:,[2,3]]
+		intervals = []
+		maxType = np.amax(groupsToUse[:,1])
+		intervals = [groupsToUse[np.where(groupsToUse[:,1] == x)][:,[2,3]] for x in range(int(maxType) + 1)]
+		# intervals = groupsToUse[:,[2,3]]
 		print("np groupsToUse", intervals)
-		# for group in groupsToUse:
-		# 	interval = sorted_on_finish[opt[1][i]]
-		# 	grouping_idx = interval[3]
-		# 	groupsToUse += groupings[grouping_idx][interval[2]].tolist()
 		if __name__ == "__main__":
 			return data, intervals
 		else:
@@ -297,10 +234,26 @@ class GetIntervals(object):
 
 if __name__ == "__main__":
 	getInts = GetIntervals()
+	path = sys.argv[1]
+	data = csvToJson.parseCsv(path)
+	getInts.reformatArray(data)
+	data["data"][13] = getInts.parseColumn(data["data"][13], lambda x: int(float(x)), int)
+	data["data"][9] = getInts.parseColumn(data["data"][9], lambda x: int(float(x)), int)
+	data["data"][1] = getInts.parseColumn(data["data"][1], lambda x: float(x), float)
+	data["data"][3] = getInts.parseElapsedTime(data["data"][3])
+	plt.plot(data["data"][13],'-g')#ints.flatten().astype(int).tolist())
+	plt.show()
 	data, ints = getInts.returnIntervals()
-	ints = np.array(ints)
-	print("ints", ints.flatten().astype(int))
-	plt.plot(data["data"][13],'-bD', markevery=ints.flatten().astype(int).tolist())
+	# ints = np.array(ints)
+	intsFlat = []
+	sizes = []
+	for intLst in ints:
+		intsFlat += intLst.flatten().astype(int).tolist()
+		sizes.append(len(intLst))
+	print("ints", intsFlat)
+	print("count ints", sizes)
+	# print("ints", ints.flatten().astype(int))
+	plt.plot(data["data"][13],'-bD', markevery=intsFlat)#ints.flatten().astype(int).tolist())
 	plt.show()
 
 
