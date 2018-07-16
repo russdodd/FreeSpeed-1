@@ -12,7 +12,7 @@ import watts_viewer as w_v
 
 
 def getBiggestFiles():
-	data_path = "/Users/cmadden/Documents/russell/Spring 2018"
+	data_path = "/Users/russelldodd/Documents/freespeedgit/Spring 2018"
 	cur_path = os.getcwd()
 	os.chdir(data_path)
 	files = []

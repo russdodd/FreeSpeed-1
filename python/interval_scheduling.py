@@ -3,10 +3,11 @@ import numpy as np
 import sys
 class OptimalSchedule(object):
 	def __init__(self, intervals, num_to_pick):
+		print("num intervals",len(intervals))
 		self.intervals = intervals
 		self.num_type_to_pick = num_to_pick
-		print(self.num_type_to_pick)
-		print(self.intervals)
+		# print(self.num_type_to_pick)
+		# print(self.intervals)
 
 # import matplotlib as plt
 # min start = 0
@@ -185,7 +186,7 @@ class OptimalSchedule(object):
 		OPT = [[[0, []] for x in range(sum_to_pick)] for y in range(len(self.intervals))]
 		for type_pick,pick in enumerate(self.num_type_to_pick):
 			counter_to_pick += pick
-			print("counter to pick", counter_to_pick)
+			# print("counter to pick", counter_to_pick)
 			while i < counter_to_pick:
 				for j in range(1, len(self.intervals)):
 					# if it is the right type 
@@ -198,7 +199,7 @@ class OptimalSchedule(object):
 					else:
 						OPT[j][i] = OPT[j-1][i].copy()
 				i+=1
-		self.printSquare(sum_to_pick, OPT)
+		# self.printSquare(sum_to_pick, OPT)
 		return OPT[len(self.intervals) - 1][sum_to_pick-1]
 
 	def returnBestSchedule(self):
