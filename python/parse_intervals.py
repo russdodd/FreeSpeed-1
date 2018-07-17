@@ -1,13 +1,12 @@
+#python3 parse_intervals.py <filepath> <piece lengths> <piece length type> <count of pieces> <threshold of piece accuracy>
+
 import sys
 import json
 import numpy as np
 import csvToJson
-#python testscoring2.py /Users/russelldodd/Documents/freespeed/data/04\,10\,18/94/94THoF\ 7\ seat\ 20180410\ 0451pm.csv  23,33 strokes,strokes 24,6 0.1
 import matplotlib.pyplot as plt
 import interval_scheduling as intshdl
-# import sys
-# import time
-from testConvolve import getStep, filterData
+from data_convolve import getStep, filterData
 from itertools import combinations
 from json import loads,dumps
 
@@ -28,31 +27,22 @@ class GetIntervals(object):
 		return newCol[:]
 
 	def parseColumn(self, col, lam, parseType):
-		# print(col)
-		# print(col[np.where(col == "---")])
 		idxs = np.where(col == "---")[0]
-		# print(np.where(col == "---"))
-		# print(idxs)
-		# print("first", idxs[0])
 		for i in idxs:
 			if ((i-1) < 0) or ((i+1) == len(col)) or (col[i-1] == "---") or (col[i+1] == "---"):
 				col[i] = "0"
 			else:
 				col[i] = str((parseType(col[i-1]) + parseType(col[i+1]))/2)
-		# col[np.where(col == "---")] = "0"
-		# print(col)
 		vfunc = np.vectorize(lam)
 		col = vfunc(col)
 		return col[:]
 
 	#thres is percent distance from expected start
 	def getFrontrises(self, thres, endVal, gap, intervalData, rises):
-		# print((thres, endVal, gap, intervalData, rises))
 		startThres = endVal - gap - gap*thres
 		endThres = endVal - gap + gap*thres
 		closeRises = []
 		for rise in rises:
-			# print(rise,intervalData[rise], endThres)
 			if intervalData[rise] >= startThres and intervalData[rise] <= endThres:
 				closeRises.append(rise)
 			elif intervalData[rise] > endThres:
@@ -61,13 +51,10 @@ class GetIntervals(object):
 
 
 	def reformatArray(self, data):
-		# newData = []
 		dataRows = np.swapaxes(np.array(data["data"]),0,1).tolist()
 		data["data"] = [np.zeros(len(dataRows[0])) for i in range(len(dataRows))]
-		# print(data["data"])
 		for i in range(len(data["data"])):
 			data["data"][i] = np.array(dataRows[i][:])
-		# data["data"]
 
 	def getIntervals(self, falls, scores, candidates):
 		bestpairs = []
@@ -77,8 +64,6 @@ class GetIntervals(object):
 				continue
 			scoreCopy = np.empty_like(scoreList)
 			scoreCopy[:] = scoreList
-			# print(scoreCopy)
-			# print(scoreCopy[0][0])
 			scoreCopy[:,0] /= np.max(scoreCopy[:,0])
 			scoreCopy[:,1] /= np.max(scoreCopy[:,1])
 			scoresScalarLst = 1 - scoreCopy[:,1] + scoreCopy[:,0]
@@ -97,7 +82,6 @@ class GetIntervals(object):
 
 	def getCombinedScores(self, scores):
 		scoreCopy = np.empty_like(scores)
-		# print(scores)
 		scoreCopy[:] = scores
 		scoreCopy[:,0] = ((scoreCopy[:,0] + 0.0000001) - np.min(scoreCopy[:,0]))/ (np.max(scoreCopy[:,0]) - np.min(scoreCopy[:,0]))
 		scoreCopy[:,1] = ((scoreCopy[:,1] + 0.0000001) - np.min(scoreCopy[:,1]))/ (np.max(scoreCopy[:,1]) - np.min(scoreCopy[:,1]))
@@ -108,10 +92,8 @@ class GetIntervals(object):
 	def getSortedOrderings(self, falls, rises, intervalIdx, gap, data, filtPower,threshold, topN, idx):
 		candidates = []
 		#get candidates for each fall for one piece size
-		# fallscopy = 
 		for fall in falls:
 			candidates.append(self.getFrontrises(threshold, data["data"][intervalIdx][fall], gap, data["data"][intervalIdx], rises).tolist())
-		# print("candidates",len(candidates),candidates)
 		# shift the points closer together
 		for i in range(len(falls)):
 			falls[i] -= 1
@@ -130,7 +112,6 @@ class GetIntervals(object):
 		return orderings, groupings #sorted_orderings, groupings
 
 	def computeP(self, sorted_on_finish):
-		# p = [0] * (len(sorted_on_finish) + 1)
 		p = []
 		for i in range((len(sorted_on_finish) + 1)):
 			p.append(0)
@@ -164,7 +145,7 @@ class GetIntervals(object):
 		data["data"][1] = self.parseColumn(data["data"][1], lambda x: float(x), float)
 		data["data"][3] = self.parseElapsedTime(data["data"][3])
 		#note to self, I think there are cases where I am zeroing a "---" for power and it ruins the variance
-		#also look into an alternative for variance that allows for one or two out liers without skewing the result?
+		#also look into an alternative for variance that allows for one or two outliers without skewing the result?
 
 		power = data["data"][13]
 		filtPower = filterData(power)
@@ -181,22 +162,18 @@ class GetIntervals(object):
 			cur_sorted_orderings, cur_groupings = self.getSortedOrderings(falls, rises, intervalIdx[i], gap[i], data, filtPower,threshold, topN[i], i)
 			groupings[i] = cur_groupings
 			sorted_orderings += cur_sorted_orderings
-		# print("sorted_orderings", sorted_orderings)
-		# print("topN", topN)
 		scheduler = intshdl.OptimalSchedule(sorted_orderings, topN)
 		opt = scheduler.returnBestSchedule()
 		groupsToUse = np.array(opt[1])
-		# print("groupsToUse", groupsToUse)
 		intervals = []
 		if len(groupsToUse) > 0:
 			maxType = np.amax(groupsToUse[:,1])
 			intervals = [groupsToUse[np.where(groupsToUse[:,1] == x)][:,[2,3]] for x in range(int(maxType) + 1)]
-		# intervals = groupsToUse[:,[2,3]]
-		# print("np groupsToUse", intervals)
 		if __name__ == "__main__":
 			return data, intervals
 		else:
 			return intervals
+
 		#for test
 	def returnIntervals(self):
 		topN = [int(arg) for arg in sys.argv[4].split(",")]
@@ -235,28 +212,21 @@ class GetIntervals(object):
 
 if __name__ == "__main__":
 	getInts = GetIntervals()
-	# plt.plot(data["data"][13],'-g')#ints.flatten().astype(int).tolist())
-	# plt.show()
 	data, ints = getInts.returnIntervals()
-	# ints = np.array(ints)
 	intsFlat = []
 	sizes = []
 	for intLst in ints:
 		intsFlat += intLst.flatten().astype(int).tolist()
 		sizes.append(len(intLst))
-	# print("ints", intsFlat)
 	print("count ints", sizes)
 
-	# print("ints", ints.flatten().astype(int))
 	plt.plot(filterData(data["data"][13]),'-b', zorder=1)#ints.flatten().astype(int).tolist())
-	# plt.plot(data["data"][13],'-b', zorder=1)#ints.flatten().astype(int).tolist())
 	if len(ints) > 0:
 		rises = np.array(intsFlat)[::2]
 		falls = np.array(intsFlat)[1::2]
 
-		plt.scatter(rises,data["data"][13][rises], color='g', marker='d', zorder=2)
-		plt.scatter(falls,data["data"][13][falls], color='r', marker='d', zorder=3)
-	
+		plt.scatter(rises,filterData(data["data"][13])[rises], color='g', marker='d', zorder=2)
+		plt.scatter(falls,filterData(data["data"][13])[falls], color='r', marker='d', zorder=3)
 	plt.show()
 
 

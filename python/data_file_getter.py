@@ -18,17 +18,13 @@ def getBiggestFiles():
 	files = []
 	for workout in os.listdir():
 		if(not isfile(workout)):
-			# print("workout", workout)
 			cur_csvs = []
 			os.chdir(workout)
 			for boat in os.listdir():
 				if(not isfile(boat)):
-					# print("boat", boat)
 					os.chdir(boat)
 					for file in os.listdir():
-						# print("file", file)
 						if file.endswith(".csv"):
-							# print("ends with csv", file)
 							cur_csvs.append([os.path.abspath(file), os.path.getsize(file)])
 					os.chdir("..")
 			os.chdir("..")
