@@ -1,4 +1,6 @@
 import csv
+
+# turns csv file into json format
 def parseCsv(filename):
 	with open(filename, 'rt') as csvfile:
 		jsonData = {"data": []}
@@ -16,7 +18,6 @@ def parseCsv(filename):
 		for row in reader:
 			if not(row[3] == "---"):
 				jsonData['data'].append(row);
-		# print(jsonData['startTime'])
 		return jsonData
 
 #expects in the form 05:38pm

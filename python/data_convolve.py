@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from scipy import signal
 from peakutils import indexes
 
+# Returns indexes that represent steps in the data
+# uses a peak finding library to find the peaks after applying the convolution
 def getStep(isRise, data, threshold=0.4):
 	dary = isRise*np.hstack(([data[0]/2]*5,data,[data[-1]/2]*5))
 	kernel = [1, 0, -1]

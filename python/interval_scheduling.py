@@ -8,6 +8,7 @@ class OptimalSchedule(object):
 		self.intervals = intervals
 		self.num_type_to_pick = num_to_pick
 	
+	# print dynamic programming table
 	def printSquare(self, sum_to_pick, OPT):
 		for i in range(sum_to_pick):
 			for j in range(len(self.intervals)):
@@ -16,7 +17,7 @@ class OptimalSchedule(object):
 			sys.stdout.write("\n")
 		sys.stdout.write("\n")
 
-
+	# computes the previous closest interval for each interval
 	def computeP(self):
 		#compute p
 		p = []
@@ -29,6 +30,7 @@ class OptimalSchedule(object):
 					break
 		return p
 
+	# the meat of the algorithm
 	def scheduleOpt(self, p):
 		# find opt
 		sum_to_pick = 1
@@ -54,6 +56,7 @@ class OptimalSchedule(object):
 				i+=1
 		return OPT[len(self.intervals) - 1][sum_to_pick-1]
 
+	# compute and return the best schedule
 	def returnBestSchedule(self):
 		self.intervals = [[0, 0, 0, 0]] + sorted(self.intervals, key=lambda x: x[3], reverse=False)
 		p = self.computeP()

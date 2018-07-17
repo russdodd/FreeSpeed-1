@@ -3,7 +3,7 @@
 import sys
 import json
 import numpy as np
-import csvToJson
+import csvToJson #file I made
 import matplotlib.pyplot as plt
 import interval_scheduling as intshdl
 from data_convolve import getStep, filterData
@@ -12,6 +12,7 @@ from json import loads,dumps
 
 class GetIntervals(object):
 
+	#calculates the average watts and variance for each candidate and then returns these
 	def calcScoresWithCandidates(self, candidates, endIdx, gap, intervalData, powerData):
 		scores = [] # array of [aveWatts, variance] pairs
 		for candidate in candidates:
@@ -20,12 +21,15 @@ class GetIntervals(object):
 			return np.array([[-1.,-1.]])
 		return np.array(scores)
 
+	# converts the Elapsed time feature from string to seconds
+	#returns the parsed column of data
 	def parseElapsedTime(self, col):
 		newCol = np.zeros(len(col))
 		for i in range(len(newCol)):
 			newCol[i] = csvToJson.elapsedTimeToSec(col[i])
 		return newCol[:]
 
+	# parses the column of data into the parse type by appying the lamba function
 	def parseColumn(self, col, lam, parseType):
 		idxs = np.where(col == "---")[0]
 		for i in idxs:
@@ -37,6 +41,8 @@ class GetIntervals(object):
 		col = vfunc(col)
 		return col[:]
 
+	# given an end point finds the start point from the candidate steps that are within 
+	# threshold distance from the expected start point
 	#thres is percent distance from expected start
 	def getFrontrises(self, thres, endVal, gap, intervalData, rises):
 		startThres = endVal - gap - gap*thres
@@ -49,13 +55,15 @@ class GetIntervals(object):
 				break
 		return np.array(closeRises)
 
-
+	# turns the column of data into a numpy array
 	def reformatArray(self, data):
 		dataRows = np.swapaxes(np.array(data["data"]),0,1).tolist()
 		data["data"] = [np.zeros(len(dataRows[0])) for i in range(len(dataRows))]
 		for i in range(len(data["data"])):
 			data["data"][i] = np.array(dataRows[i][:])
 
+	# links a candidate end point of a piece to a candidate start point that has the best score
+	# produces a list of candidate piece intervals and a list of each respective score
 	def getIntervals(self, falls, scores, candidates):
 		bestpairs = []
 		scoresFilt = []
@@ -73,6 +81,8 @@ class GetIntervals(object):
 			bestpairs.append([candidateGroup[argMax], fall])
 		return np.array(bestpairs), scoresFilt
 
+
+	# further processes the score and creates and interval that has the type and score
 	def createScoreGroupingCandidates(self, scores, groupings, idx):
 		comboScores = self.getCombinedScores(scores)
 		intervals = []
@@ -80,6 +90,7 @@ class GetIntervals(object):
 			intervals.append([comboScores[i], idx, groupings[i][0], groupings[i][1]])
 		return intervals
 
+	# combines variance and average watts to create a single weighted score from 0 to 1
 	def getCombinedScores(self, scores):
 		scoreCopy = np.empty_like(scores)
 		scoreCopy[:] = scores
@@ -89,6 +100,8 @@ class GetIntervals(object):
 		q = 1 - p
 		return (1 - scoreCopy[:,1])*p + scoreCopy[:,0]*q
 
+	# produces candidate start points given the candidate end points and then filters down to the best candidates
+	# 
 	def getSortedOrderings(self, falls, rises, intervalIdx, gap, data, filtPower,threshold, topN, idx):
 		candidates = []
 		#get candidates for each fall for one piece size
@@ -111,33 +124,7 @@ class GetIntervals(object):
 		#sorted_orderings = sorted(orderings, key=lambda x: x[0], reverse=True)
 		return orderings, groupings #sorted_orderings, groupings
 
-	def computeP(self, sorted_on_finish):
-		p = []
-		for i in range((len(sorted_on_finish) + 1)):
-			p.append(0)
-		for i in range(len(sorted_on_finish)):
-			for j in reversed(range(0, i-1)):
-				if(sorted_on_finish[j][1][1] < sorted_on_finish[i][1][0]): #finish less than start time
-					p[i] = j
-					break
-		return p
-
-
-	def getBestSchedule(self, orderings):
-		# sorted smallest finish index to largest
-		sorted_on_finish = sorted(orderings, key=lambda x: x[1][1], reverse=False)
-		sorted_on_finish = [[0,[0,0],[],-1]] + sorted_on_finish
-		p = self.computeP(sorted_on_finish)
-		OPT = []
-		for i in range(len(sorted_on_finish)):
-			OPT.append([0, [], []])
-		for j in range(1, len(sorted_on_finish)):
-			if sorted_on_finish[j][0] + OPT[p[j]][0] > OPT[j-1][0] and sorted_on_finish[j][3] not in OPT[p[j]][2]:
-				OPT[j] = [OPT[p[j]][0] + sorted_on_finish[j][0],OPT[p[j]][1] + [j], OPT[p[j]][2] + [sorted_on_finish[j][3]]]
-			else:
-				OPT[j] = OPT[j-1]
-		return sorted_on_finish, OPT[len(sorted_on_finish) - 1]
-
+	#combines everything to return the best weighted schedule of pieces given the input data
 	def combineProduceIntervals(self, data, topN, gap, intervalIdx, threshold):
 		self.reformatArray(data)
 		data["data"][13] = self.parseColumn(data["data"][13], lambda x: int(float(x)), int)
@@ -174,7 +161,8 @@ class GetIntervals(object):
 		else:
 			return intervals
 
-		#for test
+	#for test
+	# parses input arguments and initiates the process
 	def returnIntervals(self):
 		topN = [int(arg) for arg in sys.argv[4].split(",")]
 		#print(topN)
@@ -194,6 +182,7 @@ class GetIntervals(object):
 		return self.combineProduceIntervals(data, topN, gap, intervalIdx, threshold)
 
 	# for production
+	# same as above function but for use to be called by main node.js server
 	def sendIntervals(self, data, topN, gap, intervalIdx, threshold="0.1"):
 		topN = [int(arg) for arg in topN.split(",")]
 		data = loads(data)
@@ -211,6 +200,7 @@ class GetIntervals(object):
 
 
 if __name__ == "__main__":
+	# combine everything and graph result
 	getInts = GetIntervals()
 	data, ints = getInts.returnIntervals()
 	intsFlat = []
