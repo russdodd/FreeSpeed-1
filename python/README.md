@@ -12,3 +12,5 @@ applies the algorithm to the intervals. The algorithm is O(n*m) where n is the n
 
 ### The intervals and data then are used to create the matplotlib graph.
 
+## run with python 3
+

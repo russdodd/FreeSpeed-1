@@ -136,7 +136,7 @@ class GetIntervals(object):
 
 		power = data["data"][13]
 		filtPower = filterData(power)
-		rises = getStep(1, filtPower, 0.15)
+		rises = getStep(1, filtPower, 0.1)
 		falls = getStep(-1, filtPower, 0.2) #- 1
 		steps = np.hstack((rises,falls))
 		steps = np.sort(steps)
