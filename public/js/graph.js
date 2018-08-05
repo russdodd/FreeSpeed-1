@@ -192,7 +192,7 @@ function updateGraph(){
   if ($(".rower_selected").length > 0) {
     ind2 = $("#dropdown_button").val();
     username = $(".rower_selected")[0].id;
-    $("#svg1 :first-child").empty();
+    $("#svg :first-child").empty();
     d3Init();
   } else {
   }
@@ -288,13 +288,14 @@ function getData(){
       populateUsersList();
       updateAverages();
       updateGraph();
+      loadMap(global_data[username]); // from map.js to load map and plot points
       updateCurAverages();
     });
   }
 
 $( document ).ready(function() {
     var svg = d3.select("#d3Graph").append("svg")
-    .attr("id", "svg1")
+    .attr("id", "svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")

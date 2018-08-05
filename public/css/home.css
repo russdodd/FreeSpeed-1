@@ -262,6 +262,19 @@ textarea {
   stroke: steelblue;
 }
 
+.feature {
+    fill: none;
+    stroke: grey;
+    stroke-width: 1px;
+      stroke-linejoin: round;
+  }
+  .mesh {
+    fill: none;
+      stroke: lightgrey;
+      stroke-width: 2px;
+      stroke-linejoin: round;
+  }
+
 #averages_div {
   width: 100%;
   border-top: 1px solid #ccc;
@@ -358,6 +371,7 @@ textarea {
   margin: 0 auto;
 }
 
+
 #graph_x_axis {
   text-align: center;
   font-weight: 600;
@@ -369,4 +383,19 @@ textarea {
 
 #negative {
   color: red;
+}
+
+.layer, .layer svg {position: absolute;}
+
+.layer svg {
+ width: 60px;
+ height: 60px;
+ padding-right: 100px;
+ font: 10px sans-serif;
+}
+
+#mapid { 
+  margin: 0 auto;
+  height: 500px; 
+  max-width: 900px;
 }
