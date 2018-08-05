@@ -18,7 +18,7 @@ function perc2color(perc) {
     return '#' + ('000000' + h.toString(16)).slice(-6);
 }
 
-var mymap = L.map('mapid').setView([39.74739, -105], 13);
+var mymap;// = L.map('mapid').setView([39.74739, -105], 13);
 var gLayer;
 function loadMap(data){
 if(!!gLayer){
@@ -115,15 +115,34 @@ function createFeatures(dataToFormat){
 
 
       //.setView([-120.12,36.98], 13);
+      var maxBounds = [[bounds.maxLat,bounds.maxLng],[bounds.minLat, bounds.minLng]];
+      //mymap = L.map('mapid');
     var key = "pk.eyJ1Ijoicndkb2RkIiwiYSI6ImNqa2Z4M2xnaTBkYW4zcG85b2tvcHE3bDgifQ.lVq9pLj0iBAvHH5IHXGOqw";
 
-    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+
+    var osm = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-        maxZoom: 18,
+        maxZoom: 20,
+        minZoom: 10,
         id: 'mapbox.streets',
         accessToken: key
-    }).addTo(mymap);
-      mymap.fitBounds([[bounds.maxLat,bounds.maxLng],[bounds.minLat, bounds.minLng]], {padding: [20, 20]});
+    });//.addTo(mymap);
+    if (!mymap){
+        mymap = new L.Map('mapid', {
+          zoom: 5,
+          layers: [osm],
+          maxBoundsViscosity: 0.5
+        });
+    }
+    mymap.fitBounds(maxBounds, {padding: [20,20]});
+      mymap.setMaxBounds(maxBounds);
+    mymap.setMaxBounds(mymap.getBounds().pad(0.05));
+      mymap.setMinZoom(mymap.getBoundsZoom(maxBounds));
+      
+    /*mymap.on('drag', function() {
+        mymap.panInsideBounds(maxBounds, { animate: false},{padding: [2000, 2000] });
+    });*/
+    
 
     var myLines = [{
         "type": "LineString",
