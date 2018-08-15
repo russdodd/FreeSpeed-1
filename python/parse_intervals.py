@@ -9,6 +9,7 @@ import interval_scheduling as intshdl
 from data_convolve import getStep, filterData
 from itertools import combinations
 from json import loads,dumps
+import datetime
 
 class GetIntervals(object):
 
@@ -28,6 +29,14 @@ class GetIntervals(object):
 		for i in range(len(newCol)):
 			newCol[i] = csvToJson.elapsedTimeToSec(col[i])
 		return newCol[:]
+
+	#for plotting times
+	def parseElapsedTimePlot(self, col):
+		newCol = []
+		for i in range(len(col)):
+			fmt="%H:%M:%S.%f"
+			newCol.append(datetime.datetime.strptime(col[i], fmt))
+		return np.array(newCol[:])
 
 	# parses the column of data into the parse type by appying the lamba function
 	def parseColumn(self, col, lam, parseType):
@@ -91,13 +100,20 @@ class GetIntervals(object):
 		return intervals
 
 	# combines variance and average watts to create a single weighted score from 0 to 1
+
 	def getCombinedScores(self, scores):
+		print("scores", scores)
+		print("scores len", len(scores))
+		if(len(scores) == 1):
+			# only one candidate so score is max
+			return [1.0]
 		scoreCopy = np.empty_like(scores)
 		scoreCopy[:] = scores
 		scoreCopy[:,0] = ((scoreCopy[:,0] + 0.0000001) - np.min(scoreCopy[:,0]))/ (np.max(scoreCopy[:,0]) - np.min(scoreCopy[:,0]))
 		scoreCopy[:,1] = ((scoreCopy[:,1] + 0.0000001) - np.min(scoreCopy[:,1]))/ (np.max(scoreCopy[:,1]) - np.min(scoreCopy[:,1]))
 		p = 0.2
 		q = 1 - p
+		print("to return scores", (1 - scoreCopy[:,1])*p + scoreCopy[:,0]*q)
 		return (1 - scoreCopy[:,1])*p + scoreCopy[:,0]*q
 
 	# produces candidate start points given the candidate end points and then filters down to the best candidates
@@ -137,6 +153,7 @@ class GetIntervals(object):
 		power = data["data"][13]
 		filtPower = filterData(power)
 		rises = getStep(1, filtPower, 0.1)
+		#higher threshold for peaks for falls as end of piece is more defined
 		falls = getStep(-1, filtPower, 0.2) #- 1
 		steps = np.hstack((rises,falls))
 		steps = np.sort(steps)
@@ -149,6 +166,7 @@ class GetIntervals(object):
 			cur_sorted_orderings, cur_groupings = self.getSortedOrderings(falls, rises, intervalIdx[i], gap[i], data, filtPower,threshold, topN[i], i)
 			groupings[i] = cur_groupings
 			sorted_orderings += cur_sorted_orderings
+		print("sorted_orderings", sorted_orderings)
 		scheduler = intshdl.OptimalSchedule(sorted_orderings, topN)
 		opt = scheduler.returnBestSchedule()
 		groupsToUse = np.array(opt[1])

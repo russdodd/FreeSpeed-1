@@ -194,6 +194,7 @@ function updateGraph(){
     username = $(".rower_selected")[0].id;
     $("#svg :first-child").empty();
     d3Init();
+    loadMap(global_data[username], ind2); // from map.js to load map and plot points
   } else {
   }
 }
@@ -288,7 +289,7 @@ function getData(){
       populateUsersList();
       updateAverages();
       updateGraph();
-      loadMap(global_data[username]); // from map.js to load map and plot points
+      loadMap(global_data[username], ind2); // from map.js to load map and plot points
       updateCurAverages();
     });
   }

@@ -443,7 +443,7 @@ app.post('/test-python2', function(request, response) {
   client.on("error", function(error) {
     console.error("RPC client error:", error);
   });
-  client.invoke("combineProduceIntervals", JSON.stringify(data_res.data), data_res.pieces, data_res.gaps, data_res.intIdx, data_res.threshold, function(error, res, more) {
+  client.invoke("sendIntervals", JSON.stringify(data_res.data), data_res.gaps, data_res.intIdx, data_res.pieces, data_res.threshold, function(error, res, more) {
       console.log(res);
       console.timeEnd("python");
       response.send(res);
