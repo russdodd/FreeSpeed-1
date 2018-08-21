@@ -163,6 +163,10 @@ a {
 	font-size: 20px;
 }
 
+.modal-lg {
+    width: 100%;
+}
+
 #users-div {
 	text-align: center;
 	width: 900px;
@@ -173,6 +177,27 @@ h2 {
 	font-size: 30px;
 	margin: auto;
 	width: 300px;
+}
+
+h3 {
+  font-size: 18px;
+  
+  width: 300px;
+}
+
+#getDataInts {
+  margin: auto;
+}
+
+#infoDiv {
+  padding-left: 30px;
+  padding-top: 10px;
+  width: 100%;
+}
+
+#headerDiv {
+  padding: 10px;
+  width: 100%;
 }
 
 .table {
@@ -199,6 +224,8 @@ h2 {
 	background-color: #ddd;
 }
 
+.highlight { background-color: #ddd; }
+
 #users-div {
 	margin-bottom: 30px;
 	margin-top: 10px;
@@ -219,6 +246,16 @@ button {
 	margin-bottom: 20px;
 }
 
+#backBtn,
+#submitIntsBtn {
+  margin-left: 60px;
+  float: left;
+}
+#intResizeButton {
+  margin-right: 60px;
+  float: right;
+}
+
 /* The Modal (background) */
 .usermodal {
     position: fixed; /* Stay in place */
@@ -226,11 +263,11 @@ button {
     padding-top: 100px; /* Location of the box */
     left: 0;
     top: 0;
-		margin-left: 30%;
-		margin-top: 5%;
-    width: 700px; /* Full width */
-    height: 500px; /* Full height */
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
     overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 		text-align: center;
 }
 
@@ -240,8 +277,7 @@ button {
     padding-top: 50px; /* Location of the box */
     left: 0;
     top: 0;
-		margin-left: 15%;
-		margin-top: 5%;
+		
     width: 1000px; /* Full width */
     height: 500px; /* Full height */
     overflow: auto; /* Enable scroll if needed */
@@ -250,10 +286,9 @@ button {
 
 /* Modal Content */
 .modal-content {
-    position: relative;
     background-color: #fefefe;
     margin: auto;
-    padding: 0;
+    padding: 20px;
     border: 1px solid #888;
     width: 80%;
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
@@ -262,6 +297,7 @@ button {
     animation-name: animatetop;
     animation-duration: 0.4s;
 }
+
 
 /* Add Animation */
 @-webkit-keyframes animatetop {
@@ -335,13 +371,34 @@ br {
 	margin: 5px 0;
 }
 
-#submitUpload {
+#form-content {
+  width: 90%;
+  max-width: 550px;
+  margin: 0 auto;
+}
+
+#graphingContent {
+ width: 100%;
+}
+
+#graph,
+#js-plotly-tester {
+  max-width: 100%;
+  width: 100%;
+}
+
+.modal-body {
+  width: 100%;
+}
+
+
+#submitUpload,.uploadButton {
 	background: transparent;
 	padding: 10px 20px;
 	border: 2px solid black;
 }
 
-#submitUpload:hover {
+#submitUpload:hover,.uploadButton:hover {
 	background: black;
 	color: white;
 	padding: 10px 20px;
@@ -368,7 +425,3 @@ br {
 	display: none;
 }
 
-#txtFileUpload {
-	margin: auto;
-	display: inline;
-}

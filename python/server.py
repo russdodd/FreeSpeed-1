@@ -10,6 +10,7 @@ import interval_scheduling as intshdl
 from data_convolve import getStep, filterData
 from itertools import combinations
 from json import loads,dumps
+import parse_intervals
 
 class GetIntervals(object):
 
@@ -184,6 +185,9 @@ class GetIntervals(object):
 	# for production
 	# same as above function but for use to be called by main node.js server
 	def sendIntervals(self, data, gap, intervalIdx, topN, threshold="0.1"):
+		# print("gap", gap)
+		# print("intervalIdx", intervalIdx)
+		# print("topN", topN)
 		topN = [int(arg) for arg in topN.split(",")]
 		data = loads(data)
 		#print(data)
@@ -226,7 +230,7 @@ class GetIntervals(object):
 # 	plt.show()
 
 
-s = zerorpc.Server(GetIntervals())
+s = zerorpc.Server(parse_intervals.GetIntervals())
 s.bind("tcp://0.0.0.0:4242")
 s.run()
 

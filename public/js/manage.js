@@ -42,7 +42,7 @@ var modal = '<!-- The Modal -->'+
 '    </div>'+
 '</div>';
 var modal2 = '<!-- The Modal -->'+
-'<div id="myModal2" class="usermodal2">'+
+'<div id="myModal2" class="usermodal">'+
 ''+
 '  <!-- Modal content -->'+
 '  <div class="modal-content">'+

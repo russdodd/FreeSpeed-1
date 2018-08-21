@@ -73,10 +73,10 @@ class GetIntervals(object):
 
 	# links a candidate end point of a piece to a candidate start point that has the best score
 	# produces a list of candidate piece intervals and a list of each respective score
-	def getIntervals(self, falls, scores, candidates):
+	def getIntervals(self, falls, fallMagnitudes, scores, candidates):
 		bestpairs = []
 		scoresFilt = []
-		for fall, scoreList, candidateGroup in zip(falls, scores, candidates):
+		for fall, scoreList, candidateGroup, fallMagnitude in zip(falls, scores, candidates, fallMagnitudes):
 			if len(candidateGroup) == 0 or scoreList[0][0] < 0:
 				continue
 			scoreCopy = np.empty_like(scoreList)
@@ -86,7 +86,10 @@ class GetIntervals(object):
 			scoresScalarLst = 1 - scoreCopy[:,1] + scoreCopy[:,0]
 			maxScore = np.max(scoresScalarLst)
 			argMax = np.argmax(scoresScalarLst)
-			scoresFilt.append(scoreList[argMax])
+			bestScore = scoreList[argMax]
+			# bestScore.append(fallMagnitude)
+			# print("bestScore + [fallMagnitude]", np.concatenate((bestScore, np.array([fallMagnitude])), axis=0))
+			scoresFilt.append(np.concatenate((bestScore, np.array([fallMagnitude])), axis=0))
 			bestpairs.append([candidateGroup[argMax], fall])
 		return np.array(bestpairs), scoresFilt
 
@@ -102,8 +105,8 @@ class GetIntervals(object):
 	# combines variance and average watts to create a single weighted score from 0 to 1
 
 	def getCombinedScores(self, scores):
-		print("scores", scores)
-		print("scores len", len(scores))
+		# print("scores", scores)
+		# print("scores len", len(scores))
 		if(len(scores) == 1):
 			# only one candidate so score is max
 			return [1.0]
@@ -111,31 +114,35 @@ class GetIntervals(object):
 		scoreCopy[:] = scores
 		scoreCopy[:,0] = ((scoreCopy[:,0] + 0.0000001) - np.min(scoreCopy[:,0]))/ (np.max(scoreCopy[:,0]) - np.min(scoreCopy[:,0]))
 		scoreCopy[:,1] = ((scoreCopy[:,1] + 0.0000001) - np.min(scoreCopy[:,1]))/ (np.max(scoreCopy[:,1]) - np.min(scoreCopy[:,1]))
+		scoreCopy[:,2] = ((scoreCopy[:,2] + 0.0000001) - np.min(scoreCopy[:,2]))/ (np.max(scoreCopy[:,2]) - np.min(scoreCopy[:,2]))
 		p = 0.2
-		q = 1 - p
-		print("to return scores", (1 - scoreCopy[:,1])*p + scoreCopy[:,0]*q)
-		return (1 - scoreCopy[:,1])*p + scoreCopy[:,0]*q
+		q = 0.5
+		r = 0.3
+		# print("to return scores", (1 - scoreCopy[:,1])*p + scoreCopy[:,0]*q + scoreCopy[:,2]*r)
+		return (1 - scoreCopy[:,1])*p + scoreCopy[:,0]*q + scoreCopy[:,2]*r
 
 	# produces candidate start points given the candidate end points and then filters down to the best candidates
 	# 
-	def getSortedOrderings(self, falls, rises, intervalIdx, gap, data, filtPower,threshold, topN, idx):
+	def getSortedOrderings(self, falls, fallMagnitudes, rises, intervalIdx, gap, data, filtPower,threshold, topN, idx):
 		candidates = []
 		#get candidates for each fall for one piece size
 		for fall in falls:
 			candidates.append(self.getFrontrises(threshold, data["data"][intervalIdx][fall], gap, data["data"][intervalIdx], rises).tolist())
 		# shift the points closer together
-		for i in range(len(falls)):
-			falls[i] -= 1
+		# for i in range(len(falls)):
+		# 	falls[i] -= 1
 		for i in range(len(candidates)):
 			for j in range(len(candidates[i])):
 				candidates[i][j] += 1 
 		scores = []
 		for candidateGroup, fall in zip(candidates, falls):
+			# get candidate scores
 			scores.append(self.calcScoresWithCandidates(candidateGroup, fall, gap, data["data"][intervalIdx], filtPower))
 		scores = np.array(scores)
-		groupings, scores = self.getIntervals(falls, scores, candidates)
+		groupings, scores = self.getIntervals(falls, fallMagnitudes, scores, candidates)
 
 		#orderings = self.chooseN(scores, groupings, topN, idx)
+		# print("scores with fall magnitude", scores)
 		orderings = self.createScoreGroupingCandidates(scores, groupings, idx)
 		#sorted_orderings = sorted(orderings, key=lambda x: x[0], reverse=True)
 		return orderings, groupings #sorted_orderings, groupings
@@ -151,22 +158,24 @@ class GetIntervals(object):
 		#also look into an alternative for variance that allows for one or two outliers without skewing the result?
 
 		power = data["data"][13]
-		filtPower = filterData(power)
-		rises = getStep(1, filtPower, 0.1)
+		filtPower = filterData(power) #redundant as I used to get both rises and falls on filtered data
+		# now I just get rises as falls should be well defined but rises fall prey to noise around the start
+		filtPower = power 
+		rises, riseSizes = getStep(1, filterData(filtPower), 0.1)
 		#higher threshold for peaks for falls as end of piece is more defined
-		falls = getStep(-1, filtPower, 0.2) #- 1
-		steps = np.hstack((rises,falls))
-		steps = np.sort(steps)
-		steps[steps >= len(power)] = len(power) - 1
+		falls, fallSizes = getStep(-1, filtPower, 0.2) #- 1
+		# steps = np.hstack((rises,falls))
+		# steps = np.sort(steps)
+		# steps[steps >= len(power)] = len(power) - 1
 		groupings = []
 		for i in range(len(intervalIdx)):
 			groupings.append([])
 		sorted_orderings = []
 		for i in range(len(groupings)):
-			cur_sorted_orderings, cur_groupings = self.getSortedOrderings(falls, rises, intervalIdx[i], gap[i], data, filtPower,threshold, topN[i], i)
+			cur_sorted_orderings, cur_groupings = self.getSortedOrderings(falls, fallSizes, rises, intervalIdx[i], gap[i], data, filtPower,threshold, topN[i], i)
 			groupings[i] = cur_groupings
 			sorted_orderings += cur_sorted_orderings
-		print("sorted_orderings", sorted_orderings)
+		# print("sorted_orderings", sorted_orderings)
 		scheduler = intshdl.OptimalSchedule(sorted_orderings, topN)
 		opt = scheduler.returnBestSchedule()
 		groupsToUse = np.array(opt[1])
@@ -201,7 +210,7 @@ class GetIntervals(object):
 
 	# for production
 	# same as above function but for use to be called by main node.js server
-	def sendIntervals(self, data, topN, gap, intervalIdx, threshold="0.1"):
+	def sendIntervals(self, data, gap, intervalIdx, topN, threshold="0.1"):
 		topN = [int(arg) for arg in topN.split(",")]
 		data = loads(data)
 		gap = gap.split(",")
@@ -213,9 +222,19 @@ class GetIntervals(object):
 			else:
 				gap[i] = int(gap[i])
 		threshold = float(threshold)
-		return dumps(self.combineProduceIntervals(data, topN, gap, intervalIdx, threshold))
+		res = self.combineProduceIntervals(data, topN, gap, intervalIdx, threshold)
+		print("res", [len(x) for x in res])
+		# print("res",flattenInts(res))
+		# print("res",[x.toList() for x in res])
+		res = [x.tolist() for x in res]
+		return dumps(res)
 
-
+def flattenInts(ints):
+	intsFlat = []
+	sizes = []
+	for intLst in ints:
+		intsFlat += intLst.flatten().astype(int).tolist()
+	return intsFlat	
 
 if __name__ == "__main__":
 	# combine everything and graph result
@@ -228,14 +247,24 @@ if __name__ == "__main__":
 		sizes.append(len(intLst))
 	print("count ints", sizes)
 
-	plt.plot(filterData(data["data"][13]),'-b', zorder=1)#ints.flatten().astype(int).tolist())
+	# plt.plot(filterData(data["data"][13]),'-b', zorder=1)#ints.flatten().astype(int).tolist())
+	# if len(ints) > 0:
+	# 	rises = np.array(intsFlat)[::2]
+	# 	falls = np.array(intsFlat)[1::2]
+
+	# 	plt.scatter(rises,filterData(data["data"][13])[rises], color='g', marker='d', zorder=2)
+	# 	plt.scatter(falls,filterData(data["data"][13])[falls], color='r', marker='d', zorder=3)
+	plt.plot(data["data"][13],'-b', zorder=1)#ints.flatten().astype(int).tolist())
 	if len(ints) > 0:
 		rises = np.array(intsFlat)[::2]
 		falls = np.array(intsFlat)[1::2]
 
-		plt.scatter(rises,filterData(data["data"][13])[rises], color='g', marker='d', zorder=2)
-		plt.scatter(falls,filterData(data["data"][13])[falls], color='r', marker='d', zorder=3)
+		plt.scatter(rises,data["data"][13][rises], color='g', marker='d', zorder=2)
+		plt.scatter(falls,data["data"][13][falls], color='r', marker='d', zorder=3)
 	plt.show()
+	# print("comparison")
+	# print(len(filterData(data["data"][13])))
+	# print(len(data["data"][13]))
 
 
 

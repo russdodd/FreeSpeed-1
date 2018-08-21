@@ -732,6 +732,21 @@ function insertData(currUserInd, data) {
     });
 }
 
+app.get('/chartIntervals', authCheck, function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  var userID = request.user;
+  console.log("user ID" + userID)
+  conn.query("SELECT * FROM googlePassportUsers WHERE id=$1", [userID], function(error, result){
+   if(error){
+     console.log("error setting permission")
+     console.log(error)
+   }else{
+     response.render('chartIntervals.html', {username: result.rows[0].email, firstname: result.rows[0].firstName});
+   }
+ });
+
+
+});
 
 app.get('/manage-data', authCheck, function(request, response) {
   console.log('- Request received:', request.method.cyan, request.url.underline);
@@ -1015,6 +1030,29 @@ app.post('/send-email', function (req, res) {
     }
   });
 });
+
+app.post('/test-data-parse', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  //console.log(request.body.data);
+  //var data = JSON.parse(request.body.data);
+    var csv_data = parseCsv(request.body.data);
+    response.json({data: csv_data});
+  });
+
+app.post('/test-parse-intervals', function(request, response) {
+  console.log('- Request received:', request.method.cyan, request.url.underline);
+  //console.log(request.body.data);
+  //var data = JSON.parse(request.body.data);
+    var csv_data = parseCsv(request.body.data);
+  console.time("python");
+  
+  client.invoke("sendIntervals", JSON.stringify(csv_data), request.body.lengths, request.body.types, request.body.counts, request.body.threshold, 
+    function(error, res, more) {
+      console.log(res);
+      console.timeEnd("python");
+      response.json({data: csv_data, ints: JSON.parse(res)});
+  });
+  });
 
 // conn.query('DELETE FROM googlePassportUsers WHERE year=$1', [1000], function(error, result){
 //   if(error){

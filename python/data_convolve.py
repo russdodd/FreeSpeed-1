@@ -10,17 +10,22 @@ from peakutils import indexes
 def getStep(isRise, data, threshold=0.4):
 	dary = isRise*np.hstack(([data[0]/2]*5,data,[data[-1]/2]*5))
 	kernel = [1, 0, -1]
-	dY1 = np.convolve(dary, kernel, 'valid')
+	dY1 = np.convolve(dary, kernel, 'same')
 	dY1Peaks = dY1[:]
 	dY1Peaks[dY1Peaks < 0] = 0
-	peak_indexes = indexes(dY1Peaks, thres=threshold, min_dist=2) - 4
+	peak_indexes = indexes(dY1Peaks, thres=threshold, min_dist=2)
+	peak_sizes = dY1Peaks[peak_indexes]
+	peak_indexes -= 5
 	peak_indexes[peak_indexes < 0] = 0
 	peak_indexes[peak_indexes > (len(data)-1)] -=1 
-	peak_sizes = dY1Peaks[peak_indexes]
 	# plt.plot(data)
-	# plt.plot(dY1[4: -4],'-bD', markevery=peak_indexes.tolist())
+	# plt.plot(dY1[5:-5],'-bD', markevery=peak_indexes.tolist())
+	# //plt.plot(data,'-bD', markevery=peak_indexes.tolist())
 	# plt.show()
-	return peak_indexes #brings points inwards
+	# print("comparison")
+	# print(len(data))
+	# print(len(dY1[5:-5]))
+	return peak_indexes, peak_sizes #brings points inwards
 
 def stringToSecs(timeStr):
 	secDec = int(timeStr[-1])
