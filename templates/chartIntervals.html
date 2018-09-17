@@ -469,7 +469,12 @@ function buildIntervals(data, ints, pieceLengths, pieceTypes, pieceCounts){
 
     for (var i = 0, pieceCount = 0; i < pieceLengths.length; i++){
         const curCounts = pieceCounts[i]
-        var curInts = ints[i];
+        var curInts;
+        if (i< ints.length){
+            curInts = ints[i];
+        } else {
+            curInts = [];
+        }
         for (var j = 0; j < curCounts; j++, pieceCount++){
         //curInts.forEach(function(interval){
             var newRow = makeIntsTableRow(pieceLengths[i], pieceTypes[i], pieceCount, j);
@@ -518,11 +523,13 @@ function makeIntsTableRow(length, pieceType, pieceCount, pieceIndex){
     secElem.classList.add('clickable');
     thirdElem.classList.add('clickable');
     var check = $("<td />").html('<input type="checkbox"/>');
+    check.attr("interval", {length: length, pieceType: pieceType, pieceCount: pieceCount, pieceIndex: pieceIndex});
     //check.addClass('clickable');
     check.appendTo(newRow);
     newRow.appendChild(firstElem).appendChild(document.createTextNode(length));
     newRow.appendChild(secElem).appendChild(document.createTextNode(pieceType));
     newRow.appendChild(thirdElem).appendChild(document.createTextNode(pieceIndex+1));// so that it starts at 1
+    newRow.value
     return newRow
 }
 
@@ -540,6 +547,7 @@ function compileData(){
     const all_ints = $("#graph").prop("ints");
     const selected_ints = $('#intervalTable input:checkbox').map(function(i, elem){if(!elem.checked){return [all_ints[i]]}});
     console.log(selected_ints);
+
     return selected_ints;
 }
 

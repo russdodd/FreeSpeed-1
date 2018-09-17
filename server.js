@@ -1013,7 +1013,7 @@ app.post('/send-email', function (req, res) {
   emailBank.push(req.body.email)
 
   var text = '<p>You\'ve been invited to join Freespeed by Brown University crew! </p><br> <p> Login with <span style=\"color:blue\">' + req.body.email + "</span>" +
-  ' at the link <a href=\"http://localhost:8080/sign-up\">Here</a>';
+  ' at the link <a href=\"http://rowingstats.tk/sign-up\">Here</a>';
   var mailOptions = {
     from: 'brownfreespeed@gmail.com',
     to: req.body.email,
@@ -1050,7 +1050,14 @@ app.post('/test-parse-intervals', function(request, response) {
     function(error, res, more) {
       console.log(res);
       console.timeEnd("python");
-      response.json({data: csv_data, ints: JSON.parse(res)});
+      console.log("csv_data", csv_data, "ints", res);
+      var ints;
+      if (!res){
+        ints = [];
+      } else {
+        ints = JSON.parse(res);
+      }
+      response.json({data: csv_data, ints: ints});
   });
   });
 
